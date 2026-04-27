@@ -1,0 +1,27 @@
+{
+  "id": "02-strategy",
+  "name": "전략 봇",
+  "purpose": "벤치마킹 결과 + 채널 톤을 바탕으로 컨셉·제목·훅·인트로를 정한다.",
+  "model": { "use": "writer", "fallback": "researcher" },
+  "input_schema": "shared/schemas/01-benchmark.schema.json",
+  "output_schema": "shared/schemas/02-strategy.schema.json",
+  "params": {
+    "title_candidates": 7,
+    "hook_candidates": 4,
+    "title_max_length": 45,
+    "hook_max_seconds": 7,
+    "intro_target_seconds": 25,
+    "must_use_synthesis_from_benchmark": true,
+    "ctr_scoring": true
+  },
+  "guardrails": {
+    "no_clickbait": true,
+    "respect_ban_words": true,
+    "must_keep_promise_consistent": true,
+    "language_must_match_channel": true
+  },
+  "tools_allowed": [
+    "Read",
+    "Write(./projects/{slug}/02-strategy/**)"
+  ]
+}

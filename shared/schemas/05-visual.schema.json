@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "05-visual.schema.json",
+  "title": "Visual Output",
+  "description": "05-visual 봇 출력. 씬별 비주얼 에셋 명세 (CapCut JSON으로 변환할 수 있는 중간 표현).",
+  "type": "object",
+  "required": ["canvas", "fps", "scenes", "created_at"],
+  "properties": {
+    "canvas": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "integer" },
+        "height": { "type": "integer" }
+      }
+    },
+    "fps": { "type": "integer" },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["scene_id", "start_sec", "end_sec", "layers"],
+        "properties": {
+          "scene_id": { "type": "string" },
+          "start_sec": { "type": "number" },
+          "end_sec": { "type": "number" },
+          "layers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["image", "video", "text", "shape", "broll"]
+                },
+                "asset_path": { "type": "string", "description": "로컬 파일 경로" },
+                "prompt": { "type": "string", "description": "이미지/영상 생성 프롬프트" },
+                "negative_prompt": { "type": "string" },
+                "duration_sec": { "type": "number" },
+                "in_anim": { "type": "string", "description": "예: fade_in, zoom_in" },
+                "out_anim": { "type": "string" },
+                "transform": {
+                  "type": "object",
+                  "properties": {
+                    "x": { "type": "number" },
+                    "y": { "type": "number" },
+                    "scale": { "type": "number" },
+                    "rotation": { "type": "number" }
+                  }
+                },
+                "text": { "type": "string" },
+                "style": {
+                  "type": "object",
+                  "properties": {
+                    "font": { "type": "string" },
+                    "size": { "type": "number" },
+                    "color": { "type": "string" },
+                    "weight": { "type": "string" },
+                    "stroke_color": { "type": "string" },
+                    "stroke_width": { "type": "number" },
+                    "shadow": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          },
+          "transition_in": { "type": "string" },
+          "transition_out": { "type": "string" }
+        }
+      }
+    },
+    "global_audio": {
+      "type": "object",
+      "properties": {
+        "voice_track": { "type": "string" },
+        "bgm_track": { "type": "string" },
+        "bgm_volume": { "type": "number" }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

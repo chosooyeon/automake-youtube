@@ -1,0 +1,39 @@
+{
+  "_comment": "썸네일 1장 명세 템플릿. 06-edit-upload 봇이 5개 컨셉을 각각 이 형태로 채운다.",
+  "size": "1280x720",
+  "background": {
+    "type": "image",
+    "image_prompt": "",
+    "negative_prompt": "low quality, blurry, watermark, deformed text",
+    "asset_path": ""
+  },
+  "headline": {
+    "text": "",
+    "font": "Pretendard Black",
+    "size": 140,
+    "color": "#FFFFFF",
+    "stroke_color": "#0F172A",
+    "stroke_width": 8,
+    "position": { "x": 0.5, "y": 0.5 },
+    "max_chars_per_line": 7,
+    "shadow": true
+  },
+  "subhead": {
+    "text": "",
+    "font": "Pretendard Bold",
+    "size": 56,
+    "color": "#22D3EE",
+    "position": { "x": 0.5, "y": 0.78 }
+  },
+  "accent_shapes": [
+    {
+      "type": "rect",
+      "color": "#0F172A",
+      "opacity": 0.6,
+      "rect": { "x": 0.05, "y": 0.4, "w": 0.9, "h": 0.25 },
+      "radius": 24
+    }
+  ],
+  "concept": "",
+  "ctr_prediction": null
+}

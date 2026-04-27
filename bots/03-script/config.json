@@ -1,0 +1,56 @@
+{
+  "id": "03-script",
+  "name": "대본 봇",
+  "purpose": "전략을 받아 기획→집필→검수→리비전을 거친 최종 씬 단위 대본을 만든다.",
+  "model": {
+    "writer": "writer",
+    "reviewer": "reviewer"
+  },
+  "input_schema": "shared/schemas/02-strategy.schema.json",
+  "output_schema": "shared/schemas/03-script.schema.json",
+  "params": {
+    "target_duration_sec": null,
+    "wpm_korean": 320,
+    "wpm_english": 150,
+    "subtitle_max_chars_per_line": 18,
+    "max_revisions": 2,
+    "scene_min_seconds": 4,
+    "scene_max_seconds": 35,
+    "must_open_with_hook": true,
+    "must_close_with_cta": true
+  },
+  "phases": [
+    {
+      "name": "plan",
+      "goal": "전략의 컨셉/약속을 만족하는 씬 구조 1차 설계",
+      "deliverable": "outline (씬 ID, role, headline, 예상 길이)"
+    },
+    {
+      "name": "write",
+      "goal": "각 씬에 자연스러운 내레이션 작성 (TTS-ready)",
+      "rules": [
+        "구어체, 한 호흡 짧게",
+        "외래어/전문용어 풀어 쓰기",
+        "수치는 정확히, 추측은 '추정'으로 표시",
+        "광고성 어휘 금지 (brand.ban_words)"
+      ]
+    },
+    {
+      "name": "review",
+      "goal": "qa.checklist 항목별 점검 + 사실/톤/길이 검수",
+      "auto_fail_when": [
+        "ban_words 검출",
+        "promise 미이행",
+        "씬 하나가 scene_max_seconds 초과"
+      ]
+    },
+    {
+      "name": "revise",
+      "goal": "review 이슈를 fixed=true 가 될 때까지 수정 (최대 max_revisions 회)"
+    }
+  ],
+  "tools_allowed": [
+    "Read",
+    "Write(./projects/{slug}/03-script/**)"
+  ]
+}

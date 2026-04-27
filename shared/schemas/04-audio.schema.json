@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "04-audio.schema.json",
+  "title": "Audio Output",
+  "description": "04-audio 봇 출력. TTS 결과·자막 타이밍·무음 압축 정보.",
+  "type": "object",
+  "required": ["voice_file", "compressed_voice_file", "subtitle_file", "scenes", "total_duration_sec", "created_at"],
+  "properties": {
+    "voice_file": {
+      "type": "string",
+      "description": "원본 TTS 합성 결과 파일 경로 (wav/mp3)"
+    },
+    "compressed_voice_file": {
+      "type": "string",
+      "description": "무음 구간 압축이 적용된 결과 파일 경로"
+    },
+    "subtitle_file": {
+      "type": "string",
+      "description": "SRT 자막 파일 경로"
+    },
+    "tts": {
+      "type": "object",
+      "properties": {
+        "provider": { "type": "string" },
+        "voice_id": { "type": "string" },
+        "model": { "type": "string" },
+        "params": { "type": "object" }
+      }
+    },
+    "silence_compression": {
+      "type": "object",
+      "properties": {
+        "applied": { "type": "boolean" },
+        "threshold_db": { "type": "number" },
+        "min_silence_ms": { "type": "integer" },
+        "removed_ms_total": { "type": "integer" }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["scene_id", "start_sec", "end_sec"],
+        "properties": {
+          "scene_id": { "type": "string" },
+          "start_sec": { "type": "number" },
+          "end_sec": { "type": "number" },
+          "subtitle_cues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["start_sec", "end_sec", "text"],
+              "properties": {
+                "start_sec": { "type": "number" },
+                "end_sec": { "type": "number" },
+                "text": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "total_duration_sec": { "type": "number" },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

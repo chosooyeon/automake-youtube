@@ -1,0 +1,54 @@
+{
+  "id": "06-edit-upload",
+  "name": "편집+업로드 봇",
+  "purpose": "비주얼/오디오 명세를 CapCut 프로젝트 JSON으로 빌드하고, 썸네일 5장 + 업로드 메타를 만들고, 승인 시 YouTube에 업로드한다.",
+  "input_schema": "shared/schemas/05-visual.schema.json",
+  "output_schema": "shared/schemas/06-edit-upload.schema.json",
+  "capcut": {
+    "template_path_global": true,
+    "fps_from_global": true,
+    "canvas_from_global": true,
+    "include_subtitle_track": true,
+    "include_bgm_track": true,
+    "default_video_track_count": 2,
+    "default_audio_track_count": 2,
+    "default_text_track_count": 2
+  },
+  "thumbnails": {
+    "count": 5,
+    "concept_strategies": [
+      "표정+키워드 클로즈업",
+      "비포/애프터 대비",
+      "숫자 임팩트",
+      "질문형 카피",
+      "수상한/궁금증 유발"
+    ],
+    "size_from_global": true,
+    "headline_max_chars": 14,
+    "ensure_high_contrast": true,
+    "save_dir": "thumbnails/"
+  },
+  "upload": {
+    "enabled_default": false,
+    "use_global_youtube_settings": true,
+    "title_source": "02-strategy.titles[0].text",
+    "description_template": "{intro_one_liner}\n\n{summary_bullets}\n\n— 챕터 —\n{chapters}\n\n— 채널 —\n{channel_signature}\n\n#태그",
+    "tags_source": ["02-strategy.keywords", "global.apis.youtube.default_tags"],
+    "category_id_source": "global.apis.youtube.default_category_id",
+    "privacy_default": "private",
+    "thumbnail_pick": "first",
+    "made_for_kids": false
+  },
+  "human_gate": {
+    "before_capcut_build": false,
+    "before_thumbnail_generation": true,
+    "before_upload": true
+  },
+  "tools_allowed": [
+    "Read",
+    "Write(./projects/{slug}/06-edit-upload/**)",
+    "Bash(node:*)",
+    "Bash(python3:*)",
+    "Bash(ffmpeg:*)"
+  ]
+}

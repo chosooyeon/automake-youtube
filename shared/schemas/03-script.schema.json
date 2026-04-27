@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "03-script.schema.json",
+  "title": "Script Output",
+  "description": "03-script 봇의 출력 스키마. 씬 단위로 분리된 최종 대본.",
+  "type": "object",
+  "required": ["title", "total_duration_sec", "scenes", "qa", "created_at"],
+  "properties": {
+    "title": { "type": "string" },
+    "total_duration_sec": { "type": "integer" },
+    "language": { "type": "string", "default": "ko" },
+    "scenes": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "role", "narration", "estimated_duration_sec"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "고유 씬 ID (예: scene-001)",
+            "pattern": "^scene-\\d{3}$"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["hook", "intro", "body", "example", "transition", "summary", "cta"]
+          },
+          "headline": { "type": "string", "description": "이 씬의 핵심 메시지(자막 큰 글씨용)" },
+          "narration": { "type": "string", "description": "내레이션 원문 (TTS 입력)" },
+          "subtitle_lines": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "자막용으로 분할된 짧은 라인들 (각 18자 이하 권장)"
+          },
+          "b_roll_keywords": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "이 씬에 어울리는 B-roll 키워드 (비주얼 봇이 사용)"
+          },
+          "visual_intent": {
+            "type": "string",
+            "description": "이 씬에서 전달하고 싶은 시각적 분위기/연출 의도"
+          },
+          "estimated_duration_sec": { "type": "number", "minimum": 1 }
+        }
+      }
+    },
+    "qa": {
+      "type": "object",
+      "required": ["passed", "issues", "revision_count"],
+      "properties": {
+        "passed": { "type": "boolean" },
+        "revision_count": { "type": "integer", "minimum": 0 },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scene_id": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["사실오류", "톤이상", "광고성", "중복", "지루함", "길이초과", "정책위반"]
+              },
+              "note": { "type": "string" },
+              "fixed": { "type": "boolean" }
+            }
+          }
+        },
+        "checklist": {
+          "type": "object",
+          "properties": {
+            "hook_strong": { "type": "boolean" },
+            "promise_kept": { "type": "boolean" },
+            "no_banned_words": { "type": "boolean" },
+            "no_unverified_claims": { "type": "boolean" },
+            "ends_with_cta": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

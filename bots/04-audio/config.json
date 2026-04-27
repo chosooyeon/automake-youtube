@@ -1,0 +1,48 @@
+{
+  "id": "04-audio",
+  "name": "음성 봇",
+  "purpose": "씬 단위 대본을 받아 TTS 합성 → 씬별 타이밍 산출 → 자막(SRT) 생성 → 무음 압축까지.",
+  "input_schema": "shared/schemas/03-script.schema.json",
+  "output_schema": "shared/schemas/04-audio.schema.json",
+  "tts": {
+    "use_global": true,
+    "override": {
+      "provider": null,
+      "voice_id": null,
+      "model": null,
+      "stability": null,
+      "similarity_boost": null,
+      "style": null,
+      "speed": 1.0
+    },
+    "pause_between_scenes_ms": 350,
+    "sentence_pause_ms": 200,
+    "format": "wav",
+    "sample_rate": 44100
+  },
+  "subtitle": {
+    "format": "srt",
+    "max_chars_per_line": 18,
+    "max_lines_per_cue": 2,
+    "min_cue_duration_ms": 800,
+    "max_cue_duration_ms": 5000,
+    "split_on_punctuation": true,
+    "use_script_subtitle_lines": true
+  },
+  "silence_compression": {
+    "enabled": true,
+    "method": "ffmpeg_silenceremove",
+    "threshold_db": -35,
+    "min_silence_ms": 600,
+    "keep_padding_ms": 150,
+    "preserve_scene_boundaries": true
+  },
+  "tools_allowed": [
+    "Read",
+    "Write(./projects/{slug}/04-audio/**)",
+    "Bash(ffmpeg:*)",
+    "Bash(ffprobe:*)",
+    "Bash(node:*)",
+    "Bash(python3:*)"
+  ]
+}

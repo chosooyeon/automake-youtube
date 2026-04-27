@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "06-edit-upload.schema.json",
+  "title": "Edit & Upload Output",
+  "description": "06-edit-upload 봇 출력. CapCut 프로젝트 JSON 경로, 썸네일, YouTube 업로드 메타.",
+  "type": "object",
+  "required": ["capcut_project", "thumbnails", "upload_metadata", "created_at"],
+  "properties": {
+    "capcut_project": {
+      "type": "object",
+      "required": ["path", "fps", "canvas"],
+      "properties": {
+        "path": { "type": "string" },
+        "fps": { "type": "integer" },
+        "canvas": {
+          "type": "object",
+          "properties": {
+            "width": { "type": "integer" },
+            "height": { "type": "integer" }
+          }
+        },
+        "duration_sec": { "type": "number" },
+        "tracks_summary": {
+          "type": "object",
+          "properties": {
+            "video_layers": { "type": "integer" },
+            "image_layers": { "type": "integer" },
+            "text_layers": { "type": "integer" },
+            "audio_tracks": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "thumbnails": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["path", "concept"],
+        "properties": {
+          "path": { "type": "string" },
+          "concept": { "type": "string", "description": "이 썸네일의 컨셉/카피 의도" },
+          "headline": { "type": "string" },
+          "ctr_prediction": { "type": "number", "minimum": 0, "maximum": 10 }
+        }
+      }
+    },
+    "upload_metadata": {
+      "type": "object",
+      "required": ["title", "description", "tags", "category_id", "privacy"],
+      "properties": {
+        "title": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 5000 },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "category_id": { "type": "string" },
+        "privacy": {
+          "type": "string",
+          "enum": ["private", "unlisted", "public"]
+        },
+        "made_for_kids": { "type": "boolean" },
+        "publish_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "예약 업로드 시각 (없으면 즉시)"
+        },
+        "thumbnail_path_to_use": { "type": "string" },
+        "playlist_id": { "type": ["string", "null"] }
+      }
+    },
+    "upload_result": {
+      "type": "object",
+      "properties": {
+        "executed": { "type": "boolean" },
+        "video_id": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "uploaded_at": { "type": "string", "format": "date-time" },
+        "error": { "type": "string" }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

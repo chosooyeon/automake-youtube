@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "01-benchmark.schema.json",
+  "title": "Benchmark Output",
+  "description": "01-benchmark 봇의 출력 스키마. 레퍼런스 영상 N개를 수집·분석한 결과.",
+  "type": "object",
+  "required": ["topic", "queries", "references", "synthesis", "created_at"],
+  "properties": {
+    "topic": { "type": "string", "description": "분석 대상 주제/키워드" },
+    "queries": {
+      "type": "array",
+      "description": "실제 사용한 검색 쿼리들",
+      "items": { "type": "string" }
+    },
+    "references": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["url", "title", "channel"],
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "title": { "type": "string" },
+          "channel": { "type": "string" },
+          "views": { "type": "integer" },
+          "likes": { "type": "integer" },
+          "duration_sec": { "type": "integer" },
+          "published_at": { "type": "string", "format": "date-time" },
+          "thumbnail_url": { "type": "string", "format": "uri" },
+          "hook_first_15s": { "type": "string", "description": "도입 15초 요약" },
+          "structure": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "영상 구조 (예: 훅 → 문제제기 → 해결책 → 사례 → CTA)"
+          },
+          "title_pattern": { "type": "string" },
+          "thumbnail_pattern": { "type": "string" },
+          "why_it_works": { "type": "string" },
+          "weakness": { "type": "string" }
+        }
+      }
+    },
+    "synthesis": {
+      "type": "object",
+      "required": ["winning_patterns", "title_formulas", "hook_formulas", "structure_recommendation"],
+      "properties": {
+        "winning_patterns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "조회수가 높았던 공통 패턴"
+        },
+        "title_formulas": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "hook_formulas": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "thumbnail_patterns": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "structure_recommendation": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "differentiation_opportunities": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "기존과 차별화할 수 있는 포인트"
+        }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

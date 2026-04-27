@@ -1,0 +1,45 @@
+{
+  "id": "05-visual",
+  "name": "비주얼 봇",
+  "purpose": "씬별 비주얼을 설계하고, 이미지/영상 에셋을 생성하거나 명세 JSON을 만든다.",
+  "input_schema": "shared/schemas/04-audio.schema.json",
+  "output_schema": "shared/schemas/05-visual.schema.json",
+  "design": {
+    "style_keywords": ["cinematic", "high-contrast", "minimal text overlay"],
+    "default_layer_stack": ["broll_or_image", "headline_text", "subtitle_text"],
+    "headline_position": "top-center",
+    "subtitle_position": "bottom-center",
+    "safe_zone_padding_pct": 5,
+    "max_layers_per_scene": 5
+  },
+  "generation": {
+    "mode": "spec_only",
+    "image": {
+      "use_global": true,
+      "per_scene_count": 1,
+      "aspect": "16:9",
+      "negative_prompt": "low quality, blurry, watermark, text artifacts, deformed",
+      "style_tokens": ["cinematic lighting", "shallow depth of field", "8k"]
+    },
+    "video": {
+      "use_global": true,
+      "per_scene_count": 0,
+      "duration_sec_per_clip": 5
+    }
+  },
+  "broll": {
+    "prefer_local_library": true,
+    "library_path": "shared/templates/broll/"
+  },
+  "human_gate": {
+    "before_bulk_image_generation": true,
+    "before_video_generation": true
+  },
+  "tools_allowed": [
+    "Read",
+    "Write(./projects/{slug}/05-visual/**)",
+    "Bash(node:*)",
+    "Bash(python3:*)",
+    "Bash(ffmpeg:*)"
+  ]
+}

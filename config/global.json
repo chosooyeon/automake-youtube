@@ -1,0 +1,89 @@
+{
+  "$schema": "../shared/schemas/global.schema.json",
+  "channel": {
+    "name": "MY_CHANNEL_NAME",
+    "handle": "@my_channel",
+    "language": "ko",
+    "country": "KR",
+    "niche": "여기에 채널 카테고리 입력 (예: 자기계발, 테크리뷰, 요리)",
+    "target_audience": "여기에 타겟 시청자 정의 (예: 20-30대 직장인)",
+    "value_prop": "이 채널이 시청자에게 주는 한 줄 가치 제안"
+  },
+  "brand": {
+    "tone": ["친근한", "정보형", "단정적이지 않은"],
+    "ban_words": ["광고", "협찬", "내돈내산"],
+    "must_words": [],
+    "intro_signature": "안녕하세요, 오늘은 ___ 에 대해 이야기해볼게요.",
+    "outro_signature": "도움이 되셨다면 구독과 좋아요 부탁드립니다.",
+    "color_palette": ["#0F172A", "#22D3EE", "#F8FAFC"],
+    "font_pair": { "title": "Pretendard Bold", "body": "Pretendard Regular" }
+  },
+  "video_defaults": {
+    "format": "long",
+    "duration_sec": 480,
+    "aspect_ratio": "16:9",
+    "resolution": "1920x1080",
+    "fps": 30,
+    "subtitle": { "enabled": true, "position": "bottom", "max_chars_per_line": 18 }
+  },
+  "models": {
+    "writer": "claude-sonnet-4",
+    "researcher": "claude-sonnet-4",
+    "reviewer": "claude-opus-4",
+    "image": "provider://image-model-id (예: openai:gpt-image-1, midjourney, sdxl)",
+    "video": "provider://video-model-id (예: runway:gen-3, kling, pika)",
+    "tts": "provider://tts-id (예: elevenlabs:voice_id, openai:tts-1-hd)"
+  },
+  "apis": {
+    "youtube": {
+      "client_secret_env": "YOUTUBE_CLIENT_SECRET_PATH",
+      "oauth_token_env": "YOUTUBE_OAUTH_TOKEN_PATH",
+      "upload_mode": "manual_confirm",
+      "default_privacy": "private",
+      "default_category_id": "27",
+      "default_tags": ["자동화", "AI영상"]
+    },
+    "tts": {
+      "provider": "elevenlabs",
+      "api_key_env": "ELEVENLABS_API_KEY",
+      "voice_id": "REPLACE_ME",
+      "model": "eleven_multilingual_v2",
+      "stability": 0.45,
+      "similarity_boost": 0.75,
+      "style": 0.2
+    },
+    "image": {
+      "provider": "openai",
+      "api_key_env": "OPENAI_API_KEY",
+      "size": "1920x1080",
+      "quality": "high"
+    },
+    "video": {
+      "provider": "runway",
+      "api_key_env": "RUNWAY_API_KEY",
+      "duration_sec_per_clip": 5
+    },
+    "search": {
+      "provider": "youtube_data_api",
+      "api_key_env": "YOUTUBE_DATA_API_KEY",
+      "max_results": 20
+    }
+  },
+  "capcut": {
+    "template_path": "shared/templates/capcut_base.json",
+    "fps": 30,
+    "canvas": { "width": 1920, "height": 1080 }
+  },
+  "thumbnails": {
+    "count": 5,
+    "template_path": "shared/templates/thumbnail_base.json",
+    "size": "1280x720"
+  },
+  "human_gates": {
+    "before_upload": true,
+    "before_bulk_visual": true
+  },
+  "paths": {
+    "projects_dir": "projects"
+  }
+}

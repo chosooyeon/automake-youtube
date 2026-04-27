@@ -1,0 +1,43 @@
+{
+  "id": "01-benchmark",
+  "name": "벤치마킹 봇",
+  "purpose": "주제 키워드로 유튜브 레퍼런스 영상을 수집하고 패턴을 분석한다.",
+  "model": { "use": "researcher", "fallback": "writer" },
+  "input_schema": null,
+  "output_schema": "shared/schemas/01-benchmark.schema.json",
+  "params": {
+    "min_references": 7,
+    "max_references": 12,
+    "lookback_days": 365,
+    "sort_by": "viewCount",
+    "regions": ["KR"],
+    "min_views": 50000,
+    "include_shorts": false,
+    "search_strategies": [
+      "정확한 주제 키워드",
+      "주제의 상위 카테고리 키워드",
+      "타겟 페르소나가 검색할 만한 질문형 키워드",
+      "경쟁 채널 핸들 검색"
+    ]
+  },
+  "analysis": {
+    "axes": [
+      "훅(0~7초) 패턴",
+      "영상 구조",
+      "제목 공식",
+      "썸네일 비주얼/카피 공식",
+      "길이/리텐션 추정",
+      "차별화 기회"
+    ],
+    "deliverables": [
+      "references[] 각 항목의 hook_first_15s, structure, why_it_works, weakness",
+      "synthesis: winning_patterns, title_formulas, hook_formulas, structure_recommendation, differentiation_opportunities"
+    ]
+  },
+  "tools_allowed": [
+    "WebSearch",
+    "WebFetch",
+    "Read",
+    "Write(./projects/{slug}/01-benchmark/**)"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pipeline.schema.json",
+  "title": "Pipeline Config",
+  "type": "object",
+  "required": ["version", "default_order", "stages"],
+  "properties": {
+    "version": { "type": "string" },
+    "description": { "type": "string" },
+    "default_order": { "type": "array", "items": { "type": "string" } },
+    "human_gate_after": { "type": "array", "items": { "type": "string" } },
+    "stages": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["bot_dir", "inputs", "outputs"],
+        "properties": {
+          "title": { "type": "string" },
+          "bot_dir": { "type": "string" },
+          "inputs": { "type": "array", "items": { "type": "string" } },
+          "outputs": { "type": "array", "items": { "type": "string" } },
+          "depends_on": { "type": "array", "items": { "type": "string" } },
+          "requires_human_approval": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "$schema": "../shared/schemas/pipeline.schema.json",
+  "version": "1.0.0",
+  "description": "유튜브 자동화 파이프라인 - 봇 실행 순서와 의존성 정의",
+  "default_order": [
+    "01-benchmark",
+    "02-strategy",
+    "03-script",
+    "04-audio",
+    "05-visual",
+    "06-edit-upload"
+  ],
+  "human_gate_after": ["05-visual"],
+  "stages": {
+    "01-benchmark": {
+      "title": "벤치마킹 (레퍼런스 수집 + 분석)",
+      "bot_dir": "bots/01-benchmark",
+      "inputs": ["projects/{slug}/00-input/brief.md"],
+      "outputs": ["projects/{slug}/01-benchmark/output.json"],
+      "depends_on": []
+    },
+    "02-strategy": {
+      "title": "전략 (컨셉·제목·훅·인트로)",
+      "bot_dir": "bots/02-strategy",
+      "inputs": [
+        "projects/{slug}/00-input/brief.md",
+        "projects/{slug}/01-benchmark/output.json"
+      ],
+      "outputs": ["projects/{slug}/02-strategy/output.json"],
+      "depends_on": ["01-benchmark"]
+    },
+    "03-script": {
+      "title": "대본 (기획·집필·검수·리비전)",
+      "bot_dir": "bots/03-script",
+      "inputs": [
+        "projects/{slug}/02-strategy/output.json",
+        "projects/{slug}/01-benchmark/output.json"
+      ],
+      "outputs": [
+        "projects/{slug}/03-script/output.json",
+        "projects/{slug}/03-script/script.md"
+      ],
+      "depends_on": ["02-strategy"]
+    },
+    "04-audio": {
+      "title": "음성 (TTS·자막·무음 압축)",
+      "bot_dir": "bots/04-audio",
+      "inputs": ["projects/{slug}/03-script/output.json"],
+      "outputs": [
+        "projects/{slug}/04-audio/output.json",
+        "projects/{slug}/04-audio/voice.wav",
+        "projects/{slug}/04-audio/voice.compressed.wav",
+        "projects/{slug}/04-audio/subtitle.srt"
+      ],
+      "depends_on": ["03-script"]
+    },
+    "05-visual": {
+      "title": "비주얼 (씬 설계·이미지·영상)",
+      "bot_dir": "bots/05-visual",
+      "inputs": [
+        "projects/{slug}/03-script/output.json",
+        "projects/{slug}/04-audio/output.json"
+      ],
+      "outputs": [
+        "projects/{slug}/05-visual/output.json",
+        "projects/{slug}/05-visual/scenes/"
+      ],
+      "depends_on": ["03-script", "04-audio"]
+    },
+    "06-edit-upload": {
+      "title": "편집 + 업로드 (CapCut JSON · 썸네일 · YouTube)",
+      "bot_dir": "bots/06-edit-upload",
+      "inputs": [
+        "projects/{slug}/02-strategy/output.json",
+        "projects/{slug}/04-audio/output.json",
+        "projects/{slug}/05-visual/output.json"
+      ],
+      "outputs": [
+        "projects/{slug}/06-edit-upload/capcut_project.json",
+        "projects/{slug}/06-edit-upload/thumbnails/",
+        "projects/{slug}/06-edit-upload/upload_metadata.json"
+      ],
+      "depends_on": ["05-visual"],
+      "requires_human_approval": true
+    }
+  }
+}

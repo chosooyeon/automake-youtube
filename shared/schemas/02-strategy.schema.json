@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "02-strategy.schema.json",
+  "title": "Strategy Output",
+  "description": "02-strategy 봇의 출력 스키마. 컨셉·제목·훅·인트로 후보를 정함.",
+  "type": "object",
+  "required": ["concept", "titles", "hooks", "intro", "created_at"],
+  "properties": {
+    "concept": {
+      "type": "object",
+      "required": ["one_liner", "target_audience", "promise", "differentiator"],
+      "properties": {
+        "one_liner": { "type": "string", "description": "이 영상은 ___ 영상이다 (한 줄)" },
+        "target_audience": { "type": "string" },
+        "promise": { "type": "string", "description": "시청자가 끝까지 보면 얻는 것" },
+        "differentiator": { "type": "string", "description": "기존 영상들과 다른 점" },
+        "tone": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "titles": {
+      "type": "array",
+      "minItems": 5,
+      "description": "제목 후보 5+개. 첫 번째가 추천.",
+      "items": {
+        "type": "object",
+        "required": ["text", "rationale"],
+        "properties": {
+          "text": { "type": "string", "maxLength": 100 },
+          "rationale": { "type": "string" },
+          "ctr_score": { "type": "number", "minimum": 0, "maximum": 10 }
+        }
+      }
+    },
+    "hooks": {
+      "type": "array",
+      "minItems": 3,
+      "description": "0~7초 훅 후보 3+개",
+      "items": {
+        "type": "object",
+        "required": ["text", "type", "rationale"],
+        "properties": {
+          "text": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["question", "shocking_fact", "promise", "story", "contradiction", "demo"]
+          },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "intro": {
+      "type": "object",
+      "required": ["text", "duration_sec"],
+      "properties": {
+        "text": { "type": "string", "description": "훅 직후 ~30초 인트로 멘트 초안" },
+        "duration_sec": { "type": "integer", "minimum": 10, "maximum": 45 },
+        "preview_promise": { "type": "string", "description": "이 영상에서 다룰 것 예고" }
+      }
+    },
+    "outro": {
+      "type": "object",
+      "properties": {
+        "cta": { "type": "string" },
+        "next_video_teaser": { "type": "string" }
+      }
+    },
+    "keywords": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "유튜브 SEO용 키워드"
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}
