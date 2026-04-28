@@ -1,0 +1,302 @@
+{
+  "$schema": "../../../shared/schemas/05-visual.schema.json",
+  "canvas": { "width": 1920, "height": 1080 },
+  "fps": 30,
+  "scenes": [
+    {
+      "scene_id": "scene-001",
+      "start_sec": 0,
+      "end_sec": 7,
+      "transition_in": "fade_in",
+      "transition_out": "cut",
+      "layers": [
+        {
+          "type": "image",
+          "asset_path": "scenes/scene-001/bg.png",
+          "prompt": "A minimal cinematic still life: a wall calendar showing a date circled in red marker with a thick X over it, a stack of one-million-Korean-won bill illustrations dissolving into pink dust on the right, soft pastel pink and navy color palette, shallow depth of field, top-down 3/4 angle, clean editorial lighting, no people, no text, ultra-detailed, 8k",
+          "negative_prompt": "low quality, blurry, watermark, deformed text, extra fingers, real cash, brand logos",
+          "duration_sec": 7,
+          "in_anim": "zoom_in",
+          "out_anim": "fade_out"
+        },
+        {
+          "type": "text",
+          "text": "60일 넘기면 100만원 사라진다",
+          "duration_sec": 7,
+          "style": {
+            "font": "Pretendard Black",
+            "size": 110,
+            "color": "#FFFFFF",
+            "weight": "900",
+            "stroke_color": "#0F172A",
+            "stroke_width": 8,
+            "shadow": true
+          },
+          "transform": { "x": 0.5, "y": 0.5 }
+        }
+      ]
+    },
+    {
+      "scene_id": "scene-002",
+      "start_sec": 7,
+      "end_sec": 35,
+      "transition_in": "fade_in",
+      "transition_out": "slide_left",
+      "layers": [
+        {
+          "type": "image",
+          "asset_path": "scenes/scene-002/bg.png",
+          "prompt": "A friendly editorial illustration showing five stylized icons arranged in a horizontal timeline on a soft pastel pink and navy gradient background. The icons (left to right): a pregnancy card, a baby gift box, a cash envelope, a hospital cross with shield, a caregiver-with-newborn silhouette. Subtle paper texture, modern flat illustration with thin line accents, no real text labels, plenty of negative space at center for overlay text, 16:9, 8k",
+          "negative_prompt": "blurry, watermark, real text artifacts, busy background, brand logos, faces in detail",
+          "duration_sec": 28,
+          "in_anim": "fade_in",
+          "out_anim": "slide_left"
+        },
+        {
+          "type": "text",
+          "text": "오늘 다룰 5가지 정부지원금",
+          "duration_sec": 28,
+          "style": {
+            "font": "Pretendard Bold",
+            "size": 80,
+            "color": "#0F172A",
+            "stroke_color": "#FFFFFF",
+            "stroke_width": 4,
+            "shadow": false
+          },
+          "transform": { "x": 0.5, "y": 0.18 }
+        }
+      ]
+    },
+    {
+      "scene_id": "scene-003",
+      "start_sec": 35,
+      "end_sec": 110,
+      "transition_in": "slide_right",
+      "transition_out": "cut",
+      "layers": [
+        {
+          "type": "image",
+          "asset_path": "scenes/scene-003/bg.png",
+          "prompt": "A clean editorial illustration of a Korean ‘국민행복카드’ style payment card floating slightly above a desk, surrounded by minimal icons (pregnancy ultrasound, pharmacy mortar, hospital cross), pastel pink and white background, soft side light, 3/4 angle, no real brand logos, no real text on the card except a generic ‘HAPPY CARD’ wordmark mock-up, 16:9, 8k, ultra clean, modern flat-3D hybrid",
+          "negative_prompt": "real bank logos, real card numbers, photorealistic faces, watermark, blurry",
+          "duration_sec": 75,
+          "in_anim": "slide_right",
+          "out_anim": "cut"
+        },
+        {
+          "type": "text",
+          "text": "① 국민행복카드 — 100만원",
+          "duration_sec": 75,
+          "style": {
+            "font": "Pretendard Black",
+            "size": 90,
+            "color": "#FFFFFF",
+            "stroke_color": "#0F172A",
+            "stroke_width": 6,
+            "shadow": true
+          },
+          "transform": { "x": 0.5, "y": 0.12 }
+        }
+      ]
+    },
+    {
+      "scene_id": "scene-004",
+      "start_sec": 110,
+      "end_sec": 175,
+      "transition_in": "slide_right",
+      "transition_out": "cut",
+      "layers": [
+        {
+          "type": "image",
+          "asset_path": "scenes/scene-004/bg.png",
+          "prompt": "A warm editorial illustration of a baby gift box with a pink ribbon being opened, a stack of two coupon-like cards floating out (one labeled ‘#1’, one labeled ‘#2 ↑’ as conceptual marks, no real text), tiny baby socks and pacifier in soft focus, pastel pink and cream palette, soft morning light, 16:9, 8k, modern flat illustration with subtle 3D",
+          "negative_prompt": "real cash, real text labels except marks, watermark, brand logos, photorealistic baby face",
+          "duration_sec": 65,
+          "in_anim": "slide_right",
+          "out_anim": "cut"
+        },
+        {
+          "type": "text",
+          "text": "② 첫만남이용권 — 200/300만원",
+          "duration_sec": 65,
+          "style": {
+            "font": "Pretendard Black",
+            "size": 90,
+            "color": "#FFFFFF",
+            "stroke_color": "#0F172A",
+            "stroke_width": 6,
+            "shadow": true
+          },
+          "transform": { "x": 0.5, "y": 0.12 }
+        }
+      ]
+    },
+    {
+      "scene_id": "scene-005",
+      "start_sec": 175,
+      "end_sec": 253,
+      "transition_in": "slide_right",
+      "transition_out": "cut",
+      "layers": [
+        {
+          "type": "image",
+          "asset_path": "scenes/scene-005/bg.png",
+          "prompt": "Editorial illustration: a smartphone showing a generic bank account deposit notification (no real text, abstract numbers), beside a desktop calendar with the 25th highlighted, and a small countdown badge ‘D-60’ in red on the corner, pastel pink and navy palette, clean modern flat-3D hybrid style, 16:9, 8k, soft top-down lighting",
+          "negative_prompt": "real bank app, real text, real money, watermark, low quality",
+          "duration_sec": 78,
+          "in_anim": "slide_right",
+          "out_anim": "cut"
+        },
+        {
+          "type": "text",
+          "text": "③ 부모급여 — 60일 룰",
+          "duration_sec": 78,
+          "style": {
+            "font": "Pretendard Black",
+            "size": 90,
+            "color": "#FFFFFF",
+            "stroke_color": "#0F172A",
+            "stroke_width": 6,
+            "shadow": true
+          },
+          "transform": { "x": 0.5, "y": 0.12 }
+        }
+      ]
+    },
+    {
+      "scene_id": "scene-006",
+      "start_sec": 253,
+      "end_sec": 323,
+      "transition_in": "slide_right",
+      "transition_out": "cut",
+      "layers": [
+        {
+          "type": "image",
+          "asset_path": "scenes/scene-006/bg.png",
+          "prompt": "A calm hospital scene illustration: a soft-lit hospital room with a single bed in soft focus, a clipboard with a generic medical chart icon (no real text), a small 90% donut chart graphic and ‘MAX 3,000,000’ stylized as conceptual numbers, pastel pink and clinical white palette, modern editorial flat illustration, 16:9, 8k",
+          "negative_prompt": "real patient face, real medical brand logos, gore, watermark, real text",
+          "duration_sec": 70,
+          "in_anim": "slide_right",
+          "out_anim": "cut"
+        },
+        {
+          "type": "text",
+          "text": "④ 고위험 임산부 의료비 — 300만원",
+          "duration_sec": 70,
+          "style": {
+            "font": "Pretendard Black",
+            "size": 80,
+            "color": "#FFFFFF",
+            "stroke_color": "#0F172A",
+            "stroke_width": 6,
+            "shadow": true
+          },
+          "transform": { "x": 0.5, "y": 0.12 }
+        }
+      ]
+    },
+    {
+      "scene_id": "scene-007",
+      "start_sec": 323,
+      "end_sec": 388,
+      "transition_in": "slide_right",
+      "transition_out": "cut",
+      "layers": [
+        {
+          "type": "image",
+          "asset_path": "scenes/scene-007/bg.png",
+          "prompt": "A cozy editorial illustration of a postpartum care setting: a stylized caregiver figure (back view, no facial features) gently helping a new mother holding a newborn in a sunlit living room, soft beige and pastel pink palette, warm afternoon light, modern flat illustration with subtle 3D, 16:9, 8k",
+          "negative_prompt": "photorealistic faces, watermark, real brand logos, busy background, low quality",
+          "duration_sec": 65,
+          "in_anim": "slide_right",
+          "out_anim": "cut"
+        },
+        {
+          "type": "text",
+          "text": "⑤ 산모·신생아 건강관리",
+          "duration_sec": 65,
+          "style": {
+            "font": "Pretendard Black",
+            "size": 90,
+            "color": "#FFFFFF",
+            "stroke_color": "#0F172A",
+            "stroke_width": 6,
+            "shadow": true
+          },
+          "transform": { "x": 0.5, "y": 0.12 }
+        }
+      ]
+    },
+    {
+      "scene_id": "scene-008",
+      "start_sec": 388,
+      "end_sec": 415,
+      "transition_in": "fade_in",
+      "transition_out": "fade_out",
+      "layers": [
+        {
+          "type": "image",
+          "asset_path": "scenes/scene-008/bg.png",
+          "prompt": "A clean infographic-style illustration: a horizontal pregnancy-to-postpartum timeline with five labeled milestones as small icons (pregnancy card, postpartum care, birth registration, gift box, hospital), connected by a thin pink line, pastel pink and navy palette on cream background, modern editorial style, plenty of negative space for overlay text, 16:9, 8k",
+          "negative_prompt": "real text labels, watermark, brand logos, busy background, low quality",
+          "duration_sec": 27,
+          "in_anim": "fade_in",
+          "out_anim": "fade_out"
+        },
+        {
+          "type": "text",
+          "text": "📅 신청 데드라인 한 장 정리",
+          "duration_sec": 27,
+          "style": {
+            "font": "Pretendard Black",
+            "size": 90,
+            "color": "#0F172A",
+            "stroke_color": "#FFFFFF",
+            "stroke_width": 6,
+            "shadow": false
+          },
+          "transform": { "x": 0.5, "y": 0.12 }
+        }
+      ]
+    },
+    {
+      "scene_id": "scene-009",
+      "start_sec": 415,
+      "end_sec": 433,
+      "transition_in": "fade_in",
+      "transition_out": "fade_out",
+      "layers": [
+        {
+          "type": "image",
+          "asset_path": "scenes/scene-009/bg.png",
+          "prompt": "A warm closing illustration: a stylized smartphone showing a generic ‘subscribe’ bell icon with a small notification dot, set against a soft pastel pink gradient background, modern flat illustration with subtle 3D, plenty of empty space for end-screen elements, 16:9, 8k",
+          "negative_prompt": "real YouTube logo, brand logos, real text, watermark, low quality",
+          "duration_sec": 18,
+          "in_anim": "fade_in",
+          "out_anim": "fade_out"
+        },
+        {
+          "type": "text",
+          "text": "구독·알림 부탁드려요",
+          "duration_sec": 18,
+          "style": {
+            "font": "Pretendard Black",
+            "size": 100,
+            "color": "#FFFFFF",
+            "stroke_color": "#0F172A",
+            "stroke_width": 6,
+            "shadow": true
+          },
+          "transform": { "x": 0.5, "y": 0.5 }
+        }
+      ]
+    }
+  ],
+  "global_audio": {
+    "voice_track": "(CapCut 텍스트 읽기 결과 — CapCut 내부 트랙)",
+    "bgm_track": "추천: 잔잔한 어쿠스틱/피아노 (CapCut 무료 음원 ‘gentle hope’ 류). 음량은 음성 대비 -16dB.",
+    "bgm_volume": 0.15
+  },
+  "created_at": "2026-04-27T00:00:00Z"
+}

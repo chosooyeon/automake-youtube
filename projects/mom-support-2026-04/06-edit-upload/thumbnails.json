@@ -1,0 +1,44 @@
+{
+  "$schema": "../../../shared/schemas/06-edit-upload.schema.json#/properties/thumbnails",
+  "size": "1280x720",
+  "generation_mode": "prompts_only",
+  "external_tool": "gemini.google.com (나노바나나)",
+  "instructions": "각 ‘prompt’ 를 그대로 Gemini 또는 Google AI Studio에 붙여넣고 1280x720 16:9 이미지로 받으세요. 한국어 텍스트는 Gemini가 깨끗하게 못 만드는 경우가 많아, 텍스트는 ‘CapCut’ 또는 ‘피그마’ 에서 후처리로 얹는 것을 권장합니다.",
+  "candidates": [
+    {
+      "id": "thumb-01-shock",
+      "concept": "충격형 — 60일 카운트다운 + 100만원 사라짐",
+      "prompt": "16:9 YouTube thumbnail illustration, 1280x720. Left side: a wall calendar with a date heavily circled in red marker and a giant red X over it. Right side: a stack of generic Korean-style 1,000,000-won bill illustrations dissolving into pink dust particles. Background: soft pastel pink to navy gradient. Strong dramatic side-light, high contrast. Leave a clean horizontal band across the upper third for a Korean headline overlay (do NOT render real Korean text in the image — leave it blank/clean). Editorial flat-3D hybrid style, ultra-detailed, 8k.",
+      "headline_overlay_korean": "60일 넘기면 100만원 사라집니다",
+      "ctr_score": 9.0
+    },
+    {
+      "id": "thumb-02-checklist",
+      "concept": "체크리스트형 — 5가지 한 번에",
+      "prompt": "16:9 YouTube thumbnail illustration, 1280x720. A vertical checklist of 5 stylized icons on the right side: pregnancy card, gift box, cash envelope, hospital cross-shield, postpartum-caregiver silhouette. Each icon has a green checkmark next to it. Soft pastel pink background with subtle paper texture. Left side intentionally clean for a big Korean headline overlay (do NOT render real Korean text). Modern editorial flat illustration with subtle 3D, soft top-down lighting, 8k.",
+      "headline_overlay_korean": "임산부 정부지원금\n5가지 한 번에",
+      "ctr_score": 8.5
+    },
+    {
+      "id": "thumb-03-money-stack",
+      "concept": "금액 강조형 — 1,140만원 합계",
+      "prompt": "16:9 YouTube thumbnail illustration, 1280x720. Center: a large generic 1,000,000-won bill stack illustration with sparkles and a soft glow. Surrounding small icons: hospital cross, baby gift box, pregnancy card. Pastel pink and navy palette, dramatic spotlight lighting. Leave the upper portion clean for a Korean headline (no real Korean text in the image). Editorial flat-3D hybrid, 8k.",
+      "headline_overlay_korean": "임산부가 받을 수 있는 돈\n최대 1,140만원",
+      "ctr_score": 8.2
+    },
+    {
+      "id": "thumb-04-deadline",
+      "concept": "데드라인 강조형 — D-day 5개",
+      "prompt": "16:9 YouTube thumbnail illustration, 1280x720. A horizontal timeline with 5 colored milestone pins (each with a small red ‘D-’ badge). Background: pastel cream with subtle pregnancy/baby motifs in faint outline. Modern infographic style, clean, plenty of negative space at the top. No real Korean text in the image — leave space for overlay. 8k editorial illustration.",
+      "headline_overlay_korean": "출산 전·후\n신청 데드라인 5가지",
+      "ctr_score": 7.8
+    },
+    {
+      "id": "thumb-05-question",
+      "concept": "질문형 — 물음표 + 임산부 실루엣",
+      "prompt": "16:9 YouTube thumbnail illustration, 1280x720. A side-profile silhouette of a pregnant person on the left in soft pastel pink, with three large stylized question marks floating around her head, and three icons (cash envelope, gift box, hospital cross) emerging from the question marks. Soft navy gradient background. Leave the right side mostly empty for a big Korean headline (no real Korean text in image). Modern editorial flat illustration, 8k.",
+      "headline_overlay_korean": "받을 수 있는데\n안 받는 돈, 있나요?",
+      "ctr_score": 7.5
+    }
+  ]
+}

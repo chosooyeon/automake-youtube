@@ -1,0 +1,80 @@
+{
+  "_comment": "CapCut에 그대로 import되는 정식 포맷이 아닙니다. CapCut으로 직접 만들 때 따라가는 ‘레시피’ 입니다. 9개 씬을 트랙별 클립으로 정렬해두었으니, CapCut에서 각 항목을 위에서 아래로 쌓아 만드세요.",
+  "version": "1.0.0",
+  "fps": 30,
+  "canvas": { "width": 1920, "height": 1080 },
+  "duration_ms": 433000,
+  "tracks": {
+    "video": [
+      {
+        "id": "v1",
+        "type": "video",
+        "role": "scene_bg",
+        "clips": [
+          { "id": "v1-001", "asset_path": "../05-visual/scenes/scene-001/bg.png", "start_ms": 0,      "end_ms": 7000,   "in_anim": "zoom_in",   "out_anim": "fade_out" },
+          { "id": "v1-002", "asset_path": "../05-visual/scenes/scene-002/bg.png", "start_ms": 7000,   "end_ms": 35000,  "in_anim": "fade_in",   "out_anim": "slide_left" },
+          { "id": "v1-003", "asset_path": "../05-visual/scenes/scene-003/bg.png", "start_ms": 35000,  "end_ms": 110000, "in_anim": "slide_right","out_anim": "cut" },
+          { "id": "v1-004", "asset_path": "../05-visual/scenes/scene-004/bg.png", "start_ms": 110000, "end_ms": 175000, "in_anim": "slide_right","out_anim": "cut" },
+          { "id": "v1-005", "asset_path": "../05-visual/scenes/scene-005/bg.png", "start_ms": 175000, "end_ms": 253000, "in_anim": "slide_right","out_anim": "cut" },
+          { "id": "v1-006", "asset_path": "../05-visual/scenes/scene-006/bg.png", "start_ms": 253000, "end_ms": 323000, "in_anim": "slide_right","out_anim": "cut" },
+          { "id": "v1-007", "asset_path": "../05-visual/scenes/scene-007/bg.png", "start_ms": 323000, "end_ms": 388000, "in_anim": "slide_right","out_anim": "cut" },
+          { "id": "v1-008", "asset_path": "../05-visual/scenes/scene-008/bg.png", "start_ms": 388000, "end_ms": 415000, "in_anim": "fade_in",   "out_anim": "fade_out" },
+          { "id": "v1-009", "asset_path": "../05-visual/scenes/scene-009/bg.png", "start_ms": 415000, "end_ms": 433000, "in_anim": "fade_in",   "out_anim": "fade_out" }
+        ]
+      }
+    ],
+    "audio": [
+      {
+        "id": "a1",
+        "type": "audio",
+        "role": "voice",
+        "note": "CapCut의 ‘텍스트 → 텍스트 읽기(TTS)’를 각 씬 텍스트에 적용해서 자동 생성",
+        "clips": []
+      },
+      {
+        "id": "a2",
+        "type": "audio",
+        "role": "bgm",
+        "note": "CapCut 무료 음원 라이브러리에서 ‘gentle / calm / acoustic / piano’ 카테고리 1곡 선택. 음량 0.15 (음성 -16dB)",
+        "clips": []
+      }
+    ],
+    "text": [
+      {
+        "id": "t1",
+        "type": "text",
+        "role": "headline",
+        "clips": [
+          { "id": "t1-001", "text": "60일 넘기면 100만원 사라진다",          "start_ms": 0,      "end_ms": 7000,   "size": 110, "color": "#FFFFFF", "stroke": "#0F172A", "y": 0.5  },
+          { "id": "t1-002", "text": "오늘 다룰 5가지 정부지원금",            "start_ms": 7000,   "end_ms": 35000,  "size": 80,  "color": "#0F172A", "stroke": "#FFFFFF", "y": 0.18 },
+          { "id": "t1-003", "text": "① 국민행복카드 — 100만원",              "start_ms": 35000,  "end_ms": 110000, "size": 90,  "color": "#FFFFFF", "stroke": "#0F172A", "y": 0.12 },
+          { "id": "t1-004", "text": "② 첫만남이용권 — 200/300만원",          "start_ms": 110000, "end_ms": 175000, "size": 90,  "color": "#FFFFFF", "stroke": "#0F172A", "y": 0.12 },
+          { "id": "t1-005", "text": "③ 부모급여 — 60일 룰",                  "start_ms": 175000, "end_ms": 253000, "size": 90,  "color": "#FFFFFF", "stroke": "#0F172A", "y": 0.12 },
+          { "id": "t1-006", "text": "④ 고위험 임산부 의료비 — 300만원",      "start_ms": 253000, "end_ms": 323000, "size": 80,  "color": "#FFFFFF", "stroke": "#0F172A", "y": 0.12 },
+          { "id": "t1-007", "text": "⑤ 산모·신생아 건강관리",                "start_ms": 323000, "end_ms": 388000, "size": 90,  "color": "#FFFFFF", "stroke": "#0F172A", "y": 0.12 },
+          { "id": "t1-008", "text": "📅 신청 데드라인 한 장 정리",            "start_ms": 388000, "end_ms": 415000, "size": 90,  "color": "#0F172A", "stroke": "#FFFFFF", "y": 0.12 },
+          { "id": "t1-009", "text": "구독·알림 부탁드려요",                  "start_ms": 415000, "end_ms": 433000, "size": 100, "color": "#FFFFFF", "stroke": "#0F172A", "y": 0.5  }
+        ]
+      },
+      {
+        "id": "t2",
+        "type": "text",
+        "role": "subtitle",
+        "note": "CapCut에서 ../04-audio/subtitle.srt 를 ‘자막 import’ 또는 ‘자동 자막’ 후 SRT와 대조",
+        "clips": []
+      }
+    ]
+  },
+  "build_recipe_steps": [
+    "1. CapCut Mac 새 프로젝트 생성 → 캔버스 1920x1080, 30fps",
+    "2. 9개 배경 이미지(scene-001~009/bg.png)를 video 트랙에 순서대로 드래그",
+    "3. 각 클립의 길이를 capcut_project.json 의 start_ms/end_ms 와 일치시킴",
+    "4. capcut_tts_input.txt 의 9개 씬 텍스트를 한 번에 1개씩 ‘텍스트 → 텍스트 읽기’ 로 변환 (voice: 한국어 차분한 여성)",
+    "5. 자동 생성된 음성 클립의 길이가 추정과 다르면 클립 길이를 음성에 맞춰 재정렬",
+    "6. 텍스트 트랙(t1) 헤드라인 9개를 추가 (위 헤드라인 표 참고)",
+    "7. ../04-audio/subtitle.srt 를 자막 트랙에 import (혹은 CapCut 자동 자막 후 비교)",
+    "8. BGM 트랙: CapCut 무료 음원 라이브러리에서 ‘calm acoustic piano’ 1곡, 음량 0.15",
+    "9. 오디오 트랙에 ‘무음 감지/삭제’ 적용",
+    "10. 익스포트 1080p 30fps mp4 → 06-edit-upload/final.mp4"
+  ]
+}

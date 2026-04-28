@@ -1,0 +1,142 @@
+{
+  "$schema": "../../../shared/schemas/04-audio.schema.json",
+  "voice_file": "(CapCut 내장 TTS 사용 — 외부 wav 미생성)",
+  "compressed_voice_file": "(CapCut에서 텍스트 읽기 적용 후 컷 편집으로 무음 제거)",
+  "subtitle_file": "projects/mom-support-2026-04/04-audio/subtitle.srt",
+  "tts": {
+    "provider": "capcut_builtin",
+    "voice_id": "여성_차분한 (CapCut 한국어 보이스 중 선택)",
+    "model": "capcut_internal",
+    "params": {
+      "speed": 1.0,
+      "pitch": 0,
+      "note": "CapCut에서 ‘텍스트 → 텍스트 읽기’ 메뉴로 씬별 narration 텍스트를 그대로 입력. 톤은 ‘차분/정보형’ 한국어 여성 보이스 권장."
+    }
+  },
+  "silence_compression": {
+    "applied": false,
+    "method": "capcut_manual_cut",
+    "threshold_db": -35,
+    "min_silence_ms": 600,
+    "removed_ms_total": null,
+    "note": "CapCut의 ‘오디오 → 무음 감지/삭제’ 기능으로 한 번에 처리하거나, 수동 컷."
+  },
+  "scenes": [
+    { "scene_id": "scene-001", "start_sec": 0,    "end_sec": 7,
+      "subtitle_cues": [
+        { "start_sec": 0.0,  "end_sec": 1.75, "text": "출생일로부터 딱 60일." },
+        { "start_sec": 1.75, "end_sec": 3.50, "text": "하루라도 넘기면" },
+        { "start_sec": 3.50, "end_sec": 5.25, "text": "부모급여 100만 원이" },
+        { "start_sec": 5.25, "end_sec": 7.00, "text": "그대로 사라집니다." }
+      ]
+    },
+    { "scene_id": "scene-002", "start_sec": 7,   "end_sec": 35,
+      "subtitle_cues": [
+        { "start_sec": 7.00,  "end_sec": 10.10, "text": "안녕하세요, 엄마지갑입니다." },
+        { "start_sec": 10.10, "end_sec": 13.20, "text": "오늘은 2026년 4월 27일 기준" },
+        { "start_sec": 13.20, "end_sec": 16.30, "text": "임산부가 받을 수 있는 정부지원금" },
+        { "start_sec": 16.30, "end_sec": 19.40, "text": "5가지를 데드라인 순서로 정리합니다." },
+        { "start_sec": 19.40, "end_sec": 22.10, "text": "이름은 비슷하지만" },
+        { "start_sec": 22.10, "end_sec": 25.20, "text": "신청처·사용기한·받는 시점이" },
+        { "start_sec": 25.20, "end_sec": 27.90, "text": "전부 다릅니다." },
+        { "start_sec": 27.90, "end_sec": 31.40, "text": "하나라도 놓치면 0원이니" },
+        { "start_sec": 31.40, "end_sec": 35.00, "text": "끝까지 같이 정리해보세요." }
+      ]
+    },
+    { "scene_id": "scene-003", "start_sec": 35,  "end_sec": 110,
+      "subtitle_cues": [
+        { "start_sec": 35.00, "end_sec": 41.80, "text": "① 국민행복카드" },
+        { "start_sec": 41.80, "end_sec": 48.60, "text": "임신·출산 진료비 지원" },
+        { "start_sec": 48.60, "end_sec": 55.40, "text": "단태아 100만원" },
+        { "start_sec": 55.40, "end_sec": 62.20, "text": "다태아 140만원" },
+        { "start_sec": 62.20, "end_sec": 69.00, "text": "분만취약지 +20만원" },
+        { "start_sec": 69.00, "end_sec": 75.80, "text": "의료급여 수급자 단태아 120만원" },
+        { "start_sec": 75.80, "end_sec": 82.60, "text": "신청: 임신확인서 받은 직후" },
+        { "start_sec": 82.60, "end_sec": 89.40, "text": "복지로·공단·주민센터" },
+        { "start_sec": 89.40, "end_sec": 96.20, "text": "사용기한 출산일~2년" },
+        { "start_sec": 96.20, "end_sec": 103.00, "text": "*카드 수령 후 ‘바우처 등록’ 필수" },
+        { "start_sec": 103.00, "end_sec": 110.00, "text": "안 하면 잔액 충전 안 됨" }
+      ]
+    },
+    { "scene_id": "scene-004", "start_sec": 110, "end_sec": 175,
+      "subtitle_cues": [
+        { "start_sec": 110.0, "end_sec": 118.1, "text": "② 첫만남이용권" },
+        { "start_sec": 118.1, "end_sec": 126.2, "text": "첫째 200만원 / 둘째 이상 300만원" },
+        { "start_sec": 126.2, "end_sec": 134.4, "text": "쌍둥이 = 2명 합산" },
+        { "start_sec": 134.4, "end_sec": 142.5, "text": "사용기한: 출생일~2년" },
+        { "start_sec": 142.5, "end_sec": 150.6, "text": "신청: 출생신고 시 ‘행복출산 원스톱’" },
+        { "start_sec": 150.6, "end_sec": 158.8, "text": "부모급여+아동수당과 한 번에" },
+        { "start_sec": 158.8, "end_sec": 166.9, "text": "중복 수급 가능" },
+        { "start_sec": 166.9, "end_sec": 175.0, "text": "주의: 부모급여 ↔ 양육수당은 중복 불가" }
+      ]
+    },
+    { "scene_id": "scene-005", "start_sec": 175, "end_sec": 253,
+      "subtitle_cues": [
+        { "start_sec": 175.0, "end_sec": 182.8, "text": "③ 부모급여" },
+        { "start_sec": 182.8, "end_sec": 190.6, "text": "0세 월 100만원 / 1세 월 50만원" },
+        { "start_sec": 190.6, "end_sec": 198.4, "text": "(2026년 전년 동일)" },
+        { "start_sec": 198.4, "end_sec": 206.2, "text": "가정양육: 매월 25일 입금" },
+        { "start_sec": 206.2, "end_sec": 214.0, "text": "어린이집 차액" },
+        { "start_sec": 214.0, "end_sec": 221.8, "text": "0세 41.6만원 / 1세 0원" },
+        { "start_sec": 221.8, "end_sec": 229.6, "text": "★ 출생일~60일 안에 신청" },
+        { "start_sec": 229.6, "end_sec": 237.4, "text": "넘기면 출생월 소급 ❌" },
+        { "start_sec": 237.4, "end_sec": 245.2, "text": "신청월부터만 지급" },
+        { "start_sec": 245.2, "end_sec": 253.0, "text": "행정복지센터 / 복지로 / 정부24" }
+      ]
+    },
+    { "scene_id": "scene-006", "start_sec": 253, "end_sec": 323,
+      "subtitle_cues": [
+        { "start_sec": 253.0, "end_sec": 261.8, "text": "④ 고위험 임산부 의료비" },
+        { "start_sec": 261.8, "end_sec": 270.5, "text": "19대 고위험 임신질환 입원치료" },
+        { "start_sec": 270.5, "end_sec": 279.3, "text": "본인부담+비급여의 90%" },
+        { "start_sec": 279.3, "end_sec": 288.0, "text": "한도 1인당 300만원" },
+        { "start_sec": 288.0, "end_sec": 296.8, "text": "의료급여 수급자 100%" },
+        { "start_sec": 296.8, "end_sec": 305.5, "text": "2024년~ 소득 기준 폐지" },
+        { "start_sec": 305.5, "end_sec": 314.3, "text": "★ 분만일~6개월 이내 신청" },
+        { "start_sec": 314.3, "end_sec": 323.0, "text": "주소지 보건소 또는 e보건소" }
+      ]
+    },
+    { "scene_id": "scene-007", "start_sec": 323, "end_sec": 388,
+      "subtitle_cues": [
+        { "start_sec": 323.0, "end_sec": 332.3, "text": "⑤ 산모·신생아 건강관리" },
+        { "start_sec": 332.3, "end_sec": 341.6, "text": "(산후도우미 바우처)" },
+        { "start_sec": 341.6, "end_sec": 350.9, "text": "기본: 기준중위소득 150% 이하" },
+        { "start_sec": 350.9, "end_sec": 360.1, "text": "쌍둥이·셋째 이상 예외 지원" },
+        { "start_sec": 360.1, "end_sec": 369.4, "text": "지원 기간 5~40일" },
+        { "start_sec": 369.4, "end_sec": 378.7, "text": "★ 출산예정 40일 전 ~ 출산 후 60일" },
+        { "start_sec": 378.7, "end_sec": 388.0, "text": "복지로 / 정부24 / 보건소" }
+      ]
+    },
+    { "scene_id": "scene-008", "start_sec": 388, "end_sec": 415,
+      "subtitle_cues": [
+        { "start_sec": 388.0, "end_sec": 391.4, "text": "📅 신청 데드라인 캘린더" },
+        { "start_sec": 391.4, "end_sec": 394.8, "text": "임신확인 즉시 → 국민행복카드" },
+        { "start_sec": 394.8, "end_sec": 398.2, "text": "출산예정 40일 전~출산 후 60일 → 산후도우미" },
+        { "start_sec": 398.2, "end_sec": 401.6, "text": "출생신고+60일 → 부모급여·첫만남이용권" },
+        { "start_sec": 401.6, "end_sec": 405.0, "text": "분만일~6개월 → 고위험 임산부 의료비" },
+        { "start_sec": 405.0, "end_sec": 408.4, "text": "★ 부모급여+아동수당+첫만남=중복 OK" },
+        { "start_sec": 408.4, "end_sec": 411.7, "text": "★ 부모급여 ↔ 양육수당 중복 ❌" },
+        { "start_sec": 411.7, "end_sec": 415.0, "text": "거주지 추가지원: ‘복지로’ 검색" }
+      ]
+    },
+    { "scene_id": "scene-009", "start_sec": 415, "end_sec": 433,
+      "subtitle_cues": [
+        { "start_sec": 415.0, "end_sec": 418.6, "text": "구독·알림설정 부탁드려요" },
+        { "start_sec": 418.6, "end_sec": 422.2, "text": "다음 영상: 출산 후 1년간 지원금" },
+        { "start_sec": 422.2, "end_sec": 425.8, "text": "정책은 매년 변경" },
+        { "start_sec": 425.8, "end_sec": 429.4, "text": "보실 때 ‘2026.4.27 기준’ 확인" },
+        { "start_sec": 429.4, "end_sec": 433.0, "text": "최신은 복지로 / 보건복지부 129" }
+      ]
+    }
+  ],
+  "total_duration_sec": 433,
+  "capcut_tts_workflow": {
+    "step1": "CapCut 새 프로젝트 → 캔버스 1920x1080, 30fps",
+    "step2": "텍스트 트랙 추가 → 씬별 narration 텍스트 붙여넣기 (각 씬 하나의 텍스트 클립)",
+    "step3": "텍스트 클립 선택 → 우측 ‘텍스트 읽기(TTS)’ → 한국어 여성 보이스 (예: ‘차분한 여성’) → 적용",
+    "step4": "각 씬 음성 길이가 추정값(estimated_duration_sec)과 다르면 씬 시작·끝을 실제 길이에 맞춰 재정렬",
+    "step5": "오디오 트랙 → ‘무음 감지/삭제’ 또는 수동 컷",
+    "step6": "자막은 subtitle.srt 를 import 하거나 CapCut ‘자동 자막’ 후 본 srt와 대조해서 보정"
+  },
+  "created_at": "2026-04-27T00:00:00Z"
+}
