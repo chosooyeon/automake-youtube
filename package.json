@@ -1,0 +1,13 @@
+{
+  "name": "automake-youtube",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "YouTube auto-make harness (mom-support channel)",
+  "scripts": {
+    "upload": "node projects/mom-support-2026-04/06-edit-upload/upload_to_youtube.mjs"
+  },
+  "dependencies": {
+    "googleapis": "^144.0.0"
+  }
+}
