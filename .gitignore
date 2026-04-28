@@ -1,0 +1,56 @@
+# === Secrets (절대 커밋 금지) ===
+.env
+.env.local
+.env.*.local
+*.key
+*client_secret*.json
+*token*.json
+
+# === macOS / OS ===
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# === Editor ===
+.vscode/
+.idea/
+*.swp
+*~
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.python-version
+
+# === Node ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+
+# === 생성 산출물 (대용량) ===
+projects/*/05-visual/scenes/*/bg.png
+projects/*/05-visual/scenes/*/bg.jpg
+projects/*/05-visual/scenes/*/bg.jpeg
+projects/*/05-visual/scenes/*/bg.webp
+projects/*/06-edit-upload/thumbnails/*.png
+projects/*/06-edit-upload/thumbnails/*.jpg
+projects/*/06-edit-upload/audio/*.aiff
+projects/*/06-edit-upload/audio/*.wav
+projects/*/06-edit-upload/audio/*.mp3
+projects/*/06-edit-upload/segments/
+projects/*/06-edit-upload/preview.mp4
+projects/*/06-edit-upload/final.mp4
+projects/*/06-edit-upload/*.mp4
+projects/*/06-edit-upload/_*
+
+# === 로그 ===
+*.log
+projects/*/*/run.log.md
+
+# === Claude Code 캐시 (있을 경우) ===
+.claude/cache/
