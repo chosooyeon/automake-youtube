@@ -1,6 +1,6 @@
 {
   "bot_id": "S3-shorts-edit",
-  "description": "롱폼 이미지를 재활용해 9:16 세로 CapCut 프로젝트 JSON을 생성한다",
+  "description": "롱폼 이미지를 재활용해 씬-이미지 매핑을 만들고 render-shorts.mjs 로 1080×1920 MP4를 렌더링한다",
   "input": {
     "short_script": "projects/{slug}/S1-script/output.json",
     "short_audio": "projects/{slug}/S2-audio/output.json",
@@ -8,7 +8,7 @@
     "parent_scenes_dir": "projects/{parent_slug}/05-visual/scenes/"
   },
   "output": {
-    "capcut_json": "projects/{slug}/S3-edit/capcut_short.json",
+    "video_file": "projects/{slug}/S3-edit/short.mp4",
     "path": "projects/{slug}/S3-edit/output.json",
     "log": "projects/{slug}/S3-edit/run.log.md"
   },

@@ -11,12 +11,11 @@
     "log": "projects/{slug}/S2-audio/run.log.md"
   },
   "tts": {
-    "provider": "capcut_builtin",
-    "voice": "여성_차분한",
-    "speed": 1.05,
-    "pause_between_scenes_ms": 200,
-    "sentence_pause_ms": 100,
-    "wpm_korean": 320
+    "provider": "macos_say",
+    "voice": "Yuna",
+    "rate": 220,
+    "note": "render-shorts.mjs 가 say -v Yuna -r 220 으로 실행. S2는 narration 텍스트만 작성.",
+    "wpm_korean": 310
   },
   "subtitle": {
     "format": "srt",

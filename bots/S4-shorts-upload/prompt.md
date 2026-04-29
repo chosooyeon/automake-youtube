@@ -52,11 +52,14 @@
 - `made_for_kids`: false
 - `synthetic_media_label`: true (AI 보조 제작 공시)
 
-## 5. 썸네일 안내
+## 5. 영상 파일 확인
 
-S4-upload/thumbnail.jpg 에 직접 만든 썸네일을 넣어달라는 안내 메시지를 `blocking_reasons` 에 포함:
-- "썸네일을 직접 제작 후 S4-upload/thumbnail.jpg 에 저장해주세요."
-- "final_short.mp4 를 S4-upload/final_short.mp4 에 넣어주세요. (CapCut 익스포트 후)"
+S3-shorts-edit 봇이 `projects/{slug}/S3-edit/short.mp4` 를 이미 생성했는지 확인한다.
+파일이 존재하면 `ready_to_upload: true`, 없으면 "S3-edit 봇을 먼저 실행하세요" 오류 보고.
+
+썸네일은 선택 사항:
+- `S4-upload/thumbnail.jpg` 가 있으면 YouTube 업로드 시 사용
+- 없으면 YouTube가 자동 선택한 프레임을 썸네일로 사용
 
 ## 6. 출력
 
@@ -73,12 +76,9 @@ S4-upload/thumbnail.jpg 에 직접 만든 썸네일을 넣어달라는 안내 �
   "parent_slug": "mom-support-2026-04",
   "parent_video_url": "https://youtu.be/...",
   "thumbnail_path": "S4-upload/thumbnail.jpg",
-  "video_path": "S4-upload/final_short.mp4",
-  "ready_to_upload": false,
-  "blocking_reasons": [
-    "썸네일을 직접 제작 후 S4-upload/thumbnail.jpg 에 저장해주세요.",
-    "final_short.mp4 를 S4-upload/final_short.mp4 에 저장해주세요."
-  ]
+  "video_path": "S3-edit/short.mp4",
+  "ready_to_upload": true,
+  "blocking_reasons": []
 }
 ```
 

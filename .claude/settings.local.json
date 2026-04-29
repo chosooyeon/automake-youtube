@@ -6,7 +6,8 @@
       "Bash(mkdir -p \"/Users/chosooyeon/Documents/automake-youtube/admin/app/api/shorts/[slug]/logs\")",
       "Bash(npx tsc *)",
       "Bash(npm run *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(git rm *)"
     ]
   }
 }

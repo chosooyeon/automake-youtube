@@ -32,21 +32,36 @@ npm-debug.log*
 yarn-debug.log*
 .pnpm-debug.log*
 
-# === 생성 산출물 (대용량) ===
+# === 생성 산출물 — 롱폼 ===
 projects/*/05-visual/scenes/*/bg.png
 projects/*/05-visual/scenes/*/bg.jpg
 projects/*/05-visual/scenes/*/bg.jpeg
 projects/*/05-visual/scenes/*/bg.webp
+projects/*/04-audio/*.srt
+projects/*/04-audio/*.aiff
+projects/*/04-audio/*.wav
 projects/*/06-edit-upload/thumbnails/*.png
 projects/*/06-edit-upload/thumbnails/*.jpg
 projects/*/06-edit-upload/audio/*.aiff
 projects/*/06-edit-upload/audio/*.wav
 projects/*/06-edit-upload/audio/*.mp3
 projects/*/06-edit-upload/segments/
-projects/*/06-edit-upload/preview.mp4
-projects/*/06-edit-upload/final.mp4
 projects/*/06-edit-upload/*.mp4
+projects/*/06-edit-upload/*.srt
+projects/*/06-edit-upload/*.ass
 projects/*/06-edit-upload/_*
+
+# === 생성 산출물 — 숏폼 ===
+projects/*/S2-audio/*.wav
+projects/*/S2-audio/*.aiff
+projects/*/S2-audio/*.srt
+projects/*/S3-edit/*.mp4
+projects/*/S3-edit/*.srt
+projects/*/S3-edit/*.ass
+projects/*/S3-edit/segments/
+projects/*/S4-upload/*.mp4
+projects/*/S4-upload/thumbnail.jpg
+projects/*/S4-upload/thumbnail.png
 
 # === 로그 (재현 불필요, 용량만 차지) ===
 *.log

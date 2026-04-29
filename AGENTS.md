@@ -22,14 +22,14 @@ automake-youtube/
 │  └─ pipeline.json          ← 봇 실행 순서·의존성 정의
 ├─ shared/
 │  ├─ schemas/               ← 단계별 입출력 JSON 스키마 (계약서)
-│  └─ templates/             ← CapCut 템플릿, 썸네일 템플릿 등
+│  └─ templates/             ← 썸네일 템플릿 등
 ├─ bots/
 │  ├─ 01-benchmark/          ← 레퍼런스 수집 + 분석
 │  ├─ 02-strategy/           ← 컨셉·제목·훅·인트로
 │  ├─ 03-script/             ← 기획·집필·검수·리비전
 │  ├─ 04-audio/              ← TTS·자막·무음 압축
 │  ├─ 05-visual/             ← 씬 설계·이미지·영상
-│  └─ 06-edit-upload/        ← CapCut JSON·썸네일·YouTube 업로드
+│  └─ 06-edit-upload/        ← ffmpeg 렌더링·썸네일·YouTube 업로드
 └─ projects/
    └─ <영상 슬러그>/         ← 한 영상 = 한 폴더 (입력·중간산출·최종)
       ├─ 00-input/
@@ -100,5 +100,5 @@ automake-youtube/
 
 1. `projects/<slug>/00-input/brief.md` 에 주제·타겟·길이·금지어 작성
 2. Claude Code에 "이 슬러그로 풀 파이프라인 시작" 지시
-3. 5번 끝난 뒤 CapCut에서 영상 확인
+3. 5번 끝난 뒤 `projects/<slug>/06-edit-upload/final.mp4` 재생해서 영상 확인
 4. OK면 "6번 진행", 수정 필요하면 해당 봇만 재실행
