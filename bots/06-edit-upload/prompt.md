@@ -39,6 +39,18 @@
 애니메이션:
 - 05-visual 레이어의 `in_anim`/`out_anim` 을 CapCut 의 enter/exit animation 키로 매핑.
 
+### 1-1. 시그니처 슬롯 자동 적용 (`identity_apply`)
+
+`config.identity_apply` 의 플래그가 true 인 항목을 모두 CapCut JSON 에 박는다. 소스는 `global.brand.identity_slots`.
+
+- **cold_open_hook_layer** — 03-script 의 role=cold_open 씬에 빨간 풀스크린 자막 카드 + zoom-pop 0.3s 이펙트.
+- **number_card_motion** — 03-script narration 에서 정규식 `[0-9][0-9,\.]*\s?(원|만원|개월|일|주|시간|%|명|회)` 매칭되는 모든 단어에, 해당 단어 등장 시점에 우측 1/3 영역으로 빨강 카드 + zoom 0.3s + 2.5s 유지. 한 씬에 3개 이상이면 가장 큰 숫자만.
+- **signature_sfx_overlay** — `global.brand.identity_slots.signature_sfx.ding_path` 가 존재하면 audio track #2 에 number_card_motion 시작점마다 ding 0.4s, 씬 전환마다 whoosh 0.3s. 파일이 없으면 CapCut 내장 SFX `swoosh_01`, `ding_soft` 로 대체.
+- **three_line_summary_card** — 03-script 의 role=summary 씬에 3줄 텍스트 카드 (각 라인 16자 이내, 노란 배경 + 짙은 청록 글씨).
+- **outro_cta_card** — 마지막 cta 씬에 `brand.outro_signature` 를 큰 자막 + 구독 버튼 모션 오버레이.
+
+각 슬롯이 어디에 박혔는지 `output.json.identity_applied[]` 로 기록한다 (디버깅용).
+
 저장 경로:
 - `projects/{slug}/06-edit-upload/capcut_project.json`
 
@@ -48,6 +60,10 @@
 ## 2. Step 2 — 썸네일 5장
 
 `thumbnails.concept_strategies` 5개 컨셉을 각각 1장씩 만든다 (`thumbnails.count`).
+`thumbnails.apply_grid_rule: true` 면 모든 썸네일에 `global.brand.identity_slots.thumbnail_grid_rule` + `02-strategy.output.json.thumbnail_brief` 를 머지한 그리드 룰을 강제 적용:
+- 좌측 50% 인물/포인터, 우측 35% 빨간 굵은 숫자, 하단 15% 노란 띠 카피
+- 카피는 `thumbnails.headline_max_chars` 자 이하
+- `thumbnail_grid_rule.ban` 항목은 절대 사용 금지
 
 `shared/templates/thumbnail_base.json` 을 사용해 각 썸네일을 다음 형태로 명세:
 
@@ -79,10 +95,12 @@
   - `{summary_bullets}` ← 03-script 의 body 씬에서 핵심 3~5개 bullet
   - `{chapters}` ← 씬 시작 시각을 `00:00 - 헤드라인` 형식으로 (intro 합쳐서 5~8개)
   - `{channel_signature}` ← `brand.outro_signature`
+  - `{ai_disclosure}` ← `upload.ai_disclosure_in_description` 이 true 면 `global.brand.ai_disclosure.include_in_description`. false 면 빈 문자열.
 - `tags` ← `02-strategy.keywords` ∪ `global.apis.youtube.default_tags` (중복 제거, 최대 30개)
 - `category_id` ← `global.apis.youtube.default_category_id`
 - `privacy` ← `upload.privacy_default`
 - `made_for_kids` ← `upload.made_for_kids`
+- `synthetic_media_label` ← `global.brand.ai_disclosure.auto_label_synthetic_media` (boolean). true 면 업로드 메타에 포함 → 업로드 스크립트가 YouTube `madeForKids`/`altered_content` 옵션과 함께 사용자에게 안내.
 - `thumbnail_path_to_use` ← Step 2에서 고른 경로
 
 ## 4. Step 4 — 업로드 (휴먼 게이트)

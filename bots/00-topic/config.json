@@ -1,0 +1,43 @@
+{
+  "id": "00-topic",
+  "name": "주제 추천 봇",
+  "purpose": "트렌딩 키워드 + 채널 niche를 결합해 다음 영상 주제 후보 5개를 뽑는다. 파이프라인 외부에서 따로 돈다.",
+  "model": { "use": "researcher", "fallback": "writer" },
+  "input_schema": null,
+  "output_schema": null,
+  "params": {
+    "candidates_count": 5,
+    "lookback_days": 30,
+    "auto_slug_prefix_template": "{niche_short}-{YYYY-MM}-",
+    "_comment_slug": "예: mom-support-2026-05-parent-allowance. 영문 소문자/숫자/하이픈만. 띄어쓰기 X.",
+    "min_fitness_score": 6.0,
+    "must_avoid_dup_window_days": 90,
+    "rank_by": [
+      "fitness_to_channel_niche",
+      "deadline_urgency",
+      "search_demand_estimate",
+      "policy_change_recency"
+    ]
+  },
+  "filters": {
+    "exclude_topics_already_in": [
+      "topics/archive/*.json",
+      "projects/*/00-input/brief.md"
+    ],
+    "respect_brand_ban_words": true,
+    "require_at_least_one_official_source": true
+  },
+  "tools_allowed": [
+    "WebSearch",
+    "WebFetch",
+    "Read",
+    "Write(./topics/queue/**)",
+    "Write(./topics/queue/*.log.md)"
+  ],
+  "promote_action": {
+    "_comment": "어드민의 promote 버튼이 호출. 자동 brief.md 생성 + 새 프로젝트 폴더 복사.",
+    "create_project_from": "projects/_example",
+    "auto_fill_brief_md": true,
+    "move_to_archive_after_promote": true
+  }
+}

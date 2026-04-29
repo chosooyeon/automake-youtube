@@ -34,8 +34,20 @@
 - `thumbnail_pattern` — 썸네일 시각/카피 공식
 - `why_it_works` — 잘 된 이유 (가설이면 "추정:" 접두)
 - `weakness` — 이 영상의 약점/개선 여지
+- `signals` — `config.analysis.signal_metrics_to_extract.fields` 에 정의된 수치형 신호. 측정 가능한 것만 채우고 모르면 `null`.
 
 본문 데이터를 못 가져오면 **추측 금지**. "확인 불가"로 비워두고 메모를 남긴다.
+
+#### 3-1. signals 측정 가이드 (놓치지 말 것)
+- `video_length_sec` — 영상 페이지에 보이는 길이를 초로 환산.
+- `intro_length_sec` — "인사·자기소개·예고" 끝나는 시점 (보통 자막에 첫 토픽 키워드가 등장하기 직전).
+- `first_hook_sec` — 첫 강한 어필 문장이 끝나는 시점 (보통 0~7초 사이).
+- `subtitle_present` — 화면에 자막이 박혀있는지 boolean.
+- `midroll_ad_sec_estimates` — 광고 진입 추정 시각 배열 (예: [180, 360]). 8분 이상 영상에서만 의미.
+- `thumbnail_dominant_colors` — 썸네일 헥스 3개 (예: ["#E11D48","#FCD34D","#F8FAFC"]).
+- `thumbnail_has_big_number` / `thumbnail_has_face` — boolean.
+- `title_char_count`, `title_has_year`, `title_has_number` — 제목에서 자동 추출.
+- `comments_top3_themes` — 상위 댓글에서 반복되는 키워드 3개. (예: ["저도 신청했어요","링크 알려주세요","자녀에게 공유"])
 
 ### Step 4. 종합 (`synthesis`)
 - `winning_patterns`: 5~10개. 여러 레퍼런스에서 공통으로 보인 것만.
@@ -44,6 +56,13 @@
 - `thumbnail_patterns`: 가능하면 3~5개.
 - `structure_recommendation`: 우리 채널이 따라야 할 단계별 구조 1안.
 - `differentiation_opportunities`: 경쟁자들이 안 다루는 빈틈 3~5개.
+- `signal_metrics`: `config.analysis.synthesis_metric_targets.fields` 의 수치를 references[].signals 의 평균/중앙값으로 산출.
+  - 예: `avg_video_length_sec`, `median_video_length_sec`, `avg_intro_length_sec`,
+    `thumbnail_color_palette_top3` (가장 자주 등장한 3색),
+    `title_avg_char_count`, `title_pct_with_number`,
+    `midroll_ad_typical_seconds` (8분 이상 영상의 첫 미드롤 평균 시점)
+  - 결과의 1줄 해석을 `signal_metrics.interpretation` 에 넣는다.
+    예: "성공 영상 평균 8분 12초, 미드롤 평균 3분 58초. 우리는 9분 + 4분 미드롤 슬롯 권장."
 
 ## 2. 출력 규칙
 - 결과 JSON을 `projects/{slug}/01-benchmark/output.json` 에 저장.

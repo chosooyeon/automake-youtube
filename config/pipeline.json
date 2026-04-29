@@ -1,6 +1,6 @@
 {
   "$schema": "../shared/schemas/pipeline.schema.json",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "유튜브 자동화 파이프라인 - 봇 실행 순서와 의존성 정의",
   "default_order": [
     "01-benchmark",
@@ -10,8 +10,28 @@
     "05-visual",
     "06-edit-upload"
   ],
+  "_comment_step_by_step": "정책: default_order 는 참고용 일뿐, 어드민은 한 단계씩만 실행한다. 풀 파이프라인 자동 실행은 비활성.",
+  "step_by_step_only": true,
+  "out_of_pipeline": ["00-topic"],
+  "_comment_00": "00-topic 은 파이프라인 외부 봇. 영상 1편이 아니라 '다음에 만들 주제 5개' 를 뽑는 별도 트랙.",
   "human_gate_after": ["05-visual"],
   "stages": {
+    "00-topic": {
+      "title": "주제 추천 (파이프라인 외부)",
+      "bot_dir": "bots/00-topic",
+      "inputs": [
+        "config/global.json",
+        "topics/archive/*.json",
+        "projects/*/00-input/brief.md"
+      ],
+      "outputs": [
+        "topics/queue/<YYYY-MM-DD>-<HHMM>.json",
+        "topics/queue/<YYYY-MM-DD>-<HHMM>.md"
+      ],
+      "depends_on": [],
+      "out_of_pipeline": true,
+      "promote_creates_project": true
+    },
     "01-benchmark": {
       "title": "벤치마킹 (레퍼런스 수집 + 분석)",
       "bot_dir": "bots/01-benchmark",

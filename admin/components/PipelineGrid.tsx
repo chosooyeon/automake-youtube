@@ -11,6 +11,15 @@ const STAGES = [
   { id: "06-edit-upload", label: "06 편집/업로드", desc: "CapCut·썸네일·YT", gated: true },
 ] as const;
 
+const DEPS: Record<string, string | null> = {
+  "01-benchmark": null,
+  "02-strategy": "01-benchmark",
+  "03-script": "02-strategy",
+  "04-audio": "03-script",
+  "05-visual": "04-audio",
+  "06-edit-upload": "05-visual",
+};
+
 const STATUS_COLOR = {
   done: "bg-good/20 border-good/40 text-good",
   in_progress: "bg-warn/20 border-warn/40 text-warn",
@@ -29,36 +38,36 @@ interface Props {
   slug: string;
   stages: Record<string, keyof typeof STATUS_LABEL>;
   onRunSingle: (stage: string) => void;
-  onRunFull: () => void;
   onUploadClick: () => void;
 }
 
-export default function PipelineGrid({ slug, stages, onRunSingle, onRunFull, onUploadClick }: Props) {
+export default function PipelineGrid({ slug, stages, onRunSingle, onUploadClick }: Props) {
   const { push } = useToast();
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-semibold">파이프라인</h2>
-        <div className="flex gap-2">
-          <button
-            className="bg-accent text-bg font-semibold rounded-md px-3 py-1.5 text-sm hover:opacity-90"
-            onClick={() => {
-              onRunFull();
-              push({ kind: "info", title: "풀 파이프라인 시작", message: `${slug} · 5번까지 자동 실행 (백그라운드)` });
-            }}
-          >
-            ▶ 풀 파이프라인 (5번까지)
-          </button>
+        <div>
+          <h2 className="text-base font-semibold">파이프라인 (한 단계씩 실행)</h2>
+          <p className="text-[11px] text-subtext mt-0.5">
+            안전을 위해 풀 파이프라인은 비활성. 이전 단계가 완료되면 다음 단계 [실행] 버튼이 활성화됩니다.
+          </p>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {STAGES.map((s) => {
           const status = stages?.[s.id] ?? "pending";
+          const dep = DEPS[s.id];
+          const depStatus = dep ? stages?.[dep] : "done";
+          const depReady = !dep || depStatus === "done";
           const isUpload = s.id === "06-edit-upload";
+
           return (
             <div
               key={s.id}
-              className="bg-panel border border-line rounded-xl p-4 flex flex-col justify-between min-h-[140px]"
+              className={
+                "border rounded-xl p-4 flex flex-col justify-between min-h-[150px] transition " +
+                (depReady ? "bg-panel border-line" : "bg-panel/40 border-line/60 opacity-70")
+              }
             >
               <div>
                 <div className="flex items-center justify-between">
@@ -68,7 +77,12 @@ export default function PipelineGrid({ slug, stages, onRunSingle, onRunFull, onU
                   </span>
                 </div>
                 <div className="text-xs text-subtext mt-1">{s.desc}</div>
-                {(s as any).gated && (
+                {!depReady && (
+                  <div className="text-[11px] text-warn mt-2">
+                    🔒 이전 단계 ({dep}) 먼저 완료해주세요
+                  </div>
+                )}
+                {depReady && (s as any).gated && (
                   <div className="text-[11px] text-warn mt-2">🔒 사람 검수 후 활성</div>
                 )}
               </div>
@@ -79,17 +93,28 @@ export default function PipelineGrid({ slug, stages, onRunSingle, onRunFull, onU
                       onRunSingle(s.id);
                       push({ kind: "info", title: `${s.label} 실행`, message: "Claude Code 백그라운드 실행 중" });
                     }}
-                    className="text-xs bg-panel2 border border-line hover:border-accent rounded-md px-2.5 py-1.5"
+                    disabled={!depReady}
+                    className="text-xs bg-panel2 border border-line hover:border-accent disabled:opacity-40 disabled:hover:border-line rounded-md px-2.5 py-1.5"
                   >
-                    {status === "done" ? "재실행" : "실행"}
+                    {status === "done" ? "재실행" : status === "in_progress" ? "재실행" : "▶ 실행"}
                   </button>
                 ) : (
                   <button
                     onClick={onUploadClick}
-                    className="text-xs bg-bad/20 border border-bad/50 text-bad hover:bg-bad/30 rounded-md px-2.5 py-1.5"
+                    disabled={!depReady}
+                    className="text-xs bg-bad/20 border border-bad/50 text-bad hover:bg-bad/30 disabled:opacity-40 rounded-md px-2.5 py-1.5"
                   >
                     📤 업로드 모달 열기
                   </button>
+                )}
+                {status === "done" && (
+                  <a
+                    className="text-[11px] text-subtext hover:text-accent self-center"
+                    href={`/api/projects/${encodeURIComponent(slug)}/file?p=${encodeURIComponent(`${s.id}/output.json`)}`}
+                    target="_blank"
+                  >
+                    output.json
+                  </a>
                 )}
               </div>
             </div>

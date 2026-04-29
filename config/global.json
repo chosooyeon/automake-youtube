@@ -20,11 +20,59 @@
     "intro_signature": "안녕하세요, 엄마지갑입니다. 오늘은 ___ 에 대해 정확하게 정리해드릴게요.",
     "outro_signature": "정보가 도움이 되셨다면 구독·알림설정 부탁드려요. 다음 영상에서 또 만나요.",
     "color_palette": ["#0F172A", "#FCA5A5", "#FFE4E6", "#F8FAFC"],
-    "font_pair": { "title": "Pretendard Bold", "body": "Pretendard Regular" }
+    "font_pair": { "title": "Pretendard Bold", "body": "Pretendard Regular" },
+    "identity_slots": {
+      "_comment": "매 영상마다 자동으로 박히는 시그니처 7종. 일관성=수익화 통과율.",
+      "cold_open_hook": {
+        "enabled": true,
+        "max_seconds": 3,
+        "patterns": [
+          "[손해] ___ 안 받으면 ___원 사라집니다",
+          "[데드라인] ___까지만 받을 수 있어요",
+          "[의외사실] ___분들도 사실 ___ 받을 수 있습니다"
+        ]
+      },
+      "intro_signature": "이미 brand.intro_signature 사용",
+      "number_card_motion": {
+        "enabled": true,
+        "trigger": "금액·기간·인원수 등 핵심 숫자가 처음 등장할 때",
+        "style": "빨간 배경 + 흰 굵은 숫자 + 0.3s zoom-pop",
+        "duration_sec": 2.5
+      },
+      "signature_sfx": {
+        "enabled": true,
+        "ding_path": "shared/templates/sfx/ding.wav",
+        "whoosh_path": "shared/templates/sfx/whoosh.wav",
+        "_comment": "핵심 정보 전환마다 ding(0.4s). 씬 전환마다 whoosh(0.3s). 파일 없으면 CapCut 내장 SFX로 대체."
+      },
+      "three_line_summary": {
+        "enabled": true,
+        "where": ["middle", "outro"],
+        "max_chars_per_line": 16
+      },
+      "cta_pattern": {
+        "enabled": true,
+        "template": "다음 영상은 '{next_topic}' 편이에요. 놓치지 않게 알림 켜두세요. {outro_signature}"
+      },
+      "thumbnail_grid_rule": {
+        "enabled": true,
+        "layout": "좌측 인물(또는 손가락 포인트) 50% + 우측 빨간 굵은 숫자 35% + 하단 노란 띠 카피 15%",
+        "must_include": ["굵은 숫자 1개", "최대 14자 카피", "고대비 색 3개 이내"],
+        "ban": ["연예인 얼굴", "원본과 다른 합성 사진", "정부 공식 로고 직접 사용"]
+      }
+    },
+    "ai_disclosure": {
+      "_comment": "AI 도움받은 콘텐츠 표시. 솔직하게 ON 권장.",
+      "auto_label_synthetic_media": true,
+      "include_in_description": "본 영상은 정보 정리에 AI 도구를 보조적으로 사용했습니다. 모든 정책 정보는 공식 출처를 직접 확인했습니다."
+    }
   },
   "video_defaults": {
     "format": "long",
-    "duration_sec": 420,
+    "duration_sec": 540,
+    "duration_sec_min": 480,
+    "duration_sec_max": 600,
+    "_comment_duration": "8~10분 미드롤 광고 1슬롯 확보. 시니어/임산부 정보성 sweet spot.",
     "aspect_ratio": "16:9",
     "resolution": "1920x1080",
     "fps": 30,

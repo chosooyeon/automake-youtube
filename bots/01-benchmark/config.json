@@ -31,8 +31,38 @@
     ],
     "deliverables": [
       "references[] 각 항목의 hook_first_15s, structure, why_it_works, weakness",
-      "synthesis: winning_patterns, title_formulas, hook_formulas, structure_recommendation, differentiation_opportunities"
-    ]
+      "synthesis: winning_patterns, title_formulas, hook_formulas, structure_recommendation, differentiation_opportunities",
+      "synthesis: signal_metrics (수치형 가이드라인)"
+    ],
+    "signal_metrics_to_extract": {
+      "_comment": "각 레퍼런스에서 가능한 한 측정/추정해서 references[i].signals 에 기록.",
+      "fields": [
+        "video_length_sec",
+        "intro_length_sec",
+        "first_hook_sec",
+        "subtitle_present",
+        "midroll_ad_sec_estimates",
+        "thumbnail_dominant_colors",
+        "thumbnail_has_big_number",
+        "thumbnail_has_face",
+        "title_char_count",
+        "title_has_year",
+        "title_has_number",
+        "comments_top3_themes"
+      ]
+    },
+    "synthesis_metric_targets": {
+      "_comment": "synthesis.signal_metrics 에 평균/중앙값을 채워서, 우리 영상 길이/인트로 길이 결정에 쓴다.",
+      "fields": [
+        "avg_video_length_sec",
+        "median_video_length_sec",
+        "avg_intro_length_sec",
+        "thumbnail_color_palette_top3",
+        "title_avg_char_count",
+        "title_pct_with_number",
+        "midroll_ad_typical_seconds"
+      ]
+    }
   },
   "tools_allowed": [
     "WebSearch",

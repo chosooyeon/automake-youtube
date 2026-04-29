@@ -34,6 +34,7 @@
 - 길이: 읽었을 때 `params.hook_max_seconds` 초 이내 (한국어 기준 약 25~35자)
 - 각각 `type` 을 다르게 (`question`, `shocking_fact`, `promise`, `story`, `contradiction`, `demo`)
 - 벤치마킹의 `hook_formulas` 패턴을 참고하되 그대로 베끼지 않는다
+- **반드시 1개 이상은 `cold_open` 타입을 만든다** (3초 이내 한 문장. `global.brand.identity_slots.cold_open_hook.patterns` 중 하나의 변형). 첫 씬으로 뽑힐 후보.
 
 ### Step 4. 인트로 작성 (`intro`)
 - `params.intro_target_seconds` 초 분량 멘트 초안
@@ -42,8 +43,21 @@
 
 ### Step 5. 아웃트로 + 키워드
 - `outro.cta` — 구독·좋아요·다음 영상 유도 한두 문장
+  - `global.brand.identity_slots.cta_pattern.template` 을 베이스로 사용.
+  - `{next_topic}` 자리에는 `outro.next_video_teaser` 의 한 단어를 채운다.
+  - `{outro_signature}` 자리에는 `global.brand.outro_signature` 를 그대로.
 - `outro.next_video_teaser` — 다음 영상 떡밥 (비워둬도 됨)
 - `keywords` — 유튜브 SEO 태그 후보 8~15개
+
+### Step 6. 썸네일 그리드 룰 (`thumbnail_brief`)
+`global.brand.identity_slots.thumbnail_grid_rule` 을 그대로 따르되, 이 영상에 맞춰 다음을 결정해서 출력에 추가:
+- `headline_options[]` — 14자 이내 카피 5개 (충격형/숫자형/질문형/대비형/리스트형)
+- `big_number_text` — 우측에 들어갈 숫자/금액/기간 (예: "1,140만원", "60일")
+- `dominant_color_hex` — 빨강/노랑/짙은 청록 중 1
+- `face_or_pointer` — `"face_3_4" | "pointer_finger" | "stack_of_documents"` 중 1 (저작권 안전한 것)
+- `must_avoid` — `thumbnail_grid_rule.ban` 그대로 복사
+
+이 블록은 06번 봇이 썸네일 5장 만들 때 그대로 사용한다.
 
 ## 2. 가드레일
 - `guardrails.no_clickbait` true → 본문에서 못 지킬 약속은 제목에도 쓰지 않는다.
