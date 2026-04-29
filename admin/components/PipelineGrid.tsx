@@ -20,23 +20,27 @@ const DEPS: Record<string, string | null> = {
   "06-edit-upload": "05-visual",
 };
 
-const STATUS_COLOR = {
+type Status = "done" | "in_progress" | "failed" | "pending" | "missing_inputs";
+
+const STATUS_COLOR: Record<Status, string> = {
   done: "bg-good/20 border-good/40 text-good",
   in_progress: "bg-warn/20 border-warn/40 text-warn",
+  failed: "bg-bad/20 border-bad/40 text-bad",
   pending: "bg-line/40 border-line text-subtext",
   missing_inputs: "bg-bad/20 border-bad/40 text-bad",
-} as const;
+};
 
-const STATUS_LABEL = {
+const STATUS_LABEL: Record<Status, string> = {
   done: "✅ 완료",
-  in_progress: "⏳ 진행중",
+  in_progress: "⏳ 실행중",
+  failed: "❌ 실패",
   pending: "⏸ 대기",
   missing_inputs: "⚠ 입력 부족",
-} as const;
+};
 
 interface Props {
   slug: string;
-  stages: Record<string, keyof typeof STATUS_LABEL>;
+  stages: Record<string, Status>;
   onRunSingle: (stage: string) => void;
   onUploadClick: () => void;
 }
@@ -49,17 +53,20 @@ export default function PipelineGrid({ slug, stages, onRunSingle, onUploadClick 
         <div>
           <h2 className="text-base font-semibold">파이프라인 (한 단계씩 실행)</h2>
           <p className="text-[11px] text-subtext mt-0.5">
-            안전을 위해 풀 파이프라인은 비활성. 이전 단계가 완료되면 다음 단계 [실행] 버튼이 활성화됩니다.
+            이전 단계가 완료되면 다음 단계 버튼이 활성화됩니다. 실행 중에는 버튼이 잠깁니다.
           </p>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {STAGES.map((s) => {
-          const status = stages?.[s.id] ?? "pending";
+          const status: Status = (stages?.[s.id] as Status) ?? "pending";
           const dep = DEPS[s.id];
           const depStatus = dep ? stages?.[dep] : "done";
           const depReady = !dep || depStatus === "done";
+          const isRunning = status === "in_progress";
+          const isFailed = status === "failed";
           const isUpload = s.id === "06-edit-upload";
+          const canRun = depReady && !isRunning;
 
           return (
             <div
@@ -82,8 +89,19 @@ export default function PipelineGrid({ slug, stages, onRunSingle, onUploadClick 
                     🔒 이전 단계 ({dep}) 먼저 완료해주세요
                   </div>
                 )}
-                {depReady && (s as any).gated && (
+                {depReady && (s as any).gated && !isRunning && (
                   <div className="text-[11px] text-warn mt-2">🔒 사람 검수 후 활성</div>
+                )}
+                {isRunning && (
+                  <div className="text-[11px] text-warn mt-2 flex items-center gap-1">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-warn animate-pulse" />
+                    Claude 실행 중… (로그 확인)
+                  </div>
+                )}
+                {isFailed && (
+                  <div className="text-[11px] text-bad mt-2">
+                    ❌ 오류 또는 권한 거부. 로그 확인 후 재실행하세요.
+                  </div>
                 )}
               </div>
               <div className="flex gap-2 mt-3">
@@ -93,10 +111,17 @@ export default function PipelineGrid({ slug, stages, onRunSingle, onUploadClick 
                       onRunSingle(s.id);
                       push({ kind: "info", title: `${s.label} 실행`, message: "Claude Code 백그라운드 실행 중" });
                     }}
-                    disabled={!depReady}
-                    className="text-xs bg-panel2 border border-line hover:border-accent disabled:opacity-40 disabled:hover:border-line rounded-md px-2.5 py-1.5"
+                    disabled={!canRun}
+                    className={
+                      "text-xs rounded-md px-2.5 py-1.5 border transition disabled:opacity-40 disabled:cursor-not-allowed " +
+                      (isRunning
+                        ? "bg-warn/10 border-warn/40 text-warn cursor-not-allowed"
+                        : isFailed
+                        ? "bg-bad/10 border-bad/40 text-bad hover:bg-bad/20"
+                        : "bg-panel2 border-line hover:border-accent")
+                    }
                   >
-                    {status === "done" ? "재실행" : status === "in_progress" ? "재실행" : "▶ 실행"}
+                    {isRunning ? "⏳ 실행중…" : status === "done" ? "↺ 재실행" : isFailed ? "↺ 재시도" : "▶ 실행"}
                   </button>
                 ) : (
                   <button
@@ -113,7 +138,16 @@ export default function PipelineGrid({ slug, stages, onRunSingle, onUploadClick 
                     href={`/api/projects/${encodeURIComponent(slug)}/file?p=${encodeURIComponent(`${s.id}/output.json`)}`}
                     target="_blank"
                   >
-                    output.json
+                    output.json ↗
+                  </a>
+                )}
+                {isFailed && (
+                  <a
+                    className="text-[11px] text-bad/70 hover:text-bad self-center"
+                    href={`/api/projects/${encodeURIComponent(slug)}/file?p=${encodeURIComponent(`${s.id}/run.log.md`)}`}
+                    target="_blank"
+                  >
+                    로그 ↗
                   </a>
                 )}
               </div>

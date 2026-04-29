@@ -1,0 +1,504 @@
+{
+  "_generated_by": "S3-shorts-edit",
+  "_slug": "mom-support-2026-04-short-2",
+  "_parent_slug": "mom-support-2026-04",
+  "_note": "1080x1920 YouTube Shorts CapCut 프로젝트. 이미지는 부모 롱폼 05-visual에서 재사용. TTS voice는 DRY-RUN placeholder — CapCut 텍스트 읽기(TTS) 기능으로 실제 음성 합성 후 교체 필요.",
+  "version": "1.0.0",
+  "fps": 30,
+  "canvas": { "width": 1080, "height": 1920 },
+  "duration_ms": 52981,
+  "tracks": {
+    "video": [
+      {
+        "id": "v1",
+        "type": "video",
+        "role": "image_bg",
+        "clips": [
+          {
+            "id": "v1-hook",
+            "scene_id": "short-hook",
+            "asset_path": "projects/mom-support-2026-04/05-visual/scenes/scene-001/bg.jpg",
+            "start_ms": 0,
+            "end_ms": 6667,
+            "in_anim": "pop_scale",
+            "out_anim": "cut",
+            "transform": {
+              "x": 0.5,
+              "y": 0.5,
+              "scale": 1.3,
+              "rotation": 0,
+              "crop_mode": "center_crop_vertical",
+              "_note": "원본 16:9(1920x1080) → 1080x1920 캔버스 높이 맞춤 후 가로 중앙 크롭"
+            }
+          },
+          {
+            "id": "v1-body1",
+            "scene_id": "short-body-1",
+            "asset_path": "projects/mom-support-2026-04/05-visual/scenes/scene-005/bg.jpg",
+            "start_ms": 6867,
+            "end_ms": 24010,
+            "in_anim": "zoom_in_fast",
+            "out_anim": "cut",
+            "transform": {
+              "x": 0.5,
+              "y": 0.5,
+              "scale": 1.3,
+              "rotation": 0,
+              "crop_mode": "center_crop_vertical"
+            }
+          },
+          {
+            "id": "v1-body2",
+            "scene_id": "short-body-2",
+            "asset_path": "projects/mom-support-2026-04/05-visual/scenes/scene-005/bg.jpg",
+            "start_ms": 24210,
+            "end_ms": 44210,
+            "in_anim": "zoom_in_fast",
+            "out_anim": "cut",
+            "transform": {
+              "x": 0.5,
+              "y": 0.5,
+              "scale": 1.3,
+              "rotation": 0,
+              "crop_mode": "center_crop_vertical"
+            }
+          },
+          {
+            "id": "v1-cta",
+            "scene_id": "short-cta",
+            "asset_path": "projects/mom-support-2026-04/05-visual/scenes/scene-008/bg.jpg",
+            "start_ms": 44410,
+            "end_ms": 52981,
+            "in_anim": "zoom_in_fast",
+            "out_anim": "fade_out",
+            "transform": {
+              "x": 0.5,
+              "y": 0.5,
+              "scale": 1.3,
+              "rotation": 0,
+              "crop_mode": "center_crop_vertical"
+            }
+          }
+        ]
+      }
+    ],
+    "audio": [
+      {
+        "id": "a1",
+        "type": "audio",
+        "role": "voice",
+        "clips": [
+          {
+            "id": "a1-voice",
+            "asset_path": "projects/mom-support-2026-04-short-2/S2-audio/voice.compressed.wav",
+            "start_ms": 0,
+            "end_ms": 52981,
+            "volume": 1.0,
+            "fade_in_ms": 0,
+            "fade_out_ms": 300,
+            "_note": "DRY-RUN 무음 placeholder. CapCut 텍스트 읽기(여성_차분한, speed 1.05) 적용 후 교체."
+          }
+        ]
+      },
+      {
+        "id": "a2",
+        "type": "audio",
+        "role": "bgm",
+        "clips": [
+          {
+            "id": "a2-bgm",
+            "asset_path": "",
+            "start_ms": 0,
+            "end_ms": 52981,
+            "volume": 0.15,
+            "fade_in_ms": 500,
+            "fade_out_ms": 1000,
+            "_note": "CapCut 무료 음원 'gentle hope' 류 선택. 음량 -16dB(volume 0.15). CapCut에서 직접 추가."
+          }
+        ]
+      }
+    ],
+    "text": [
+      {
+        "id": "t1",
+        "type": "text",
+        "role": "subtitle",
+        "_style_defaults": {
+          "font": "Pretendard Bold",
+          "size": 72,
+          "color": "#FFFFFF",
+          "stroke_color": "#000000",
+          "stroke_width": 4,
+          "position": { "x": 0.5, "y": 0.5 },
+          "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+          "in_anim": "zoom_in_fast",
+          "_number_highlight": "숫자 포함 cue는 color #FFE600, size 80"
+        },
+        "clips": [
+          {
+            "id": "sub-01",
+            "text": "출생일로부터 딱 60일",
+            "start_ms": 0,
+            "end_ms": 2222,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-02",
+            "text": "이거 넘기면 부모급여",
+            "start_ms": 2222,
+            "end_ms": 4444,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-03",
+            "text": "100만원 그냥 사라져요.",
+            "start_ms": 4444,
+            "end_ms": 6667,
+            "font": "Pretendard Bold",
+            "size": 80,
+            "color": "#FFE600",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast",
+            "_highlight": "숫자 강조"
+          },
+          {
+            "id": "sub-04",
+            "text": "부모급여, 0세 아기는",
+            "start_ms": 6867,
+            "end_ms": 9010,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-05",
+            "text": "매달 100만원",
+            "start_ms": 9010,
+            "end_ms": 11153,
+            "font": "Pretendard Bold",
+            "size": 80,
+            "color": "#FFE600",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast",
+            "_highlight": "숫자 강조"
+          },
+          {
+            "id": "sub-06",
+            "text": "1세는 매달 50만원",
+            "start_ms": 11153,
+            "end_ms": 13296,
+            "font": "Pretendard Bold",
+            "size": 80,
+            "color": "#FFE600",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast",
+            "_highlight": "숫자 강조"
+          },
+          {
+            "id": "sub-07",
+            "text": "자동으로 안 들어와요.",
+            "start_ms": 13296,
+            "end_ms": 15439,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-08",
+            "text": "직접 신청해야 나와요.",
+            "start_ms": 15439,
+            "end_ms": 17582,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-09",
+            "text": "가정 양육이면 매월 25일",
+            "start_ms": 17582,
+            "end_ms": 19725,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-10",
+            "text": "통장으로 나와요.",
+            "start_ms": 19725,
+            "end_ms": 21868,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-11",
+            "text": "어린이집이면 차액만",
+            "start_ms": 21868,
+            "end_ms": 24010,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-12",
+            "text": "신청 기한이 있어요.",
+            "start_ms": 24210,
+            "end_ms": 26432,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-13",
+            "text": "출생일로부터 60일 안에",
+            "start_ms": 26432,
+            "end_ms": 28654,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-14",
+            "text": "신청해야 소급돼요.",
+            "start_ms": 28654,
+            "end_ms": 30876,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-15",
+            "text": "60일 넘기면",
+            "start_ms": 30876,
+            "end_ms": 33098,
+            "font": "Pretendard Bold",
+            "size": 80,
+            "color": "#FFE600",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast",
+            "_highlight": "숫자 강조"
+          },
+          {
+            "id": "sub-16",
+            "text": "신청한 달부터만 나와요.",
+            "start_ms": 33098,
+            "end_ms": 35320,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-17",
+            "text": "0세 한 달치 100만원",
+            "start_ms": 35320,
+            "end_ms": 37542,
+            "font": "Pretendard Bold",
+            "size": 80,
+            "color": "#FFE600",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast",
+            "_highlight": "숫자 강조"
+          },
+          {
+            "id": "sub-18",
+            "text": "하루만 늦어도 날려요.",
+            "start_ms": 37542,
+            "end_ms": 39764,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-19",
+            "text": "출생신고 때 원스톱으로",
+            "start_ms": 39764,
+            "end_ms": 41986,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-20",
+            "text": "같이 신청하면 안전해요.",
+            "start_ms": 41986,
+            "end_ms": 44210,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-21",
+            "text": "국민행복카드도 있어요.",
+            "start_ms": 44410,
+            "end_ms": 46553,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-22",
+            "text": "첫만남이용권도 있고요.",
+            "start_ms": 46553,
+            "end_ms": 48696,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-23",
+            "text": "5가지 전부 원본 영상에",
+            "start_ms": 48696,
+            "end_ms": 50839,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          },
+          {
+            "id": "sub-24",
+            "text": "구독하면 다음도 알림",
+            "start_ms": 50839,
+            "end_ms": 52981,
+            "font": "Pretendard Bold",
+            "size": 72,
+            "color": "#FFFFFF",
+            "stroke_color": "#000000",
+            "stroke_width": 4,
+            "position": { "x": 0.5, "y": 0.5 },
+            "background": { "type": "pill", "color": "#00000099", "padding_x": 20, "padding_y": 8 },
+            "in_anim": "zoom_in_fast"
+          }
+        ]
+      },
+      {
+        "id": "t2",
+        "type": "text",
+        "role": "hook_overlay",
+        "clips": [
+          {
+            "id": "t2-hook",
+            "text": "⏰ 60일 넘기면 100만원 사라져요",
+            "start_ms": 0,
+            "end_ms": 6667,
+            "font": "Pretendard ExtraBold",
+            "size": 56,
+            "color": "#FFE600",
+            "stroke_color": "#000000",
+            "stroke_width": 3,
+            "position": { "x": 0.5, "y": 0.08 },
+            "shadow": true,
+            "in_anim": "pop_scale"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -52,5 +52,7 @@
   "tools_allowed": [
     "Read",
     "Write(./projects/{slug}/03-script/**)"
-  ]
+  ],
+  "model_tier": "sonnet",
+  "max_turns": 30
 }

@@ -33,5 +33,7 @@
     "threshold_db": -35,
     "min_silence_ms": 500,
     "keep_padding_ms": 100
-  }
+  },
+  "model_tier": "haiku",
+  "max_turns": 15
 }

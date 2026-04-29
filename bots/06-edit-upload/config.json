@@ -43,7 +43,10 @@
     "use_global_youtube_settings": true,
     "title_source": "02-strategy.titles[0].text",
     "description_template": "{intro_one_liner}\n\n{summary_bullets}\n\n— 챕터 —\n{chapters}\n\n— 채널 —\n{channel_signature}\n\n{ai_disclosure}\n\n#태그",
-    "tags_source": ["02-strategy.keywords", "global.apis.youtube.default_tags"],
+    "tags_source": [
+      "02-strategy.keywords",
+      "global.apis.youtube.default_tags"
+    ],
     "category_id_source": "global.apis.youtube.default_category_id",
     "privacy_default": "private",
     "thumbnail_pick": "first",
@@ -62,5 +65,7 @@
     "Bash(node:*)",
     "Bash(python3:*)",
     "Bash(ffmpeg:*)"
-  ]
+  ],
+  "model_tier": "sonnet",
+  "max_turns": 35
 }

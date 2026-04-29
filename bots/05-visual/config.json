@@ -5,8 +5,16 @@
   "input_schema": "shared/schemas/04-audio.schema.json",
   "output_schema": "shared/schemas/05-visual.schema.json",
   "design": {
-    "style_keywords": ["cinematic", "high-contrast", "minimal text overlay"],
-    "default_layer_stack": ["broll_or_image", "headline_text", "subtitle_text"],
+    "style_keywords": [
+      "cinematic",
+      "high-contrast",
+      "minimal text overlay"
+    ],
+    "default_layer_stack": [
+      "broll_or_image",
+      "headline_text",
+      "subtitle_text"
+    ],
     "headline_position": "top-center",
     "subtitle_position": "bottom-center",
     "safe_zone_padding_pct": 5,
@@ -19,7 +27,11 @@
       "per_scene_count": 1,
       "aspect": "16:9",
       "negative_prompt": "low quality, blurry, watermark, text artifacts, deformed",
-      "style_tokens": ["cinematic lighting", "shallow depth of field", "8k"]
+      "style_tokens": [
+        "cinematic lighting",
+        "shallow depth of field",
+        "8k"
+      ]
     },
     "video": {
       "use_global": true,
@@ -41,5 +53,7 @@
     "Bash(node:*)",
     "Bash(python3:*)",
     "Bash(ffmpeg:*)"
-  ]
+  ],
+  "model_tier": "haiku",
+  "max_turns": 25
 }

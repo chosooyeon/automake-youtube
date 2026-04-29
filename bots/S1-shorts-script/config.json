@@ -26,8 +26,18 @@
     "max_subtitle_lines": 2
   },
   "extraction": {
-    "prefer_scenes_with": ["number", "shocking_fact", "before_after", "direct_benefit"],
-    "avoid": ["intro_only", "outro_cta_only"],
+    "prefer_scenes_with": [
+      "number",
+      "shocking_fact",
+      "before_after",
+      "direct_benefit"
+    ],
+    "avoid": [
+      "intro_only",
+      "outro_cta_only"
+    ],
     "max_scenes_to_pick": 3
-  }
+  },
+  "model_tier": "sonnet",
+  "max_turns": 20
 }

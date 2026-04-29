@@ -2,7 +2,10 @@
   "id": "01-benchmark",
   "name": "벤치마킹 봇",
   "purpose": "주제 키워드로 유튜브 레퍼런스 영상을 수집하고 패턴을 분석한다.",
-  "model": { "use": "researcher", "fallback": "writer" },
+  "model": {
+    "use": "researcher",
+    "fallback": "writer"
+  },
   "input_schema": null,
   "output_schema": "shared/schemas/01-benchmark.schema.json",
   "params": {
@@ -10,7 +13,9 @@
     "max_references": 12,
     "lookback_days": 365,
     "sort_by": "viewCount",
-    "regions": ["KR"],
+    "regions": [
+      "KR"
+    ],
     "min_views": 50000,
     "include_shorts": false,
     "search_strategies": [
@@ -69,5 +74,7 @@
     "WebFetch",
     "Read",
     "Write(./projects/{slug}/01-benchmark/**)"
-  ]
+  ],
+  "model_tier": "sonnet",
+  "max_turns": 40
 }

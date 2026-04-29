@@ -19,8 +19,14 @@
     "title_max_chars": 80,
     "description_template": "{hook_oneliner}\n\n{summary_bullets}\n\n원본 영상 전체 보기 👇\n{parent_video_url}\n\n{hashtags} #Shorts",
     "tags_inherit_from_parent": true,
-    "add_tags": ["Shorts", "숏츠", "shorts"],
+    "add_tags": [
+      "Shorts",
+      "숏츠",
+      "shorts"
+    ],
     "ai_disclosure_in_description": true,
     "thumbnail_note": "썸네일은 직접 제작 후 S4-upload/thumbnail.jpg 에 넣어주세요."
-  }
+  },
+  "model_tier": "haiku",
+  "max_turns": 15
 }

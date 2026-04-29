@@ -1,0 +1,83 @@
+{
+  "slug": "mom-support-2026-04-short-2",
+  "parent_slug": "mom-support-2026-04",
+  "stage": "S3-edit",
+  "bot_id": "S3-shorts-edit",
+  "generated_at": "2026-04-29T14:40:00.000Z",
+  "canvas": "1080x1920",
+  "fps": 30,
+  "total_duration_sec": 52.981,
+  "within_60s_limit": true,
+  "capcut_json_path": "S3-edit/capcut_short.json",
+  "image_mapping": [
+    {
+      "short_scene_id": "short-hook",
+      "role": "hook",
+      "visual_hint": "parent_scene_001_image",
+      "parent_image_path": "projects/mom-support-2026-04/05-visual/scenes/scene-001/bg.jpg",
+      "file_exists": true,
+      "crop_mode": "center_crop_vertical",
+      "zoom": 1.3,
+      "in_anim": "pop_scale",
+      "start_ms": 0,
+      "end_ms": 6667
+    },
+    {
+      "short_scene_id": "short-body-1",
+      "role": "body",
+      "visual_hint": "parent_scene_005_image",
+      "parent_image_path": "projects/mom-support-2026-04/05-visual/scenes/scene-005/bg.jpg",
+      "file_exists": true,
+      "crop_mode": "center_crop_vertical",
+      "zoom": 1.3,
+      "in_anim": "zoom_in_fast",
+      "start_ms": 6867,
+      "end_ms": 24010
+    },
+    {
+      "short_scene_id": "short-body-2",
+      "role": "body",
+      "visual_hint": "parent_scene_005_image",
+      "parent_image_path": "projects/mom-support-2026-04/05-visual/scenes/scene-005/bg.jpg",
+      "file_exists": true,
+      "crop_mode": "center_crop_vertical",
+      "zoom": 1.3,
+      "in_anim": "zoom_in_fast",
+      "start_ms": 24210,
+      "end_ms": 44210
+    },
+    {
+      "short_scene_id": "short-cta",
+      "role": "cta",
+      "visual_hint": "parent_scene_008_image",
+      "parent_image_path": "projects/mom-support-2026-04/05-visual/scenes/scene-008/bg.jpg",
+      "file_exists": true,
+      "crop_mode": "center_crop_vertical",
+      "zoom": 1.3,
+      "in_anim": "zoom_in_fast",
+      "start_ms": 44410,
+      "end_ms": 52981
+    }
+  ],
+  "subtitle_cues_total": 24,
+  "number_highlight_cues": [3, 5, 6, 15, 17],
+  "hook_overlay": {
+    "text": "⏰ 60일 넘기면 100만원 사라져요",
+    "scene": "short-hook",
+    "start_ms": 0,
+    "end_ms": 6667,
+    "position_y": 0.08,
+    "color": "#FFE600"
+  },
+  "audio": {
+    "voice_path": "projects/mom-support-2026-04-short-2/S2-audio/voice.compressed.wav",
+    "dry_run": true,
+    "dry_run_note": "S2-audio DRY-RUN 계승. CapCut 텍스트 읽기(TTS) 기능으로 실제 음성 합성 필요. 음성 합성 후 voice.wav 교체.",
+    "bgm_note": "CapCut 무료 음원 'gentle hope' 류 직접 추가. 음량 -16dB(0.15)."
+  },
+  "next_step": {
+    "stage": "S4-upload",
+    "action": "CapCut에서 capcut_short.json 임포트 → TTS 적용 → 수동 확인 후 S4-shorts-upload 봇으로 업로드"
+  },
+  "warnings": []
+}

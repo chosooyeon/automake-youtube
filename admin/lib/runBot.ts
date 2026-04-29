@@ -3,6 +3,27 @@ import fs from "node:fs";
 import path from "node:path";
 import { REPO_ROOT, stageDir, stageRunLog, type StageId } from "./paths";
 
+const MODEL_TIERS: Record<string, string> = {
+  haiku: "claude-haiku-4-5-20251001",
+  sonnet: "claude-sonnet-4-6",
+  opus: "claude-opus-4-7",
+};
+
+function readBotModelArgs(stage: string): string[] {
+  try {
+    const cfg = JSON.parse(
+      fs.readFileSync(path.join(REPO_ROOT, "bots", stage, "config.json"), "utf8")
+    );
+    const tier: string = cfg.model_tier ?? "sonnet";
+    const model = MODEL_TIERS[tier] ?? MODEL_TIERS.sonnet;
+    const args: string[] = ["--model", model];
+    if (cfg.max_turns) args.push("--max-turns", String(cfg.max_turns));
+    return args;
+  } catch {
+    return ["--model", MODEL_TIERS.sonnet];
+  }
+}
+
 export function isClaudeInstalled(): { installed: boolean; version?: string; reason?: string } {
   const r = spawnSync("claude", ["--version"], { encoding: "utf8" });
   if (r.error) return { installed: false, reason: "claude CLI not found in PATH" };
@@ -41,17 +62,18 @@ export function runBot({ slug, stage, extraNote }: RunOptions) {
   fs.appendFileSync(logPath, header + "\n");
 
   const promptParts = [
-    "AGENTS.md, config/global.json, config/pipeline.json 를 먼저 읽어줘.",
-    `그다음 \`projects/${slug}/\` 의 ${stage} 봇을 실행해줘.`,
-    `봇 정의는 \`bots/${stage}/prompt.md\` 와 \`bots/${stage}/config.json\` 을 따른다.`,
-    `결과 산출물은 반드시 \`projects/${slug}/${stage}/\` 안에 저장하고,`,
-    `검수 로그는 \`projects/${slug}/${stage}/run.log.md\` 에 append.`,
+    `config/global.json 을 먼저 읽어줘.`,
+    `그다음 \`bots/${stage}/prompt.md\` 와 \`bots/${stage}/config.json\` 을 읽고,`,
+    `\`projects/${slug}/${stage}/\` 봇을 실행해줘.`,
+    `결과 산출물: \`projects/${slug}/${stage}/output.json\``,
+    `로그: \`projects/${slug}/${stage}/run.log.md\` 에 append.`,
     extraNote ? `추가 요구사항: ${extraNote}` : "",
   ]
     .filter(Boolean)
     .join("\n");
 
-  const child = spawn("claude", ["-p", promptParts], {
+  const modelArgs = readBotModelArgs(stage);
+  const child = spawn("claude", ["-p", promptParts, ...modelArgs], {
     cwd: REPO_ROOT,
     env: process.env,
     stdio: ["ignore", "pipe", "pipe"],
@@ -75,13 +97,16 @@ export function runUploadScript(slug: string, opts: { dryRun?: boolean; channel?
   const uploadDir = isShorts ? "S4-upload" : "06-edit-upload";
   const videoFile = isShorts ? "final_short.mp4" : "final.mp4";
 
-  const scriptPath = path.join(REPO_ROOT, "projects", slug, uploadDir, "upload_to_youtube.mjs");
+  // 숏폼은 공유 스크립트 사용, 롱폼은 프로젝트별 스크립트
+  const scriptPath = isShorts
+    ? path.join(REPO_ROOT, "scripts", "upload_shorts.mjs")
+    : path.join(REPO_ROOT, "projects", slug, uploadDir, "upload_to_youtube.mjs");
   if (!fs.existsSync(scriptPath)) {
     throw new Error(`업로드 스크립트가 없습니다: ${scriptPath}`);
   }
   const finalMp4 = path.join(REPO_ROOT, "projects", slug, uploadDir, videoFile);
   if (!fs.existsSync(finalMp4)) {
-    throw new Error(`${videoFile} 가 없습니다. CapCut 익스포트 후 ${uploadDir}/${videoFile} 로 복사하세요.`);
+    throw new Error(`${videoFile} 가 없습니다. CapCut에서 9:16(1080×1920) 익스포트 후 ${uploadDir}/${videoFile} 로 복사하세요.`);
   }
   const logPath = path.join(REPO_ROOT, "projects", slug, uploadDir, "upload.log.md");
   fs.appendFileSync(logPath, `\n## ▶ Upload @ ${new Date().toISOString()} (ch${channel}${isShorts ? " Shorts" : ""})\n${opts.dryRun ? "(DRY-RUN)\n" : ""}\n\`\`\`\n`);
@@ -109,7 +134,9 @@ export function runUploadScript(slug: string, opts: { dryRun?: boolean; channel?
     }
   }
 
-  const child = spawn(process.execPath, [scriptPath], {
+  // 숏폼 공유 스크립트는 slug를 인자로 받음
+  const scriptArgs = isShorts ? [scriptPath, slug] : [scriptPath];
+  const child = spawn(process.execPath, scriptArgs, {
     cwd: REPO_ROOT,
     env: spawnEnv,
     stdio: ["ignore", "pipe", "pipe"],
@@ -146,15 +173,16 @@ export function runShortsBot({ slug, stage, parentSlug }: RunShortsOptions) {
   fs.appendFileSync(logPath, header + "\n");
 
   const promptParts = [
-    "AGENTS.md, config/global.json 를 먼저 읽어줘.",
-    `그다음 숏폼 프로젝트 \`projects/${slug}/\` 의 ${stage} 봇을 실행해줘.`,
-    `봇 정의는 \`bots/${stage}/prompt.md\` 와 \`bots/${stage}/config.json\` 을 따른다.`,
-    `부모 롱폼 프로젝트는 \`projects/${parentSlug}/\` 이다.`,
-    `결과 산출물은 반드시 \`projects/${slug}/${stage}/\` 안에 저장하고,`,
-    `검수 로그는 \`projects/${slug}/${stage}/run.log.md\` 에 append.`,
+    `config/global.json 을 먼저 읽어줘.`,
+    `그다음 \`bots/${stage}/prompt.md\` 와 \`bots/${stage}/config.json\` 을 읽고,`,
+    `숏폼 프로젝트 \`projects/${slug}/${stage}/\` 봇을 실행해줘.`,
+    `부모 롱폼 프로젝트: \`projects/${parentSlug}/\``,
+    `결과 산출물: \`projects/${slug}/${stage}/output.json\``,
+    `로그: \`projects/${slug}/${stage}/run.log.md\` 에 append.`,
   ].join("\n");
 
-  const child = spawn("claude", ["-p", promptParts], {
+  const modelArgs = readBotModelArgs(stage);
+  const child = spawn("claude", ["-p", promptParts, ...modelArgs], {
     cwd: REPO_ROOT,
     env: process.env,
     stdio: ["ignore", "pipe", "pipe"],

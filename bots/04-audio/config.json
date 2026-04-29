@@ -44,5 +44,7 @@
     "Bash(ffprobe:*)",
     "Bash(node:*)",
     "Bash(python3:*)"
-  ]
+  ],
+  "model_tier": "haiku",
+  "max_turns": 20
 }

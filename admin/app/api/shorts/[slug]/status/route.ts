@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "node:fs";
-import { shortsMetaPath, SHORTS_STAGES, shortsStageOutputJson, projectDir, type ShortsStageId } from "@/lib/paths";
+import { shortsMetaPath, SHORTS_STAGES, projectDir, type ShortsStageId } from "@/lib/paths";
+import { getShortsStageStatus } from "@/lib/projects";
 import path from "node:path";
 
 export const dynamic = "force-dynamic";
@@ -16,19 +17,14 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
 
   const stages: Record<string, string> = {};
   for (const s of SHORTS_STAGES) {
-    const out = shortsStageOutputJson(params.slug, s as ShortsStageId);
-    if (fs.existsSync(out)) {
-      stages[s] = "done";
-    } else {
-      const logPath = path.join(projectDir(params.slug), s, "run.log.md");
-      stages[s] = fs.existsSync(logPath) ? "in_progress" : "pending";
-    }
+    stages[s] = getShortsStageStatus(params.slug, s as ShortsStageId);
   }
 
-  // S4-upload 추가 체크: 영상/썸네일 존재 여부
   const uploadDir = path.join(projectDir(params.slug), "S4-upload");
   const videoReady = fs.existsSync(path.join(uploadDir, "final_short.mp4"));
-  const thumbReady = fs.existsSync(path.join(uploadDir, "thumbnail.jpg")) || fs.existsSync(path.join(uploadDir, "thumbnail.png"));
+  const thumbReady =
+    fs.existsSync(path.join(uploadDir, "thumbnail.jpg")) ||
+    fs.existsSync(path.join(uploadDir, "thumbnail.png"));
 
   return NextResponse.json({ ok: true, slug: params.slug, meta, stages, videoReady, thumbReady });
 }

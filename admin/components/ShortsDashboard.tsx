@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "./Toast";
 
 type ShortsStageId = "S1-script" | "S2-audio" | "S3-edit" | "S4-upload";
+type StageStatus = "done" | "in_progress" | "failed" | "pending";
 
 const SHORTS_STAGES: ShortsStageId[] = ["S1-script", "S2-audio", "S3-edit", "S4-upload"];
 
@@ -14,11 +15,25 @@ const SHORTS_STAGE_LABELS: Record<ShortsStageId, string> = {
   "S4-upload": "업로드 준비",
 };
 
+const STATUS_COLORS: Record<StageStatus, string> = {
+  done: "text-good border-good/40 bg-good/10",
+  in_progress: "text-warn border-warn/40 bg-warn/10",
+  failed: "text-bad border-bad/40 bg-bad/10",
+  pending: "text-subtext border-line bg-panel",
+};
+
+const STATUS_LABELS: Record<StageStatus, string> = {
+  done: "완료",
+  in_progress: "실행중",
+  failed: "실패",
+  pending: "대기",
+};
+
 interface ShortsProject {
   slug: string;
   parentSlug: string;
   createdAt?: string;
-  stages: Record<ShortsStageId, "done" | "in_progress" | "pending">;
+  stages: Record<ShortsStageId, StageStatus>;
 }
 
 export default function ShortsDashboard() {
@@ -26,6 +41,7 @@ export default function ShortsDashboard() {
   const [selected, setSelected] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { push } = useToast();
 
   async function refresh() {
@@ -43,11 +59,29 @@ export default function ShortsDashboard() {
     }
   }
 
+  async function deleteProject(slug: string) {
+    if (!confirm(`"${slug}" 프로젝트를 삭제하시겠습니까? 되돌릴 수 없습니다.`)) return;
+    setDeleting(true);
+    try {
+      const r = await fetch(`/api/shorts/${encodeURIComponent(slug)}`, { method: "DELETE" });
+      const j = await r.json();
+      if (j.ok) {
+        push({ kind: "success", title: "삭제 완료", message: slug });
+        setSelected("");
+        refresh();
+      } else {
+        push({ kind: "error", title: "삭제 실패", message: j.error });
+      }
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   useEffect(() => {
     refresh();
     const t = setInterval(refresh, 8000);
     return () => clearInterval(t);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const current = projects.find((p) => p.slug === selected);
 
@@ -96,6 +130,15 @@ export default function ShortsDashboard() {
             <button onClick={refresh} disabled={loading} className="text-xs text-subtext hover:text-text">
               {loading ? "…" : "↻"}
             </button>
+            {selected && (
+              <button
+                onClick={() => deleteProject(selected)}
+                disabled={deleting}
+                className="text-xs text-bad/70 hover:text-bad border border-bad/30 hover:border-bad/60 rounded px-2 py-1 transition disabled:opacity-40"
+              >
+                {deleting ? "삭제중…" : "🗑 삭제"}
+              </button>
+            )}
           </div>
 
           {current && <ShortsProjectView project={current} onRefresh={refresh} />}
@@ -118,11 +161,32 @@ export default function ShortsDashboard() {
 }
 
 function ShortsProjectView({ project, onRefresh }: { project: ShortsProject; onRefresh: () => void }) {
-  const [runningStage, setRunningStage] = useState<ShortsStageId | null>(null);
   const [logStage, setLogStage] = useState<ShortsStageId | null>(null);
   const [logs, setLogs] = useState("");
+  const [starting, setStarting] = useState<ShortsStageId | null>(null);
   const { push } = useToast();
 
+  // 실행중인 단계가 있으면 로그 자동 표시
+  const runningStage = SHORTS_STAGES.find((s) => project.stages[s] === "in_progress") ?? null;
+  useEffect(() => {
+    if (runningStage && logStage !== runningStage) setLogStage(runningStage);
+  }, [runningStage]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 서버가 in_progress 확인하면 starting 해제
+  useEffect(() => {
+    if (!starting) return;
+    const s = project.stages[starting];
+    if (s === "in_progress" || s === "done") setStarting(null);
+  }, [project.stages, starting]);
+
+  // 30초 안전 타임아웃 (서버 응답 없을 때 버튼 복구)
+  useEffect(() => {
+    if (!starting) return;
+    const t = setTimeout(() => setStarting(null), 30_000);
+    return () => clearTimeout(t);
+  }, [starting]);
+
+  // 로그 폴링 (logStage 설정 시)
   useEffect(() => {
     if (!logStage) return;
     let alive = true;
@@ -133,14 +197,14 @@ function ShortsProjectView({ project, onRefresh }: { project: ShortsProject; onR
         const j = await r.json();
         if (alive) setLogs(j.logs || "");
       } catch {}
-      if (alive) timer = setTimeout(tick, 2500);
+      if (alive) timer = setTimeout(tick, 2000);
     }
     tick();
     return () => { alive = false; clearTimeout(timer); };
   }, [logStage, project.slug]);
 
   async function runStage(stage: ShortsStageId) {
-    setRunningStage(stage);
+    setStarting(stage);
     setLogStage(stage);
     setLogs("");
     try {
@@ -152,26 +216,17 @@ function ShortsProjectView({ project, onRefresh }: { project: ShortsProject; onR
       const j = await r.json();
       if (!j.ok) {
         push({ kind: "error", title: `${stage} 실행 실패`, message: j.error });
+        setStarting(null); // 시작 실패 → 즉시 해제
       } else {
         push({ kind: "info", title: `${stage} 실행 시작됨`, message: "로그를 확인하세요." });
+        setTimeout(onRefresh, 1500);
+        // starting은 서버가 in_progress 확인할 때까지 유지 (위 useEffect에서 해제)
       }
-    } finally {
-      setRunningStage(null);
-      setTimeout(onRefresh, 3000);
+    } catch {
+      push({ kind: "error", title: `${stage} 연결 오류`, message: "서버에 연결할 수 없습니다." });
+      setStarting(null);
     }
   }
-
-  const STATUS_COLORS: Record<string, string> = {
-    done: "text-good border-good/40 bg-good/10",
-    in_progress: "text-warn border-warn/40 bg-warn/10",
-    pending: "text-subtext border-line bg-panel",
-  };
-
-  const STATUS_LABELS: Record<string, string> = {
-    done: "완료",
-    in_progress: "실행중",
-    pending: "대기",
-  };
 
   return (
     <div className="space-y-4">
@@ -182,9 +237,14 @@ function ShortsProjectView({ project, onRefresh }: { project: ShortsProject; onR
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {SHORTS_STAGES.map((stage) => {
-          const status = project.stages[stage] || "pending";
-          const isRunning = runningStage === stage;
-          const prevDone = stage === "S1-script" || project.stages[SHORTS_STAGES[SHORTS_STAGES.indexOf(stage) - 1]] === "done";
+          const status: StageStatus = project.stages[stage] || "pending";
+          const isRunning = status === "in_progress";
+          const isFailed = status === "failed";
+          const isStarting = starting === stage;
+          const prevIdx = SHORTS_STAGES.indexOf(stage) - 1;
+          const prevDone = prevIdx < 0 || project.stages[SHORTS_STAGES[prevIdx]] === "done";
+          const canRun = prevDone && !isRunning && !isStarting;
+
           return (
             <div
               key={stage}
@@ -193,17 +253,39 @@ function ShortsProjectView({ project, onRefresh }: { project: ShortsProject; onR
               <div className="flex items-center justify-between">
                 <div className="text-xs font-mono opacity-60">{stage}</div>
                 <div className={`text-[10px] border rounded px-1.5 py-0.5 ${STATUS_COLORS[status]}`}>
-                  {STATUS_LABELS[status]}
+                  {isStarting ? "시작중…" : STATUS_LABELS[status]}
                 </div>
               </div>
               <div className="text-sm font-semibold">{SHORTS_STAGE_LABELS[stage]}</div>
+
+              {isRunning && (
+                <div className="text-[10px] flex items-center gap-1 opacity-80">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-warn animate-pulse" />
+                  Claude 실행 중…
+                </div>
+              )}
+              {isFailed && (
+                <div className="text-[10px] text-bad">
+                  오류 또는 권한 거부
+                </div>
+              )}
+
               <div className="flex gap-1 mt-auto flex-wrap">
                 <button
                   onClick={() => runStage(stage)}
-                  disabled={isRunning || !prevDone}
-                  className="text-xs bg-accent text-bg font-semibold rounded px-2 py-1 disabled:opacity-40"
+                  disabled={!canRun}
+                  className={
+                    "text-xs font-semibold rounded px-2.5 py-1 border transition disabled:opacity-40 disabled:cursor-not-allowed " +
+                    (isRunning || isStarting
+                      ? "bg-warn/10 border-warn/40 text-warn cursor-not-allowed"
+                      : isFailed
+                      ? "bg-bad/10 border-bad/40 text-bad hover:bg-bad/20"
+                      : status === "done"
+                      ? "bg-panel2 border-line text-subtext hover:border-accent hover:text-text"
+                      : "bg-accent text-bg border-accent hover:opacity-90")
+                  }
                 >
-                  {isRunning ? "실행중…" : status === "done" ? "재실행" : "실행"}
+                  {isRunning || isStarting ? "⏳ 실행중…" : isFailed ? "↺ 재시도" : status === "done" ? "↺ 재실행" : "▶ 실행"}
                 </button>
                 {status !== "pending" && (
                   <button
@@ -222,7 +304,12 @@ function ShortsProjectView({ project, onRefresh }: { project: ShortsProject; onR
       {logStage && (
         <div className="bg-panel border border-line rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold">📜 로그 — {logStage}</h3>
+            <h3 className="text-sm font-semibold flex items-center gap-2">
+              📜 로그 — {logStage}
+              {runningStage === logStage && (
+                <span className="text-[10px] text-warn border border-warn/40 rounded px-1.5 py-0.5 animate-pulse">실행중</span>
+              )}
+            </h3>
             <button onClick={() => setLogStage(null)} className="text-xs text-subtext hover:text-text">닫기</button>
           </div>
           <pre className="mono text-[11px] leading-snug bg-bg border border-line rounded-md p-3 h-56 overflow-auto whitespace-pre-wrap">

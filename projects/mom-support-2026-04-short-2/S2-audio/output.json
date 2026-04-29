@@ -1,0 +1,106 @@
+{
+  "slug": "mom-support-2026-04-short-2",
+  "parent_slug": "mom-support-2026-04",
+  "stage": "S2-audio",
+  "bot_id": "S2-shorts-audio",
+  "generated_at": "2026-04-29T14:30:00.000Z",
+  "dry_run": true,
+  "dry_run_note": "TTS API 키 없음. wpm_korean=320, speed=1.05로 길이 추정. voice.wav/voice.compressed.wav는 무음 placeholder(1s). CapCut에서 텍스트 읽기(TTS) 기능으로 실제 음성 합성 필요.",
+  "tts": {
+    "provider": "capcut_builtin",
+    "voice": "여성_차분한",
+    "speed": 1.05,
+    "wpm_korean": 320,
+    "effective_chars_per_sec": 5.6,
+    "pause_between_scenes_ms": 200,
+    "sentence_pause_ms": 100
+  },
+  "voice_file": "S2-audio/voice.wav",
+  "compressed_voice_file": "S2-audio/voice.compressed.wav",
+  "subtitle_file": "S2-audio/subtitle.srt",
+  "total_duration_sec": 53,
+  "compressed_duration_sec": 51,
+  "within_59s_limit": true,
+  "silence_compression": {
+    "method": "ffmpeg_silenceremove",
+    "threshold_db": -35,
+    "min_silence_ms": 500,
+    "keep_padding_ms": 100,
+    "estimated_removed_sec": 2,
+    "note": "DRY-RUN: 실제 압축 미실행. 씬 간 휴지(200ms)는 임계값(500ms) 미만이므로 보존됨. 실제 CapCut TTS 적용 후 ffmpeg로 압축 권장."
+  },
+  "scenes": [
+    {
+      "id": "short-hook",
+      "role": "hook",
+      "start_sec": 0.000,
+      "end_sec": 6.667,
+      "duration_sec": 6.667,
+      "source_duration_sec": 7,
+      "tts_syllable_count": 34,
+      "narration": "출생일로부터 딱 60일이에요. 이거 넘기면 부모급여 100만원 그냥 사라져요.",
+      "subtitle_cues": [
+        {"index": 1, "start": "00:00:00,000", "end": "00:00:02,222", "text": "출생일로부터 딱 60일"},
+        {"index": 2, "start": "00:00:02,222", "end": "00:00:04,444", "text": "이거 넘기면 부모급여"},
+        {"index": 3, "start": "00:00:04,444", "end": "00:00:06,667", "text": "100만원 그냥 사라져요."}
+      ]
+    },
+    {
+      "id": "short-body-1",
+      "role": "body",
+      "start_sec": 6.867,
+      "end_sec": 24.010,
+      "duration_sec": 17.143,
+      "source_duration_sec": 18,
+      "tts_syllable_count": 85,
+      "narration": "부모급여, 0세 아기는 매달 100만원이에요. 1세는 매달 50만원이고요. 자동으로 안 들어와요. 직접 신청해야 나와요. 가정에서 키우면 매월 25일에 통장으로 나와요. 어린이집이면 차액만 받아요.",
+      "subtitle_cues": [
+        {"index": 4,  "start": "00:00:06,867", "end": "00:00:09,010", "text": "부모급여, 0세 아기는"},
+        {"index": 5,  "start": "00:00:09,010", "end": "00:00:11,153", "text": "매달 100만원"},
+        {"index": 6,  "start": "00:00:11,153", "end": "00:00:13,296", "text": "1세는 매달 50만원"},
+        {"index": 7,  "start": "00:00:13,296", "end": "00:00:15,439", "text": "자동으로 안 들어와요."},
+        {"index": 8,  "start": "00:00:15,439", "end": "00:00:17,582", "text": "직접 신청해야 나와요."},
+        {"index": 9,  "start": "00:00:17,582", "end": "00:00:19,725", "text": "가정 양육이면 매월 25일"},
+        {"index": 10, "start": "00:00:19,725", "end": "00:00:21,868", "text": "통장으로 나와요."},
+        {"index": 11, "start": "00:00:21,868", "end": "00:00:24,010", "text": "어린이집이면 차액만"}
+      ]
+    },
+    {
+      "id": "short-body-2",
+      "role": "body",
+      "start_sec": 24.210,
+      "end_sec": 44.210,
+      "duration_sec": 20.000,
+      "source_duration_sec": 21,
+      "tts_syllable_count": 110,
+      "narration": "그런데 신청 기한이 있어요. 출생일로부터 60일 안에 신청해야 출생월부터 소급돼요. 60일 넘기면 신청한 달부터만 나와요. 0세 한 달치가 100만원이에요. 하루만 늦어도 100만원 날리는 거예요. 출생신고 할 때 행복출산 원스톱으로 같이 신청하면 제일 안전해요.",
+      "subtitle_cues": [
+        {"index": 12, "start": "00:00:24,210", "end": "00:00:26,432", "text": "신청 기한이 있어요."},
+        {"index": 13, "start": "00:00:26,432", "end": "00:00:28,654", "text": "출생일로부터 60일 안에"},
+        {"index": 14, "start": "00:00:28,654", "end": "00:00:30,876", "text": "신청해야 소급돼요."},
+        {"index": 15, "start": "00:00:30,876", "end": "00:00:33,098", "text": "60일 넘기면"},
+        {"index": 16, "start": "00:00:33,098", "end": "00:00:35,320", "text": "신청한 달부터만 나와요."},
+        {"index": 17, "start": "00:00:35,320", "end": "00:00:37,542", "text": "0세 한 달치 100만원"},
+        {"index": 18, "start": "00:00:37,542", "end": "00:00:39,764", "text": "하루만 늦어도 날려요."},
+        {"index": 19, "start": "00:00:39,764", "end": "00:00:41,986", "text": "출생신고 때 원스톱으로"},
+        {"index": 20, "start": "00:00:41,986", "end": "00:00:44,210", "text": "같이 신청하면 안전해요."}
+      ]
+    },
+    {
+      "id": "short-cta",
+      "role": "cta",
+      "start_sec": 44.410,
+      "end_sec": 52.981,
+      "duration_sec": 8.571,
+      "source_duration_sec": 9,
+      "tts_syllable_count": 51,
+      "narration": "국민행복카드, 첫만남이용권도 있어요. 5가지 지원금 전부 원본 영상에서 확인하세요. 구독하면 다음 정보도 놓치지 않아요.",
+      "subtitle_cues": [
+        {"index": 21, "start": "00:00:44,410", "end": "00:00:46,553", "text": "국민행복카드도 있어요."},
+        {"index": 22, "start": "00:00:46,553", "end": "00:00:48,696", "text": "첫만남이용권도 있고요."},
+        {"index": 23, "start": "00:00:48,696", "end": "00:00:50,839", "text": "5가지 전부 원본 영상에"},
+        {"index": 24, "start": "00:00:50,839", "end": "00:00:52,981", "text": "구독하면 다음도 알림"}
+      ]
+    }
+  ]
+}

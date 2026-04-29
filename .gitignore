@@ -48,9 +48,12 @@ projects/*/06-edit-upload/final.mp4
 projects/*/06-edit-upload/*.mp4
 projects/*/06-edit-upload/_*
 
-# === 로그 ===
+# === 로그 (재현 불필요, 용량만 차지) ===
 *.log
 projects/*/*/run.log.md
+projects/*/*/upload.log.md
+topics/queue/*.log.md
+topics/archive/*.log.md
 
 # === Claude Code 캐시 (있을 경우) ===
 .claude/cache/

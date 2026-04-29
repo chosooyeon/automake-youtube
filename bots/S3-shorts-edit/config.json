@@ -46,5 +46,7 @@
     "default_out": "fade_out",
     "hook_in": "pop_scale",
     "transition": "cut"
-  }
+  },
+  "model_tier": "haiku",
+  "max_turns": 20
 }
