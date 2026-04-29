@@ -53,3 +53,25 @@ export function expandHome(p: string): string {
   if (p.startsWith("~")) return path.join(os.homedir(), p.slice(1));
   return p;
 }
+
+export const SHORTS_STAGES = ["S1-script", "S2-audio", "S3-edit", "S4-upload"] as const;
+export type ShortsStageId = (typeof SHORTS_STAGES)[number];
+
+export const SHORTS_STAGE_LABELS: Record<ShortsStageId, string> = {
+  "S1-script": "숏폼 대본",
+  "S2-audio": "음성/자막",
+  "S3-edit": "9:16 편집",
+  "S4-upload": "업로드 준비",
+};
+
+export function shortsStageDir(slug: string, stage: ShortsStageId): string {
+  return path.join(projectDir(slug), stage);
+}
+
+export function shortsStageOutputJson(slug: string, stage: ShortsStageId): string {
+  return path.join(shortsStageDir(slug, stage), "output.json");
+}
+
+export function shortsMetaPath(slug: string): string {
+  return path.join(projectDir(slug), "00-input", "shorts_meta.json");
+}

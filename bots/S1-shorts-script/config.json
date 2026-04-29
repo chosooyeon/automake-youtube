@@ -1,0 +1,33 @@
+{
+  "bot_id": "S1-shorts-script",
+  "description": "롱폼 대본에서 가장 임팩트 있는 순간을 추출해 30~60초 숏폼 대본을 작성한다",
+  "input": {
+    "parent_slug_from": "projects/{slug}/00-input/shorts_meta.json",
+    "long_form_script": "projects/{parent_slug}/03-script/output.json",
+    "long_form_strategy": "projects/{parent_slug}/02-strategy/output.json"
+  },
+  "output": {
+    "path": "projects/{slug}/S1-script/output.json",
+    "log": "projects/{slug}/S1-script/run.log.md"
+  },
+  "script": {
+    "target_duration_sec": 55,
+    "min_duration_sec": 30,
+    "max_duration_sec": 59,
+    "structure": {
+      "hook_sec": 5,
+      "body_sec": 40,
+      "cta_sec": 10
+    },
+    "wpm_korean": 320,
+    "style": "shorts_trendy",
+    "anti_ai_detection": true,
+    "max_chars_per_subtitle_line": 15,
+    "max_subtitle_lines": 2
+  },
+  "extraction": {
+    "prefer_scenes_with": ["number", "shocking_fact", "before_after", "direct_benefit"],
+    "avoid": ["intro_only", "outro_cta_only"],
+    "max_scenes_to_pick": 3
+  }
+}

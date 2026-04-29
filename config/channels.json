@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "label": "채널 1",
+    "channel_id": "UCx76HaeHjqyCes8a_wgOh9w",
+    "channel_name": "엄마지갑64",
+    "token_env": "YOUTUBE_OAUTH_TOKEN_PATH",
+    "channel_id_env": "YOUTUBE_CHANNEL_ID_1",
+    "client_secret_env": "YOUTUBE_CLIENT_SECRET_PATH",
+    "note": "기본 채널. node scripts/init-youtube-auth.mjs --channel 1 로 토큰 발급"
+  },
+  {
+    "id": 2,
+    "label": "채널 2",
+    "channel_id": "UCbMr-TTmdtNBOrkxtSoiCfA",
+    "channel_name": "owen",
+    "token_env": "YOUTUBE_OAUTH_TOKEN_PATH_2",
+    "channel_id_env": "YOUTUBE_CHANNEL_ID_2",
+    "client_secret_env": "YOUTUBE_CLIENT_SECRET_PATH",
+    "note": "두 번째 채널. YouTube Studio에서 채널 전환 후 node scripts/init-youtube-auth.mjs --channel 2 실행"
+  }
+]

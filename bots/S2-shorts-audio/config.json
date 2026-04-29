@@ -1,0 +1,37 @@
+{
+  "bot_id": "S2-shorts-audio",
+  "description": "숏폼 대본(S1) 기반으로 TTS 합성 사양과 SRT 자막을 생성한다",
+  "input": {
+    "short_script": "projects/{slug}/S1-script/output.json"
+  },
+  "output": {
+    "path": "projects/{slug}/S2-audio/output.json",
+    "voice_file": "projects/{slug}/S2-audio/voice.wav",
+    "subtitle_file": "projects/{slug}/S2-audio/subtitle.srt",
+    "log": "projects/{slug}/S2-audio/run.log.md"
+  },
+  "tts": {
+    "provider": "capcut_builtin",
+    "voice": "여성_차분한",
+    "speed": 1.05,
+    "pause_between_scenes_ms": 200,
+    "sentence_pause_ms": 100,
+    "wpm_korean": 320
+  },
+  "subtitle": {
+    "format": "srt",
+    "max_chars_per_line": 15,
+    "max_lines_per_cue": 2,
+    "min_cue_duration_ms": 600,
+    "max_cue_duration_ms": 3000,
+    "split_on_punctuation": true,
+    "style": "center_bold"
+  },
+  "silence_compression": {
+    "enabled": true,
+    "method": "ffmpeg_silenceremove",
+    "threshold_db": -35,
+    "min_silence_ms": 500,
+    "keep_padding_ms": 100
+  }
+}

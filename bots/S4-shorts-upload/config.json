@@ -1,0 +1,26 @@
+{
+  "bot_id": "S4-shorts-upload",
+  "description": "YouTube Shorts 업로드 메타데이터를 생성한다 (#Shorts 포함)",
+  "input": {
+    "short_script": "projects/{slug}/S1-script/output.json",
+    "parent_strategy": "projects/{parent_slug}/02-strategy/output.json",
+    "parent_upload_meta": "projects/{parent_slug}/06-edit-upload/upload_metadata.json"
+  },
+  "output": {
+    "metadata_file": "projects/{slug}/S4-upload/upload_metadata.json",
+    "path": "projects/{slug}/S4-upload/output.json",
+    "log": "projects/{slug}/S4-upload/run.log.md"
+  },
+  "upload": {
+    "privacy_default": "private",
+    "category_id": "27",
+    "made_for_kids": false,
+    "force_hashtag_shorts": true,
+    "title_max_chars": 80,
+    "description_template": "{hook_oneliner}\n\n{summary_bullets}\n\n원본 영상 전체 보기 👇\n{parent_video_url}\n\n{hashtags} #Shorts",
+    "tags_inherit_from_parent": true,
+    "add_tags": ["Shorts", "숏츠", "shorts"],
+    "ai_disclosure_in_description": true,
+    "thumbnail_note": "썸네일은 직접 제작 후 S4-upload/thumbnail.jpg 에 넣어주세요."
+  }
+}

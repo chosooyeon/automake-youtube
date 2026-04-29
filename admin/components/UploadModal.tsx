@@ -16,9 +16,20 @@ interface UploadInfo {
   videoSizeMB: number | null;
 }
 
+interface ChannelInfo {
+  id: number;
+  label: string;
+  channel_id: string;
+  channel_name: string;
+  token_exists: boolean;
+  configured: boolean;
+}
+
 export default function UploadModal({ open, onClose, slug }: Props) {
   const [info, setInfo] = useState<UploadInfo | null>(null);
+  const [channels, setChannels] = useState<ChannelInfo[]>([]);
   const [confirmText, setConfirmText] = useState("");
+  const [channel, setChannel] = useState(1);
   const [busy, setBusy] = useState(false);
   const { push } = useToast();
 
@@ -28,12 +39,16 @@ export default function UploadModal({ open, onClose, slug }: Props) {
     fetch(`/api/projects/${encodeURIComponent(slug)}/upload`, { cache: "no-store" })
       .then((r) => r.json())
       .then(setInfo);
+    fetch("/api/system/channels", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => setChannels(j.channels || []));
   }, [open, slug]);
 
   if (!open) return null;
 
   const ready = info?.metaExists && info?.videoExists;
   const wantedConfirm = "업로드";
+  const selectedCh = channels.find((c) => c.id === channel);
 
   async function start(dryRun: boolean) {
     setBusy(true);
@@ -41,7 +56,7 @@ export default function UploadModal({ open, onClose, slug }: Props) {
       const r = await fetch(`/api/projects/${encodeURIComponent(slug)}/upload`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ confirm: true, dryRun }),
+        body: JSON.stringify({ confirm: true, dryRun, channel }),
       });
       const j = await r.json();
       if (!j.ok) {
@@ -78,14 +93,68 @@ export default function UploadModal({ open, onClose, slug }: Props) {
               <Row ok={info.videoExists} label={`final.mp4 ${info.videoSizeMB ? `(${info.videoSizeMB} MB)` : ""}`} />
               <Row ok={info.metaExists} label="upload_metadata.json" />
             </ul>
+
             {info.meta && (
               <div className="bg-bg border border-line rounded-md p-3 mb-3 text-xs">
                 <div><span className="text-subtext">제목:</span> {info.meta.title}</div>
                 <div><span className="text-subtext">공개:</span> {info.meta.privacy}</div>
                 <div><span className="text-subtext">카테고리:</span> {info.meta.category_id}</div>
-                <div><span className="text-subtext">태그:</span> {(info.meta.tags || []).slice(0,4).join(", ")} …</div>
+                <div><span className="text-subtext">태그:</span> {(info.meta.tags || []).slice(0, 4).join(", ")} …</div>
               </div>
             )}
+
+            {/* 채널 선택 */}
+            <div className="mb-3">
+              <label className="text-xs text-subtext block mb-1.5">업로드할 채널</label>
+              {channels.length === 0 ? (
+                <div className="text-xs text-warn">채널 정보 로딩 중…</div>
+              ) : (
+                <div className="flex gap-2 flex-wrap">
+                  {channels.map((ch) => (
+                    <button
+                      key={ch.id}
+                      onClick={() => setChannel(ch.id)}
+                      className={
+                        "flex flex-col items-start text-left rounded-lg border px-3 py-2 transition min-w-[140px] " +
+                        (channel === ch.id
+                          ? "bg-accent/15 border-accent"
+                          : "border-line bg-panel2 hover:border-accent/50")
+                      }
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className={ch.configured ? "text-good text-xs" : "text-bad text-xs"}>
+                          {ch.configured ? "●" : "○"}
+                        </span>
+                        <span className="text-sm font-semibold">
+                          {ch.channel_name || ch.label}
+                        </span>
+                      </div>
+                      {ch.channel_id && (
+                        <div className="text-[10px] text-subtext mono mt-0.5 truncate max-w-[160px]">
+                          {ch.channel_id}
+                        </div>
+                      )}
+                      {!ch.configured && (
+                        <div className="text-[10px] text-warn mt-0.5">토큰 미설정</div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {selectedCh && !selectedCh.configured && (
+                <div className="text-[11px] text-warn bg-warn/10 border border-warn/30 rounded px-2.5 py-1.5 mt-2">
+                  이 채널의 OAuth 토큰이 없습니다.<br />
+                  터미널에서 실행하세요:{" "}
+                  <code className="mono">node scripts/init-youtube-auth.mjs --channel {selectedCh.id}</code>
+                </div>
+              )}
+              {selectedCh && selectedCh.configured && (
+                <div className="text-[10px] text-good mt-1">
+                  ✓ 채널 토큰 준비됨 — 업로드 시 Channel ID 자동 검증
+                </div>
+              )}
+            </div>
 
             {!ready && (
               <div className="text-xs text-warn bg-warn/10 border border-warn/40 rounded-md px-3 py-2 mb-3">
@@ -115,7 +184,7 @@ export default function UploadModal({ open, onClose, slug }: Props) {
               </button>
               <button
                 onClick={() => start(false)}
-                disabled={busy || !ready || confirmText !== wantedConfirm}
+                disabled={busy || !ready || confirmText !== wantedConfirm || (!!selectedCh && !selectedCh.configured)}
                 className="text-sm rounded-md border border-bad/60 bg-bad/20 text-bad font-semibold px-3 py-2 disabled:opacity-40"
               >
                 {busy ? "업로드중…" : "📤 업로드 실행"}

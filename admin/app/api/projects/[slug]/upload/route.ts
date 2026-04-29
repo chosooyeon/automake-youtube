@@ -16,7 +16,8 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
     return NextResponse.json({ ok: false, error: "confirm: true 필요 (2단계 확인)" }, { status: 400 });
   }
   try {
-    const r = runUploadScript(params.slug, { dryRun: !!body?.dryRun });
+    const channel = Number.isInteger(body?.channel) ? (body.channel as number) : 1;
+    const r = runUploadScript(params.slug, { dryRun: !!body?.dryRun, channel });
     return NextResponse.json({ ok: true, ...r });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e?.message || String(e) }, { status: 500 });

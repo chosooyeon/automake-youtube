@@ -4,13 +4,14 @@ import { useState } from "react";
 import LongFormDashboard from "./LongFormDashboard";
 import ComingSoonLine from "./ComingSoonLine";
 import TopicQueue from "./TopicQueue";
+import ShortsDashboard from "./ShortsDashboard";
 
 type Tab = "topics" | "longform" | "shorts" | "instacard" | "blog";
 
 const TABS: { id: Tab; label: string; status: "live" | "planned" }[] = [
   { id: "topics", label: "💡 주제 큐 (0번)", status: "live" },
   { id: "longform", label: "🎬 롱폼 (YouTube 8~10분)", status: "live" },
-  { id: "shorts", label: "📱 숏폼 (Shorts/Reels)", status: "planned" },
+  { id: "shorts", label: "📱 숏폼 (YouTube Shorts)", status: "live" },
   { id: "instacard", label: "🟪 인스타 카드 피드", status: "planned" },
   { id: "blog", label: "📝 블로그 글", status: "planned" },
 ];
@@ -44,28 +45,7 @@ export default function Dashboard() {
 
       {tab === "topics" && <TopicQueue />}
       {tab === "longform" && <LongFormDashboard />}
-      {tab === "shorts" && (
-        <ComingSoonLine
-          line="shorts"
-          title="숏폼 (YouTube Shorts / Instagram Reels / TikTok)"
-          basedOn="롱폼 영상이 5번까지 끝나면, 같은 대본·자료를 30~60초 숏폼으로 자동 컷."
-          autoSteps={[
-            "롱폼 03-script.output.json 의 best_hook + key_moment 3개 추출",
-            "04-audio voice 의 해당 구간만 잘라 새 SRT 생성 (ffmpeg trim)",
-            "9:16 비율로 캔버스 회전 + 자막 가운데 배치 (CapCut JSON 9:16 템플릿)",
-            "CapCut export → final_short.mp4",
-            "YouTube Shorts API 업로드 (Data API v3 같은 엔드포인트, 세로 영상 자동 인식)",
-          ]}
-          required={[
-            { name: "YouTube Data API (이미 있음)", status: "ok" },
-            { name: "Instagram Graph API (Meta 비즈니스 + 페이스북 페이지 연결)", status: "todo", note: "리뷰 통과 시간 1~2주" },
-            { name: "TikTok Content Posting API", status: "todo", note: "공식 파트너 신청 필요. 개인 계정은 수동 업로드가 현실적." },
-            { name: "ffmpeg (이미 tools/ffmpeg)", status: "ok" },
-          ]}
-          difficulty="쉬움"
-          difficultyNote="기존 자산을 자르는 거라 새로 만드는 게 거의 없음. 메타(API) 통과만 시간 들 뿐."
-        />
-      )}
+      {tab === "shorts" && <ShortsDashboard />}
       {tab === "instacard" && (
         <ComingSoonLine
           line="instacard"

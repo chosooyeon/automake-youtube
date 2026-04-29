@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useToast } from "./Toast";
+import ManualTopicModal from "./ManualTopicModal";
 
 interface Candidate {
   topic_oneliner: string;
@@ -44,6 +45,7 @@ export default function TopicQueue() {
     candidateIndex: number;
     candidate: Candidate;
   } | null>(null);
+  const [showManual, setShowManual] = useState(false);
   const { push } = useToast();
 
   async function refresh() {
@@ -122,13 +124,21 @@ export default function TopicQueue() {
               파이프라인과 분리. 이 봇만 따로 계속 돌려서 후보를 쌓아두고, 마음에 드는 1개를 골라 자동으로 프로젝트로 만들 수 있어요.
             </p>
           </div>
-          <button
-            onClick={runNew}
-            disabled={running}
-            className="bg-accent text-bg font-semibold rounded-lg px-4 py-2.5 text-sm hover:opacity-90 disabled:opacity-50"
-          >
-            {running ? "실행 중…" : "🔄 새로 5개 뽑기"}
-          </button>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={() => setShowManual(true)}
+              className="border border-line bg-panel2 text-text font-semibold rounded-lg px-4 py-2.5 text-sm hover:opacity-80"
+            >
+              ✏️ 직접 입력
+            </button>
+            <button
+              onClick={runNew}
+              disabled={running}
+              className="bg-accent text-bg font-semibold rounded-lg px-4 py-2.5 text-sm hover:opacity-90 disabled:opacity-50"
+            >
+              {running ? "실행 중…" : "🔄 새로 5개 뽑기"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -220,6 +230,16 @@ export default function TopicQueue() {
           }}
         />
       )}
+
+      <ManualTopicModal
+        open={showManual}
+        onClose={() => setShowManual(false)}
+        onCreated={(slug) => {
+          push({ kind: "success", title: "프로젝트 생성됨", message: `슬러그: ${slug} (롱폼 탭에서 작업 시작)` });
+          setShowManual(false);
+          refresh();
+        }}
+      />
     </div>
   );
 }

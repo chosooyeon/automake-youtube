@@ -22,8 +22,13 @@ for (const line of fs.readFileSync(path.join(ROOT, '.env'), 'utf8').split('\n'))
   const m = line.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$/);
   if (m) env[m[1]] = m[2].replace(/^['"]|['"]$/g, '').trim();
 }
-const CLIENT_SECRET_PATH = env.YOUTUBE_CLIENT_SECRET_PATH;
-const TOKEN_PATH = env.YOUTUBE_OAUTH_TOKEN_PATH;
+// 채널 env 오버라이드 지원: runBot.ts 가 채널 선택 시 process.env 를 교체해서 전달함
+function expandHome(p) { return p?.startsWith('~') ? path.join(process.env.HOME, p.slice(1)) : p; }
+
+const CLIENT_SECRET_PATH = expandHome(process.env.YOUTUBE_CLIENT_SECRET_PATH || env.YOUTUBE_CLIENT_SECRET_PATH);
+const TOKEN_PATH = expandHome(process.env.YOUTUBE_OAUTH_TOKEN_PATH || env.YOUTUBE_OAUTH_TOKEN_PATH);
+const EXPECTED_CHANNEL_ID = process.env.YOUTUBE_EXPECTED_CHANNEL_ID || '';
+
 if (!CLIENT_SECRET_PATH || !TOKEN_PATH) {
   console.error('❌ .env 에 YOUTUBE_CLIENT_SECRET_PATH / YOUTUBE_OAUTH_TOKEN_PATH 가 필요합니다.');
   process.exit(1);
@@ -106,6 +111,24 @@ async function getAuth() {
   return oauth2;
 }
 
+async function verifyChannel(youtube) {
+  if (!EXPECTED_CHANNEL_ID) return; // 채널 ID 미설정 시 스킵
+  const resp = await youtube.channels.list({ part: ['snippet'], mine: true, maxResults: 1 });
+  const ch = resp.data.items?.[0];
+  if (!ch) {
+    console.error('❌ 채널 정보를 가져올 수 없습니다.');
+    process.exit(1);
+  }
+  if (ch.id !== EXPECTED_CHANNEL_ID) {
+    console.error(`\n❌ 채널 불일치!`);
+    console.error(`   예상 Channel ID: ${EXPECTED_CHANNEL_ID}`);
+    console.error(`   실제 Channel ID: ${ch.id} (${ch.snippet?.title})`);
+    console.error(`   토큰 파일이 잘못됐습니다. node scripts/init-youtube-auth.mjs --channel <번호> 를 다시 실행하세요.`);
+    process.exit(1);
+  }
+  console.log(`✓ 채널 확인: ${ch.snippet?.title} (${ch.id})`);
+}
+
 async function uploadVideo(youtube) {
   const total = fs.statSync(VIDEO).size;
   console.log(`\n📤 영상 업로드 시작 (${(total/1024/1024).toFixed(2)} MB)`);
@@ -182,6 +205,7 @@ async function main() {
 
   const auth = await getAuth();
   const youtube = google.youtube({ version: 'v3', auth });
+  await verifyChannel(youtube);
   const videoId = await uploadVideo(youtube);
   await addCaption(youtube, videoId);
   await postPinnedComment(youtube, videoId);

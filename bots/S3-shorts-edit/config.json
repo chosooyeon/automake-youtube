@@ -1,0 +1,50 @@
+{
+  "bot_id": "S3-shorts-edit",
+  "description": "롱폼 이미지를 재활용해 9:16 세로 CapCut 프로젝트 JSON을 생성한다",
+  "input": {
+    "short_script": "projects/{slug}/S1-script/output.json",
+    "short_audio": "projects/{slug}/S2-audio/output.json",
+    "parent_visuals": "projects/{parent_slug}/05-visual/output.json",
+    "parent_scenes_dir": "projects/{parent_slug}/05-visual/scenes/"
+  },
+  "output": {
+    "capcut_json": "projects/{slug}/S3-edit/capcut_short.json",
+    "path": "projects/{slug}/S3-edit/output.json",
+    "log": "projects/{slug}/S3-edit/run.log.md"
+  },
+  "canvas": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "aspect": "9:16"
+  },
+  "image_reuse": {
+    "crop_mode": "center_crop_vertical",
+    "zoom_factor": 1.3,
+    "allow_same_image_multiple_scenes": true,
+    "fallback_if_no_parent_image": "solid_color_brand"
+  },
+  "text_style": {
+    "subtitle": {
+      "position": "center",
+      "font": "Pretendard Bold",
+      "size_px": 72,
+      "color": "#FFFFFF",
+      "stroke_color": "#000000",
+      "stroke_width": 4,
+      "background": "semi_transparent_pill"
+    },
+    "hook_overlay": {
+      "position": "top_center",
+      "font": "Pretendard ExtraBold",
+      "size_px": 56,
+      "color": "#FFE600"
+    }
+  },
+  "animations": {
+    "default_in": "zoom_in_fast",
+    "default_out": "fade_out",
+    "hook_in": "pop_scale",
+    "transition": "cut"
+  }
+}

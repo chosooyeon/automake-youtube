@@ -112,9 +112,25 @@
   - 제목 / 설명 일부 / 태그 / privacy / 썸네일 경로 / publish_at
 - 승인되면 다음 절차:
   1. `apis.youtube.client_secret_env` 와 `oauth_token_env` 에서 자격 증명 로드
-  2. YouTube Data API v3 `videos.insert` 로 업로드
-  3. 업로드 후 `videos.update` 로 썸네일 적용
-  4. 결과를 `upload_result` 에 기록 (`video_id`, `url`, `uploaded_at`)
+     - client_secret.json 은 두 채널이 공유 (같은 Google 계정)
+     - token 파일은 채널별로 다름 — `YOUTUBE_OAUTH_TOKEN_PATH` (ch1) / `YOUTUBE_OAUTH_TOKEN_PATH_2` (ch2)
+     - runBot.ts 가 채널 선택에 따라 env var 를 오버라이드해서 전달하므로, 스크립트는 `process.env` 를 우선 읽는다
+  2. **채널 ID 검증** — `YOUTUBE_EXPECTED_CHANNEL_ID` env var 가 설정된 경우 반드시 확인:
+     ```javascript
+     const EXPECTED = process.env.YOUTUBE_EXPECTED_CHANNEL_ID || '';
+     if (EXPECTED) {
+       const resp = await youtube.channels.list({ part: ['snippet'], mine: true, maxResults: 1 });
+       const ch = resp.data.items?.[0];
+       if (!ch || ch.id !== EXPECTED) {
+         console.error('❌ 채널 불일치! 예상:', EXPECTED, '실제:', ch?.id);
+         process.exit(1);
+       }
+       console.log('✓ 채널 확인:', ch.snippet.title, ch.id);
+     }
+     ```
+  3. YouTube Data API v3 `videos.insert` 로 업로드
+  4. 업로드 후 `videos.update` 로 썸네일 적용
+  5. 결과를 `upload_result` 에 기록 (`video_id`, `url`, `uploaded_at`)
 - 한 번이라도 실패하면 `upload_result.error` 에 메시지 남기고 멈춘다.
 
 업로드를 안 하는 경우(기본):

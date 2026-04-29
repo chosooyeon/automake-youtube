@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"/Users/chosooyeon/Documents/automake-youtube/admin/app/api/shorts/[slug]/run\")",
+      "Bash(mkdir -p \"/Users/chosooyeon/Documents/automake-youtube/admin/app/api/shorts/[slug]/status\")",
+      "Bash(mkdir -p \"/Users/chosooyeon/Documents/automake-youtube/admin/app/api/shorts/[slug]/logs\")",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)"
+    ]
+  }
+}

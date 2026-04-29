@@ -20,3 +20,18 @@ html, body {
 
 /* 모노 폰트 */
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+/* 공통 인풋 */
+.input-base {
+  width: 100%;
+  background: #0B0F1A;
+  border: 1px solid #1F2937;
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  color: #E5E7EB;
+  outline: none;
+}
+.input-base:focus {
+  border-color: #6366F1;
+}
