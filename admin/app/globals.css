@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  background: #0B0F1A;
+  color: #E5E7EB;
+}
+
+* { box-sizing: border-box; }
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+/* 모노 폰트 */
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
