@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "./Toast";
 
 interface Props {
@@ -19,7 +19,21 @@ export default function ManualTopicModal({ open, onClose, onCreated }: Props) {
   const [deadlineDate, setDeadlineDate] = useState("");
   const [slug, setSlug] = useState("");
   const [busy, setBusy] = useState(false);
+  const [activeNiche, setActiveNiche] = useState<string>("");
+  const [activeNicheLabel, setActiveNicheLabel] = useState<string>("");
   const { push } = useToast();
+
+  useEffect(() => {
+    if (!open) return;
+    fetch("/api/system/niche", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => {
+        setActiveNiche(j.active);
+        const info = (j.niches ?? []).find((n: any) => n.id === j.active);
+        setActiveNicheLabel(info?.channelName ?? j.active);
+      })
+      .catch(() => {});
+  }, [open]);
 
   if (!open) return null;
 
@@ -68,6 +82,7 @@ export default function ManualTopicModal({ open, onClose, onCreated }: Props) {
           must_cover: mustCover,
           primary_sources: primarySources,
           deadline_date: deadlineDate.trim(),
+          niche: activeNiche || undefined,
         }),
       });
       const j = await r.json();
@@ -99,6 +114,17 @@ export default function ManualTopicModal({ open, onClose, onCreated }: Props) {
           <h2 className="text-lg font-semibold">✏️ 주제 직접 입력</h2>
           <button onClick={onClose} className="text-subtext hover:text-text">✕</button>
         </div>
+
+        {activeNiche && (
+          <div className="mb-3 text-[11px] text-subtext bg-panel2 border border-line rounded-md px-3 py-2">
+            현재 활성 채널/니치 →{" "}
+            <span className="text-text font-semibold">{activeNicheLabel}</span>{" "}
+            <span className="mono opacity-60">({activeNiche})</span>
+            <div className="opacity-60 mt-0.5">
+              이 니치의 brand·톤·금지어가 자동 적용된 channel_config.json 이 함께 생성됩니다.
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3">
           <Field label="주제 *" hint="영상 한 줄 설명">

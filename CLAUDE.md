@@ -9,7 +9,8 @@
 | `bots/{stage}/prompt.md` | 봇 상세 지시사항 |
 | `projects/{slug}/{stage}/output.json` | **성공 판정 기준** — 없으면 실패 |
 | `projects/{slug}/{stage}/run.log.md` | 실행 로그 (append) |
-| `config/global.json` | 채널·브랜드·API 전역 설정 |
+| `config/global.json` | 채널·브랜드·API 전역 설정 (`active_niche` + `niches.*` 로 다중 니치 지원) |
+| `projects/<slug>/00-input/channel_config.json` | 프로젝트별 resolved 채널 설정 스냅샷. 봇이 global.json 보다 우선 읽음 |
 | `shared/schemas/` | 입출력 JSON 스키마 |
 
 ## 실행 규칙 (모든 봇 공통)

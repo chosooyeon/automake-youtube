@@ -7,6 +7,7 @@ interface Project {
   hasBrief: boolean;
   stages: Record<string, "done" | "in_progress" | "pending" | "missing_inputs">;
   lastModified: number;
+  niche?: string;
 }
 
 interface Props {
@@ -53,12 +54,15 @@ export default function ProjectSelector({ value, onChange, onCreate, refreshKey 
           disabled={loading || projects.length === 0}
         >
           {projects.length === 0 && <option value="">— 없음 —</option>}
-          {projects.map((p) => (
-            <option key={p.slug} value={p.slug}>
-              {p.slug}
-              {Object.values(p.stages).filter((v) => v === "done").length}/6 완료
-            </option>
-          ))}
+          {projects.map((p) => {
+            const done = Object.values(p.stages).filter((v) => v === "done").length;
+            const nicheTag = p.niche && p.niche !== "mom_wallet" ? ` · ${p.niche}` : "";
+            return (
+              <option key={p.slug} value={p.slug}>
+                {p.slug} · {done}/6 완료{nicheTag}
+              </option>
+            );
+          })}
         </select>
       </div>
     </div>

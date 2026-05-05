@@ -7,6 +7,10 @@
 ## 0. 컨텍스트 로드
 
 1. `config/global.json` 의 `channel`, `brand`, `apis.search`
+   - **multi-niche 처리**: 호출자(어드민)가 prompt 에 `활성 니치: <name>` 을 명시하면 그 니치 기준으로 작업한다.
+     - `mom_wallet` (기본): root 의 channel/brand/apis.search 그대로 사용.
+     - 그 외 (예: `psychology`): `niches[<name>]` 의 channel/brand/apis.search 를 root 위에 deep-merge 한 값을 사용. `niches[<name>]` 에 없는 키는 root 값 사용.
+   - 호출자가 명시하지 않으면 `active_niche` 필드 (없으면 `mom_wallet`) 를 사용.
 2. `bots/00-topic/config.json` 의 `params`, `filters`
 3. **중복 회피 입력**:
    - `topics/archive/*.json` 의 모든 `picked_candidate.topic_oneliner`
@@ -71,7 +75,9 @@
 ### Step 5. 슬러그 생성 규칙 (`slug_suggestion`)
 - 영문 소문자 / 숫자 / 하이픈만
 - 형식: `{niche_short}-{YYYY-MM}-{topic_keyword}`
-- `niche_short` 는 `channel.handle` 에서 @ 빼고 단어 1~2개 추출 (예: `@mom_wallet` → `mom-support`)
+- `niche_short` 는 활성 니치의 `channel.handle` 에서 @ 빼고 단어 1~2개 추출
+  - `@mom_wallet` → `mom-support`
+  - `@mind_microscope` → `psy` (심리 채널은 짧게)
 - 길이 60자 이내
 - archive 와 충돌 시 끝에 `-2`, `-3` 붙임
 
@@ -81,6 +87,7 @@
 ```json
 {
   "generated_at": "2026-04-29T08:15:00Z",
+  "niche": "mom_wallet",
   "lookback_days": 30,
   "queries_used": [...],
   "sources_consulted": [...],
@@ -89,6 +96,8 @@
   "next_run_recommendation": "2주 뒤 재실행 권장 (정책 발표 주기 기준)"
 }
 ```
+
+`niche` 필드는 호출자가 명시한 활성 니치를 그대로 기록. 다음 단계(promote)에서 프로젝트 생성 시 channel_config.json 스냅샷이 이 niche 로 작성된다.
 
 ## 2. 출력 + 로그
 

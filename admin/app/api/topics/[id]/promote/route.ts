@@ -4,6 +4,7 @@ import path from "node:path";
 import { briefPath, projectDir, PROJECTS_DIR } from "@/lib/paths";
 import { copyExampleProject } from "@/lib/projects";
 import { QUEUE_DIR, buildBriefMarkdown, moveQueueToArchive, type TopicCandidate } from "@/lib/topics";
+import { writeChannelConfigSnapshot } from "@/lib/niche";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   fs.mkdirSync(path.join(projectDir(slug), "00-input"), { recursive: true });
   fs.writeFileSync(briefPath(slug), buildBriefMarkdown(candidate, slug));
 
+  // niche: queue 문서에 niche 가 적혀 있으면 그걸로, 없으면 active_niche 사용
+  const queueNiche: string | undefined =
+    typeof queueDoc?.niche === "string" && queueDoc.niche.trim() ? queueDoc.niche.trim() : undefined;
+  const snap = writeChannelConfigSnapshot(slug, queueNiche);
+
   // queue → archive
   const archivePath = moveQueueToArchive({
     queueId: params.id,
@@ -72,6 +78,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   return NextResponse.json({
     ok: true,
     slug,
+    niche: snap.niche,
     briefPath: `projects/${slug}/00-input/brief.md`,
     archivedTo: path.relative(process.cwd(), archivePath),
   });

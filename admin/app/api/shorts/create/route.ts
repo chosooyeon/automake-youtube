@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "node:fs";
 import path from "node:path";
 import { PROJECTS_DIR, projectDir, shortsMetaPath } from "@/lib/paths";
+import { getProjectNiche, writeChannelConfigSnapshot } from "@/lib/niche";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +73,11 @@ export async function POST(req: Request) {
   ].join("\n");
   fs.writeFileSync(path.join(target, "00-input", "brief.md"), brief);
 
-  return NextResponse.json({ ok: true, slug, parentSlug });
+  // 부모 niche 그대로 상속
+  const parentNiche = getProjectNiche(parentSlug);
+  const snap = writeChannelConfigSnapshot(slug, parentNiche);
+
+  return NextResponse.json({ ok: true, slug, parentSlug, niche: snap.niche });
 }
 
 function copyDir(src: string, dst: string) {

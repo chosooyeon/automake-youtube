@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { briefPath, projectDir, PROJECTS_DIR } from "@/lib/paths";
 import { copyExampleProject } from "@/lib/projects";
+import { writeChannelConfigSnapshot, loadResolvedConfig } from "@/lib/niche";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,12 @@ export async function POST(req: Request) {
 
   fs.mkdirSync(path.join(projectDir(slug), "00-input"), { recursive: true });
 
+  // niche resolution: body.niche 우선, 없으면 active_niche 사용
+  const nicheOverride = body?.niche ? String(body.niche) : undefined;
+  const snap = writeChannelConfigSnapshot(slug, nicheOverride);
+  const resolved = loadResolvedConfig(snap.niche);
+  const defaultDuration: number = resolved?.video_defaults?.duration_sec ?? 540;
+
   const audience: string = String(body?.audience || "").trim();
   const promise: string = String(body?.promise || "").trim();
   const mustCover: string[] = Array.isArray(body?.must_cover) ? body.must_cover.map(String) : [];
@@ -70,7 +77,10 @@ export async function POST(req: Request) {
   lines.push(`- ${audience || "TBD"}`);
   lines.push("");
   lines.push("## 길이");
-  lines.push("- 540 초 (8~10분 sweet spot)");
+  lines.push(`- ${defaultDuration} 초 (채널 기본값. 8~10분 sweet spot)`);
+  lines.push("");
+  lines.push("## 채널/니치");
+  lines.push(`- niche: \`${snap.niche}\` (channel_config.json 자동 생성됨)`);
   lines.push("");
   lines.push("## 약속 (시청자가 끝까지 보면 가져갈 가치)");
   lines.push(`- ${promise || "TBD"}`);
@@ -100,5 +110,10 @@ export async function POST(req: Request) {
 
   fs.writeFileSync(briefPath(slug), lines.join("\n"));
 
-  return NextResponse.json({ ok: true, slug, briefPath: `projects/${slug}/00-input/brief.md` });
+  return NextResponse.json({
+    ok: true,
+    slug,
+    niche: snap.niche,
+    briefPath: `projects/${slug}/00-input/brief.md`,
+  });
 }

@@ -5,6 +5,7 @@ import LongFormDashboard from "./LongFormDashboard";
 import ComingSoonLine from "./ComingSoonLine";
 import TopicQueue from "./TopicQueue";
 import ShortsDashboard from "./ShortsDashboard";
+import NicheSelector from "./NicheSelector";
 
 type Tab = "topics" | "longform" | "shorts" | "instacard" | "blog";
 
@@ -18,9 +19,13 @@ const TABS: { id: Tab; label: string; status: "live" | "planned" }[] = [
 
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("topics");
+  const [nicheKey, setNicheKey] = useState(0);
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <NicheSelector onChange={() => setNicheKey((k) => k + 1)} />
+      </div>
       <div className="flex gap-1 border-b border-line overflow-x-auto">
         {TABS.map((t) => (
           <button

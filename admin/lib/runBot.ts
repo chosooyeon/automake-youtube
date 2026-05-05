@@ -62,7 +62,9 @@ export function runBot({ slug, stage, extraNote }: RunOptions) {
   fs.appendFileSync(logPath, header + "\n");
 
   const promptParts = [
-    `config/global.json 을 먼저 읽어줘.`,
+    `먼저 이 프로젝트의 채널 설정을 로드해.`,
+    `우선순위 1: \`projects/${slug}/00-input/channel_config.json\` (있으면 이 파일이 channel/brand/video_defaults/apis 의 source of truth. 봇 prompt 들이 'config/global.json' 이라고 적혀 있어도 이 스냅샷의 같은 키를 우선 사용해.)`,
+    `우선순위 2: \`config/global.json\` (channel_config.json 이 없을 때만 사용)`,
     `그다음 \`bots/${stage}/prompt.md\` 와 \`bots/${stage}/config.json\` 을 읽고,`,
     `\`projects/${slug}/${stage}/\` 봇을 실행해줘.`,
     `결과 산출물: \`projects/${slug}/${stage}/output.json\``,
@@ -173,7 +175,9 @@ export function runShortsBot({ slug, stage, parentSlug }: RunShortsOptions) {
   fs.appendFileSync(logPath, header + "\n");
 
   const promptParts = [
-    `config/global.json 을 먼저 읽어줘.`,
+    `먼저 이 프로젝트의 채널 설정을 로드해.`,
+    `우선순위 1: \`projects/${slug}/00-input/channel_config.json\` (있으면 이 파일이 channel/brand/video_defaults/apis 의 source of truth. 부모 롱폼의 channel_config.json 도 fallback 으로 참고 가능.)`,
+    `우선순위 2: \`projects/${parentSlug}/00-input/channel_config.json\` 또는 \`config/global.json\``,
     `그다음 \`bots/${stage}/prompt.md\` 와 \`bots/${stage}/config.json\` 을 읽고,`,
     `숏폼 프로젝트 \`projects/${slug}/${stage}/\` 봇을 실행해줘.`,
     `부모 롱폼 프로젝트: \`projects/${parentSlug}/\``,
