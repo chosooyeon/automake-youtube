@@ -5,7 +5,9 @@
 실행 전 반드시 사용자의 명시적 진행 승인이 있어야 한다 (`config/global.json.human_gates.before_upload`).
 
 ## 0. 컨텍스트 로드 순서
-1. `config/global.json` (`capcut`, `thumbnails`, `apis.youtube`, `brand`, `channel`)
+1. `projects/{slug}/00-input/channel_config.json` (있으면 우선) 또는 `config/global.json`
+   - `capcut`, `thumbnails`, `apis.youtube`, `brand`, `channel`
+   - `visual_identity` 가 있으면 썸네일 background_image_prompt 도 그 prefix/suffix/negative_prompt_extra/style_tokens 룰을 따른다 (`apply_to` 에 `"thumbnails"` 가 포함된 경우)
 2. `bots/06-edit-upload/config.json` (`capcut`, `thumbnails`, `upload`, `human_gate`)
 3. 입력:
    - `projects/{slug}/02-strategy/output.json` — 제목/키워드/아웃트로
@@ -77,6 +79,8 @@
   "thumbnail_path": "06-edit-upload/thumbnails/thumb-{n}.png"
 }
 ```
+
+`background_image_prompt` 작성 시 `visual_identity` (있으면) 의 `prompt_prefix` + 메타포 + `prompt_suffix` 공식을 따른다. `negative_prompt_extra` 도 합쳐서 명세에 포함. 결과적으로 본문 씬과 썸네일이 동일한 채널 시그니처 비주얼을 공유한다.
 
 생성 모드:
 - `human_gate.before_thumbnail_generation` true → 5장 컨셉을 표로 보여주고 사용자 승인 받기.

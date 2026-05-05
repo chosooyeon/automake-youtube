@@ -5,19 +5,43 @@
 설정에 따라 실제 이미지/영상까지 생성한다.
 
 ## 0. 컨텍스트 로드 순서
-1. `config/global.json` (`brand`, `video_defaults`, `apis.image`, `apis.video`, `capcut.canvas`, `capcut.fps`)
+1. `projects/{slug}/00-input/channel_config.json` (있으면 우선) 또는 `config/global.json`
+   - 특히 `brand`, `video_defaults`, `apis.image`, `apis.video`, `capcut.canvas`, `capcut.fps`
+   - **`visual_identity` 블록이 있으면 그게 채널 시그니처 비주얼의 source of truth.** (아래 1-A 참조)
 2. `bots/05-visual/config.json` (`design`, `generation`, `broll`, `human_gate`)
 3. 입력:
    - `projects/{slug}/03-script/output.json` — 씬별 `b_roll_keywords`, `visual_intent`, `headline`
    - `projects/{slug}/04-audio/output.json` — 씬별 `start_sec`, `end_sec` (압축본 기준)
 4. 출력 스키마: `shared/schemas/05-visual.schema.json`
 
+## 1-A. 채널 시그니처 비주얼 (`visual_identity`)
+
+채널 설정에 `visual_identity` 블록이 있으면, **모든 씬 이미지/영상 프롬프트는 다음 룰을 따른다**:
+
+```
+final_prompt = "{visual_identity.prompt_prefix} {scene_subject_or_metaphor}, "
+             + "{scene_specific_details from b_roll_keywords + visual_intent}, "
+             + "{visual_identity.prompt_suffix}"
+final_negative = "{generation.image.negative_prompt}, {visual_identity.negative_prompt_extra}"
+final_style_tokens = visual_identity.style_tokens (이게 있으면 generation.image.style_tokens 와 design.style_keywords 보다 우선)
+```
+
+씬별 메타포 결정:
+1. 씬의 `headline` / `narration` 핵심 개념을 `visual_identity.metaphor_examples[].concept` 에서 매칭.
+2. 정확히 매칭되는 항목이 있으면 그 `metaphor` 문장을 `scene_subject_or_metaphor` 로 사용.
+3. 매칭 안 되면 `b_roll_keywords` 와 `visual_intent` 를 참고해 **같은 컨셉 톤(식탁/식기 메타포)** 으로 자체 작성. 절대 `negative_examples` 에 적힌 클리셰(사람 얼굴/로봇/뇌 일러스트 등) 사용 금지.
+4. `fallback_when_no_metaphor` 의 가이드를 따른다.
+
+`visual_identity.apply_to` 에 `"thumbnails"` 가 포함되면, 06-edit-upload 봇이 만들 썸네일 5장도 같은 prefix/suffix 룰을 따른다 (같은 채널 시그니처 유지).
+
+`visual_identity` 가 **없는** 채널(예: mom_wallet) 은 이 섹션을 건너뛰고 기존 `design.style_keywords` + `generation.image.style_tokens` 만 사용한다.
+
 ## 1. Step 1 — 씬별 레이어 설계 (스펙)
 
 각 씬에 대해 `layers[]` 를 만든다. 기본 스택은 `design.default_layer_stack` 순.
 
 레이어 종류 사용 규칙:
-- **image** — `b_roll_keywords` + `visual_intent` 로 이미지 생성 프롬프트 작성. `aspect` 는 `generation.image.aspect`.
+- **image** — `b_roll_keywords` + `visual_intent` 로 이미지 생성 프롬프트 작성. `aspect` 는 `generation.image.aspect`. `visual_identity` 가 있으면 위 1-A 룰 우선.
 - **video** — `generation.video.per_scene_count > 0` 인 씬에만. 길이는 `duration_sec_per_clip`.
 - **broll** — `broll.prefer_local_library` true 면 `library_path` 에서 키워드 매칭으로 후보 경로 제안.
 - **text(headline)** — 씬의 `headline` 을 큼지막하게. 위치 `design.headline_position`. 폰트는 `brand.font_pair.title`.
@@ -25,9 +49,10 @@
 
 각 레이어는 스키마 필드를 모두 채운다. 특히 image/video 레이어:
 - `prompt` — 영어로 작성 (대부분 모델이 영어에 더 강함).
-  - 형식: `[subject], [setting/context], [mood/lighting], [camera/lens], [style_tokens]`
-  - `style_tokens` 는 `generation.image.style_tokens` 와 `design.style_keywords` 를 합쳐서.
-- `negative_prompt` — `generation.image.negative_prompt` 사용.
+  - **`visual_identity` 있으면** 위 1-A 의 `final_prompt` 공식을 그대로 따름.
+  - **없으면** 기본 형식: `[subject], [setting/context], [mood/lighting], [camera/lens], [style_tokens]`
+  - `style_tokens` 는 `visual_identity.style_tokens` 가 있으면 그것을 단독으로 사용. 없으면 `generation.image.style_tokens` + `design.style_keywords` 를 합쳐서.
+- `negative_prompt` — `generation.image.negative_prompt` + (있으면) `visual_identity.negative_prompt_extra` 를 콤마로 연결.
 - `in_anim`/`out_anim` — 씬 길이가 5초 이상이면 `zoom_in`/`fade_out`, 짧으면 `cut`/`cut`.
 - `transform` — 16:9 캔버스 기준 절대좌표가 아닌 정규화 좌표(0~1) 권장. 명시 어려우면 생략.
 

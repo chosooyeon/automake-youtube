@@ -6,6 +6,7 @@ import ComingSoonLine from "./ComingSoonLine";
 import TopicQueue from "./TopicQueue";
 import ShortsDashboard from "./ShortsDashboard";
 import NicheSelector from "./NicheSelector";
+import BlogGenerator from "./BlogGenerator";
 
 type Tab = "topics" | "longform" | "shorts" | "instacard" | "blog";
 
@@ -14,7 +15,7 @@ const TABS: { id: Tab; label: string; status: "live" | "planned" }[] = [
   { id: "longform", label: "🎬 롱폼 (YouTube 8~10분)", status: "live" },
   { id: "shorts", label: "📱 숏폼 (YouTube Shorts)", status: "live" },
   { id: "instacard", label: "🟪 인스타 카드 피드", status: "planned" },
-  { id: "blog", label: "📝 블로그 글", status: "planned" },
+  { id: "blog", label: "📝 블로그 글 (네이버)", status: "live" },
 ];
 
 export default function Dashboard() {
@@ -73,28 +74,7 @@ export default function Dashboard() {
           difficultyNote="이미지 합성 자체는 쉬운데 Meta API 검수가 시간 듦. 검수 전엔 PNG 파일만 자동 생성하고 사람이 수동 업로드."
         />
       )}
-      {tab === "blog" && (
-        <ComingSoonLine
-          line="blog"
-          title="블로그 글 (네이버 블로그 / 티스토리 / Medium)"
-          basedOn="03-script 본문을 검색엔진용 긴 글로 재구성."
-          autoSteps={[
-            "03-script.output.json + 01-benchmark 의 출처 URL 들을 모아 재구성 프롬프트로 Claude 호출",
-            "글 구조: H1 제목 / 요약 / 3~5개 H2 섹션 / 표 1~2개 / FAQ 5개 / 출처 링크",
-            "이미지: 06-edit 의 thumbnails/ 5장 + 카드 1~2장 삽입",
-            "마크다운 + 이미지 zip → 플랫폼별 어댑터로 업로드",
-            "내부 링크: '같은 채널의 유튜브 영상 보기' 임베드",
-          ]}
-          required={[
-            { name: "네이버 블로그 글쓰기 API", status: "blocked", note: "현재 공식 글쓰기 OpenAPI는 사실상 닫혀있음 (조회만). 자동 게시는 Selenium 같은 헤드리스 브라우저가 필요. 비추." },
-            { name: "Tistory Open API", status: "blocked", note: "2024년 신규 발급 중단. 신규 자동화 비현실." },
-            { name: "Medium API", status: "ok", note: "공식 'Integration tokens' 발급 가능. medium.com/me/settings → Integration tokens." },
-            { name: "WordPress / Ghost API", status: "ok", note: "본인 도메인이 있다면 가장 자동화 친화적." },
-          ]}
-          difficulty="조건부 어려움"
-          difficultyNote="본인 도메인(WordPress/Ghost) 또는 Medium 이면 쉬움. 네이버 블로그 자동 발행은 비추 (정책 위반 위험). 차선: 마크다운만 자동 생성 → 사람이 복붙."
-        />
-      )}
+      {tab === "blog" && <BlogGenerator />}
     </div>
   );
 }

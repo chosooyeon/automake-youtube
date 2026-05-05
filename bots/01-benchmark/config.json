@@ -75,6 +75,7 @@
     "Read",
     "Write(./projects/{slug}/01-benchmark/**)"
   ],
-  "model_tier": "sonnet",
+  "model_tier": "opus",
+  "_model_tier_reason": "벤치마크 분석 = 패턴 추출 + 차별화 기회 추론 = 전략적 판단. opus(4.7) 사용.",
   "max_turns": 40
 }

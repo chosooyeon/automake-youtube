@@ -33,19 +33,29 @@ yarn-debug.log*
 .pnpm-debug.log*
 
 # === 생성 산출물 — 롱폼 ===
+# 이미지 (Pollinations / Imagen 등으로 재생성 가능)
 projects/*/05-visual/scenes/*/bg.png
 projects/*/05-visual/scenes/*/bg.jpg
 projects/*/05-visual/scenes/*/bg.jpeg
 projects/*/05-visual/scenes/*/bg.webp
+projects/*/05-visual/scenes/*/img-*.png
+projects/*/05-visual/scenes/*/img-*.jpg
+# 오디오 (TTS 로 재생성 가능)
 projects/*/04-audio/*.srt
 projects/*/04-audio/*.aiff
 projects/*/04-audio/*.wav
+projects/*/04-audio/*.mp3
+projects/*/04-audio/scene_audio/
+# 06 편집/업로드 산출물 (final.mp4, scene_clips, build 메타)
 projects/*/06-edit-upload/thumbnails/*.png
 projects/*/06-edit-upload/thumbnails/*.jpg
 projects/*/06-edit-upload/audio/*.aiff
 projects/*/06-edit-upload/audio/*.wav
 projects/*/06-edit-upload/audio/*.mp3
 projects/*/06-edit-upload/segments/
+projects/*/06-edit-upload/scene_clips/
+projects/*/06-edit-upload/concat.txt
+projects/*/06-edit-upload/build_meta.json
 projects/*/06-edit-upload/*.mp4
 projects/*/06-edit-upload/*.srt
 projects/*/06-edit-upload/*.ass
@@ -72,3 +82,7 @@ topics/archive/*.log.md
 
 # === Claude Code 캐시 (있을 경우) ===
 .claude/cache/
+
+# === TS 빌드 캐시 ===
+admin/tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo

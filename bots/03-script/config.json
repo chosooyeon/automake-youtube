@@ -53,6 +53,7 @@
     "Read",
     "Write(./projects/{slug}/03-script/**)"
   ],
-  "model_tier": "sonnet",
+  "model_tier": "opus",
+  "_model_tier_reason": "대본 기획·집필·검수·리비전 = 사실확인+톤판단+창의 = 전략적 판단의 연속. opus(4.7) 사용.",
   "max_turns": 30
 }

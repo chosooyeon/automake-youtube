@@ -1,0 +1,219 @@
+{
+  "$schema": "../shared/schemas/global.schema.json",
+  "channel": {
+    "name": "심리식탁 (가칭)",
+    "handle": "@simri_table",
+    "language": "ko",
+    "country": "KR",
+    "niche": "심리학·뇌과학·행동경제학을 일상의 결정과 인간관계에 연결해주는 채널",
+    "target_audience": "20~45세 직장인·자기계발 관심층, 책은 안 읽지만 심리·뇌과학 영상은 챙겨보는 사람",
+    "value_prop": "베스트셀러 심리학 도서 한 권을 8~10분 안에 정리하고, 오늘 당장 써먹을 결정 도구를 준다"
+  },
+  "brand": {
+    "tone": [
+      "차분하지만 단정적",
+      "근거를 인용하는",
+      "단정 X 과장 X"
+    ],
+    "ban_words": [
+      "광고",
+      "협찬",
+      "내돈내산",
+      "100% 보장",
+      "무조건",
+      "꿀팁대박",
+      "사이코패스 자가진단",
+      "이런 사람은 거르세요",
+      "MBTI 별 ___ 인 사람"
+    ],
+    "must_words": [
+      "연구에 따르면",
+      "심리학자",
+      "출처"
+    ],
+    "intro_signature": "안녕하세요, 심리식탁입니다. 오늘은 ___ 한 그릇을 함께 떠먹어 볼게요.",
+    "outro_signature": "오늘 내용이 도움이 되셨다면 구독·알림설정 부탁드려요. 다음 영상에서 또 만나요.",
+    "color_palette": [
+      "#0F172A",
+      "#7C3AED",
+      "#E0E7FF",
+      "#F8FAFC"
+    ],
+    "font_pair": {
+      "title": "Pretendard Bold",
+      "body": "Pretendard Regular"
+    },
+    "identity_slots": {
+      "_comment": "심리 채널 시그니처. 일관성 = retention.",
+      "cold_open_hook": {
+        "enabled": true,
+        "max_seconds": 3,
+        "patterns": [
+          "[질문] ___ 해본 적 있나요?",
+          "[충격사실] ___명 중 ___명이 ___ 합니다",
+          "[모순] ___ 는 사실 ___ 입니다"
+        ]
+      },
+      "intro_signature": "이미 brand.intro_signature 사용",
+      "number_card_motion": {
+        "enabled": true,
+        "trigger": "심리 실험 결과·통계·법칙의 핵심 숫자가 처음 등장할 때",
+        "style": "보라 배경 + 흰 굵은 숫자 + 0.3s zoom-pop",
+        "duration_sec": 2.5
+      },
+      "signature_sfx": {
+        "enabled": true,
+        "ding_path": "shared/templates/sfx/ding.wav",
+        "whoosh_path": "shared/templates/sfx/whoosh.wav",
+        "_comment": "핵심 인사이트 전환마다 ding(0.4s). 챕터 전환마다 whoosh(0.3s)."
+      },
+      "three_line_summary": {
+        "enabled": true,
+        "where": [
+          "middle",
+          "outro"
+        ],
+        "max_chars_per_line": 18
+      },
+      "cta_pattern": {
+        "enabled": true,
+        "template": "다음 영상은 '{next_topic}' 편입니다. 놓치지 않게 알림 켜두세요. {outro_signature}"
+      },
+      "thumbnail_grid_rule": {
+        "enabled": true,
+        "layout": "좌측 인물(또는 뇌·아이콘) 50% + 우측 굵은 한 단어 35% + 하단 보라/노랑 띠 카피 15%",
+        "must_include": [
+          "굵은 단어 1개",
+          "최대 14자 카피",
+          "고대비 색 3개 이내"
+        ],
+        "ban": [
+          "연예인 얼굴",
+          "특정 정신질환 자가진단성 카피",
+          "공포감 조성성 표현"
+        ]
+      }
+    },
+    "ai_disclosure": {
+      "_comment": "AI 보조 표시. ON 권장.",
+      "auto_label_synthetic_media": true,
+      "include_in_description": "본 영상은 정보 정리에 AI 도구를 보조적으로 사용했습니다. 인용된 연구·도서 출처는 더보기란에서 확인하실 수 있습니다."
+    }
+  },
+  "video_defaults": {
+    "format": "long",
+    "duration_sec": 510,
+    "duration_sec_min": 480,
+    "duration_sec_max": 600,
+    "_comment_duration": "심리·뇌과학 retention sweet spot은 8~9분. 8분 30초 기준으로 미드롤 광고 1슬롯 확보.",
+    "aspect_ratio": "16:9",
+    "resolution": "1920x1080",
+    "fps": 30,
+    "subtitle": {
+      "enabled": true,
+      "position": "bottom",
+      "max_chars_per_line": 18
+    }
+  },
+  "models": {
+    "writer": "claude-sonnet-4",
+    "researcher": "claude-sonnet-4",
+    "reviewer": "claude-opus-4",
+    "image": "google:gemini-imagen-3 (나노바나나 / 웹UI 수동 가능)",
+    "video": "none-for-this-channel",
+    "tts": "capcut-builtin (한국어 내장 TTS 사용)"
+  },
+  "apis": {
+    "youtube": {
+      "client_secret_env": "YOUTUBE_CLIENT_SECRET_PATH",
+      "oauth_token_env": "YOUTUBE_OAUTH_TOKEN_PATH",
+      "upload_mode": "manual_confirm",
+      "default_privacy": "private",
+      "default_category_id": "27",
+      "default_tags": [
+        "임산부",
+        "정부지원금",
+        "출산지원금",
+        "부모급여",
+        "첫만남이용권",
+        "육아",
+        "복지로"
+      ]
+    },
+    "tts": {
+      "provider": "capcut_builtin",
+      "note": "외부 TTS API 호출하지 않음. 4번 봇은 씬 매핑 + SRT만 생성하고, CapCut에서 텍스트 읽기(TTS) 기능을 클릭으로 적용한다.",
+      "voice_id_in_capcut": "여성_차분한 / 또는 사용자 선호",
+      "speed": 1
+    },
+    "image": {
+      "provider": "gemini_web_or_api",
+      "api_key_env": "GEMINI_API_KEY",
+      "size": "1280x720",
+      "quality": "high",
+      "note": "키가 없으면 5번/6번 봇은 프롬프트만 출력하고, 사용자가 gemini.google.com 에서 ‘이미지 만들어줘’로 직접 생성하도록 안내."
+    },
+    "video": {
+      "provider": "none",
+      "note": "이 채널은 영상 생성 모델 사용 안 함. CapCut 모션·줌·트랜지션으로 처리."
+    },
+    "search": {
+      "provider": "web_search",
+      "primary_sources": [
+        "https://scholar.google.com",
+        "https://www.apa.org",
+        "https://psycnet.apa.org",
+        "https://pubmed.ncbi.nlm.nih.gov",
+        "https://www.koreascience.or.kr"
+      ],
+      "secondary_sources": [
+        "https://www.dongascience.com",
+        "https://www.hani.co.kr",
+        "https://www.psychologytoday.com",
+        "https://bigthink.com",
+        "https://www.kpsy.or.kr"
+      ],
+      "youtube_research_queries": [
+        "Daniel Kahneman 손실회피",
+        "행동경제학 베스트셀러",
+        "심리학 법칙 일상",
+        "뇌과학 의사결정",
+        "설득의 심리학"
+      ],
+      "max_results": 20
+    }
+  },
+  "capcut": {
+    "template_path": "shared/templates/capcut_base.json",
+    "fps": 30,
+    "canvas": {
+      "width": 1920,
+      "height": 1080
+    },
+    "mac_projects_dir": "~/Movies/CapCut/User Data/Projects/com.lveditor.draft",
+    "place_project_json_into_capcut_dir": true
+  },
+  "thumbnails": {
+    "count": 5,
+    "template_path": "shared/templates/thumbnail_base.json",
+    "size": "1280x720",
+    "generation_mode": "prompts_only",
+    "external_tool": "gemini_web (나노바나나)",
+    "external_tool_note": "심리 채널 썸네일은 인물 표정(놀람·고민) 50% + 굵은 한 단어. 정부 로고 사용 X."
+  },
+  "human_gates": {
+    "before_upload": true,
+    "before_bulk_visual": true
+  },
+  "paths": {
+    "projects_dir": "projects"
+  },
+  "fact_check": {
+    "policy_topics_require_official_source": false,
+    "min_official_sources": 2,
+    "currency_year": 2026,
+    "as_of_date": "2026-05-05",
+    "_comment_psychology": "심리학 주제는 정부 공식 출처 강제 X. 대신 동료 심사 논문(peer-reviewed)·베스트셀러 도서·신뢰 매체 2개 이상 필수."
+  },
+  "_resolved_niche": "psychology"
+}

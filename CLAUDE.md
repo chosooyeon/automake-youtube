@@ -23,5 +23,11 @@
 ## 단계 의존성 (롱폼)
 00-topic → 01-benchmark → 02-strategy → 03-script → 04-audio → 05-visual → 06-edit-upload
 
+## 모델 티어
+- `opus` (4.7): 01·02·03 (전략 사고)
+- `sonnet` (4.6): 00·06·S1 (중간 사고)
+- `haiku` (4.5): 04·05·S2·S3·S4 (절차 변환)
+- 각 봇 `config.json.model_tier`. admin 와 `scripts/run-bot.sh` 둘 다 같은 매핑 사용.
+
 ## 단계 의존성 (숏폼)
 부모 롱폼 03-script output → S1-script → S2-audio → S3-edit → S4-upload

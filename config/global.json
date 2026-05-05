@@ -143,10 +143,13 @@
       ]
     },
     "tts": {
-      "provider": "capcut_builtin",
-      "note": "외부 TTS API 호출하지 않음. 4번 봇은 씬 매핑 + SRT만 생성하고, CapCut에서 텍스트 읽기(TTS) 기능을 클릭으로 적용한다.",
-      "voice_id_in_capcut": "여성_차분한 / 또는 사용자 선호",
-      "speed": 1
+      "provider": "edge_tts",
+      "_provider_alternatives": "edge_tts (Microsoft, 무료, msedge-tts npm) / capcut_builtin (수동) / openai / elevenlabs",
+      "voice": "ko-KR-SunHiNeural",
+      "_voice_note": "ko-KR-SunHiNeural = 차분한 여성 (mom_wallet 기본). 니치별로 niches.<id>.apis.tts.voice 로 override.",
+      "rate": "-5%",
+      "pitch": "+0Hz",
+      "volume": "+0%"
     },
     "image": {
       "provider": "gemini_web_or_api",
@@ -218,8 +221,8 @@
     "_comment": "각 니치는 root 필드(channel/brand/video_defaults/apis.search/fact_check)를 deep-merge 로 덮어쓴다. mom_wallet 은 root 가 그대로 정의이므로 여기 따로 두지 않는다.",
     "psychology": {
       "channel": {
-        "name": "마음현미경 (가칭)",
-        "handle": "@mind_microscope",
+        "name": "심리식탁 (가칭)",
+        "handle": "@healingtable64",
         "language": "ko",
         "country": "KR",
         "niche": "심리학·뇌과학·행동경제학을 일상의 결정과 인간관계에 연결해주는 채널",
@@ -248,7 +251,7 @@
           "심리학자",
           "출처"
         ],
-        "intro_signature": "안녕하세요, 마음현미경입니다. 오늘은 ___ 에 대해 풀어드릴게요.",
+        "intro_signature": "안녕하세요, 심리식탁입니다. 오늘은 ___ 한 그릇을 함께 떠먹어 볼게요.",
         "outro_signature": "오늘 내용이 도움이 되셨다면 구독·알림설정 부탁드려요. 다음 영상에서 또 만나요.",
         "color_palette": [
           "#0F172A",
@@ -298,16 +301,19 @@
           },
           "thumbnail_grid_rule": {
             "enabled": true,
-            "layout": "좌측 인물(또는 뇌·아이콘) 50% + 우측 굵은 한 단어 35% + 하단 보라/노랑 띠 카피 15%",
+            "layout": "좌측 인물 표정(놀람/고민/당혹) 클로즈업 50% + 우측 굵은 한 단어 35% + 하단 띠 카피 15%",
             "must_include": [
-              "굵은 단어 1개",
+              "인물 표정 1명",
+              "굵은 한 단어",
               "최대 14자 카피",
               "고대비 색 3개 이내"
             ],
             "ban": [
               "연예인 얼굴",
               "특정 정신질환 자가진단성 카피",
-              "공포감 조성성 표현"
+              "공포감 조성성 표현",
+              "정부 로고",
+              "로봇·AI 클리셰 이미지"
             ]
           }
         },
@@ -357,6 +363,14 @@
             "설득의 심리학"
           ],
           "max_results": 20
+        },
+        "tts": {
+          "provider": "edge_tts",
+          "voice": "ko-KR-InJoonNeural",
+          "_voice_note": "차분한 한국어 남성 (Microsoft Edge TTS). 심리식탁 채널 톤에 맞춤. 대안: ko-KR-BongJinNeural (좀 더 깊은 남성), ko-KR-HyunsuNeural (다국어 남성), ko-KR-SunHiNeural (여성 차분).",
+          "rate": "-10%",
+          "pitch": "+0Hz",
+          "volume": "+0%"
         }
       },
       "fact_check": {
@@ -367,7 +381,20 @@
         "_comment_psychology": "심리학 주제는 정부 공식 출처 강제 X. 대신 동료 심사 논문(peer-reviewed)·베스트셀러 도서·신뢰 매체 2개 이상 필수."
       },
       "thumbnails": {
-        "external_tool_note": "심리 채널 썸네일은 인물 표정(놀람·고민) 50% + 굵은 한 단어. 정부 로고 사용 X."
+        "external_tool_note": "심리식탁 썸네일 = 인물 표정(놀람·고민·당혹) 50% + 굵은 한 단어. 정부 로고/연예인 얼굴/로봇·뇌 일러스트 사용 X."
+      },
+      "_visual_identity_disabled": {
+        "_comment": "식탁 메타포 강제 적용은 retention 우려로 비활성. 본문 씬은 b_roll_keywords 기반 cinematic 자유 생성. 식탁 메타포는 옵션으로만 사용 (예: 핵심 reveal 컷). 다시 켜고 싶으면 키 이름을 visual_identity 로 되돌릴 것.",
+        "concept_name": "심리식탁 메타포 (Dining Table Metaphor)",
+        "prompt_prefix": "A cinematic miniature still life on a warm walnut dining table, claymation style 3D rendered miniature objects representing the concept of",
+        "prompt_suffix": "soft top-down studio lighting, shallow depth of field, warm wood texture, no text, no human faces, no robots, no brain illustrations, 8k",
+        "metaphor_examples": [
+          { "concept": "손실 회피 / Loss aversion", "metaphor": "두 접시 위 동전 더미와 그 사이 기울어진 작은 저울" },
+          { "concept": "매몰비용 / Sunk cost", "metaphor": "다 식어 굳어버린 죽 한 그릇 옆에 새 그릇이 놓여있는 식탁" },
+          { "concept": "인지 부조화 / Cognitive dissonance", "metaphor": "포크와 숟가락이 서로 다른 방향을 가리키는 정렬되지 않은 식기" },
+          { "concept": "확증 편향 / Confirmation bias", "metaphor": "여러 색 사탕 중 한 가지 색만 골라 담은 그릇" },
+          { "concept": "도파민 / Dopamine loop", "metaphor": "케이크 위 체리를 향해 끝없이 돌아가는 작은 포크" }
+        ]
       }
     }
   }

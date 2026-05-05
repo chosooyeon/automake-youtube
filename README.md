@@ -92,6 +92,32 @@ deep-focus-01 풀 파이프라인 시작해. 5번까지만.
 Claude Code는 `AGENTS.md` → `config/pipeline.json` → 각 봇 `prompt.md` 순으로 읽고
 01 → 02 → 03 → 04 → 05 까지 순서대로 돌립니다.
 
+#### 또는 터미널 wrapper 사용 (admin 안 거치고 바로)
+```bash
+# 한 봇만 실행 (admin 의 runBot.ts 와 동일한 model_tier 매핑 사용)
+scripts/run-bot.sh 03-script deep-focus-01
+scripts/run-bot.sh 04-audio  deep-focus-01 "여성 차분한 톤"
+
+# 숏폼
+scripts/run-bot.sh S1-shorts-script my-short --parent deep-focus-01
+
+# 0번 (주제 추천)
+scripts/run-topic.sh
+scripts/run-topic.sh --niche psychology
+
+# 자막 없는 영상 한 방에 (이미지 + TTS + ffmpeg)
+node scripts/build-video.mjs deep-focus-01
+```
+
+#### 모델 티어 매핑 (각 봇 `config.json.model_tier`)
+| 티어 | 모델 ID | 사용 봇 |
+|---|---|---|
+| `opus` (4.7) | `claude-opus-4-7` | 01-benchmark · 02-strategy · 03-script (전략적 사고) |
+| `sonnet` (4.6) | `claude-sonnet-4-6` | 00-topic · 06-edit-upload · S1-shorts-script (중간 사고) |
+| `haiku` (4.5) | `claude-haiku-4-5-20251001` | 04-audio · 05-visual · S2/S3/S4 (절차적/단순 변환) |
+
+admin 대시보드와 터미널 wrapper 가 같은 매핑(`scripts/lib/resolve-model.sh` ↔ `admin/lib/runBot.ts`)을 사용합니다.
+
 ### Step 4. 중간 검수
 5번까지 끝나면 다음 산출물을 사람이 확인:
 - `projects/deep-focus-01/02-strategy/summary.md` — 제목·훅·인트로

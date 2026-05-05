@@ -1,0 +1,81 @@
+{
+  "_grid_rule_source": "channel_config.json.brand.identity_slots.thumbnail_grid_rule",
+  "layout": "좌측 인물 표정(놀람/고민/당혹) 클로즈업 50% + 우측 굵은 한 단어 35% + 하단 띠 카피 15%",
+  "size": "1280x720",
+  "ban": ["연예인 얼굴", "특정 정신질환 자가진단성 카피", "공포감 조성성 표현", "정부 로고", "로봇·AI 클리셰 이미지"],
+  "thumbnails": [
+    {
+      "thumbnail_path": "06-edit-upload/thumbnails/thumb-1.png",
+      "concept": "직격 — 2.25배의 무게",
+      "headline": "당신의 손해 2.25배",
+      "accent_word": "2.25배",
+      "background_image_prompt": "Korean man in his 30s close-up portrait, mouth slightly agape in shock and worry, eyes wide and slightly downcast, plain dark gray studio background, soft side lighting from the left, cinematic 85mm lens, photorealistic, 8k, no text in image, magazine cover quality",
+      "negative_prompt": "low quality, blurry, smiling, happy face, multiple people, watermark, cartoon, anime, robot, brain illustration",
+      "right_panel_text_overlay": "2.25배",
+      "right_panel_text_style": { "font": "Pretendard ExtraBold", "size": 240, "color": "#DC2626", "stroke_color": "#FFFFFF", "stroke_width": 12 },
+      "bottom_strip_text": "당신의 손해 2.25배",
+      "bottom_strip_color": "#FACC15",
+      "ctr_prediction": 8.5,
+      "ctr_reason": "구체 숫자 + 직접 호명('당신의'). 인물 표정이 '놀람·고민' 필수 요건 충족. 고대비 빨강·노랑."
+    },
+    {
+      "thumbnail_path": "06-edit-upload/thumbnails/thumb-2.png",
+      "concept": "질문형 — 5만원의 통증",
+      "headline": "왜 더 아플까?",
+      "accent_word": "왜?",
+      "background_image_prompt": "Korean woman in her late 20s close-up, face showing genuine confusion and slight frustration, hand half-raised near temple, plain warm beige studio background, cinematic 85mm portrait lens, soft natural light, photorealistic, 8k, no text in image",
+      "negative_prompt": "low quality, blurry, smiling, multiple people, watermark, cartoon, robot, brain illustration",
+      "right_panel_text_overlay": "왜?",
+      "right_panel_text_style": { "font": "Pretendard ExtraBold", "size": 320, "color": "#7C3AED", "stroke_color": "#FFFFFF", "stroke_width": 14 },
+      "bottom_strip_text": "5만원 잃은 게 더 아픈 이유",
+      "bottom_strip_color": "#FACC15",
+      "ctr_prediction": 7.8,
+      "ctr_reason": "질문형 호기심 자극. '왜?' 단일 단어 임팩트. 표정이 '고민' 톤."
+    },
+    {
+      "thumbnail_path": "06-edit-upload/thumbnails/thumb-3.png",
+      "concept": "경고형 — 매몰비용",
+      "headline": "5년이 아깝다고?",
+      "accent_word": "아깝다",
+      "background_image_prompt": "Korean person in their 30s seen from a 3/4 angle, eyes closed in deep regret with pursed lips, hand resting on forehead, plain dark blue studio background, cinematic dramatic side light, photorealistic, 8k, no text",
+      "negative_prompt": "low quality, blurry, smiling, watermark, cartoon, robot, brain illustration",
+      "right_panel_text_overlay": "아깝다",
+      "right_panel_text_style": { "font": "Pretendard ExtraBold", "size": 220, "color": "#DC2626", "stroke_color": "#FFFFFF", "stroke_width": 12 },
+      "bottom_strip_text": "당신을 묶어두는 한 마디",
+      "bottom_strip_color": "#FACC15",
+      "ctr_prediction": 8.2,
+      "ctr_reason": "한국 직장인이 즉시 공감. '아깝다' 단어가 매몰비용 핵심. 표정 후회 톤."
+    },
+    {
+      "thumbnail_path": "06-edit-upload/thumbnails/thumb-4.png",
+      "concept": "권위형 — 노벨상 + 책",
+      "headline": "노벨상 1줄 정리",
+      "accent_word": "노벨상",
+      "background_image_prompt": "Korean person in their 40s holding a thick book ('Thinking Fast and Slow') half-visible, contemplative serious expression looking off camera, plain warm cream studio background, cinematic editorial portrait, soft top light, photorealistic, 8k, no text on book cover beyond original",
+      "negative_prompt": "low quality, blurry, smiling, multiple people, watermark, cartoon, robot, brain illustration, made up book title",
+      "right_panel_text_overlay": "노벨상",
+      "right_panel_text_style": { "font": "Pretendard ExtraBold", "size": 220, "color": "#0F172A", "stroke_color": "#FACC15", "stroke_width": 14 },
+      "bottom_strip_text": "카너먼이 평생 증명한 법칙",
+      "bottom_strip_color": "#FACC15",
+      "ctr_prediction": 7.5,
+      "ctr_reason": "권위 시그널(노벨상·도서)로 신뢰도 ↑. 표정은 'serious contemplation'. 단점: 호기심 자극은 보통."
+    },
+    {
+      "thumbnail_path": "06-edit-upload/thumbnails/thumb-5.png",
+      "concept": "공감형 — 마트의 함정",
+      "headline": "오늘만 30% 함정",
+      "accent_word": "함정",
+      "background_image_prompt": "Korean shopper close-up profile, expression of dawning realization with mouth slightly open and brow raised, plain bright yellow studio background, cinematic 85mm lens, soft front lighting, photorealistic, 8k, no text in image",
+      "negative_prompt": "low quality, blurry, smiling broadly, watermark, cartoon, robot, brain illustration",
+      "right_panel_text_overlay": "함정",
+      "right_panel_text_style": { "font": "Pretendard ExtraBold", "size": 280, "color": "#DC2626", "stroke_color": "#FFFFFF", "stroke_width": 14 },
+      "bottom_strip_text": "오늘만 30% 할인의 비밀",
+      "bottom_strip_color": "#0F172A",
+      "ctr_prediction": 7.9,
+      "ctr_reason": "마트 = 보편 일상. '함정'이라는 단어가 호기심 + 약한 위협 조합. 노랑 배경으로 시안성."
+    }
+  ],
+  "_picked_for_upload": "thumb-1.png",
+  "_pick_reason": "ctr_prediction 최고 + 영상 핵심 숫자(2.25배)와 직접 일치. A/B 테스트 시 thumb-3 (매몰비용) 도 같이 시도 추천.",
+  "_generation_note": "각 background_image_prompt 를 이미지 도구에 붙여 인물 표정 사진 생성 → CapCut/Photoshop 에서 우측 굵은 단어 + 하단 띠 카피 합성. 한글 텍스트는 이미지 안에 박지 말고 합성 단계에서 추가."
+}

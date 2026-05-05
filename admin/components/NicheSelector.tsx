@@ -7,6 +7,8 @@ interface NicheInfo {
   id: string;
   channelName: string;
   niche: string;
+  visualConcept?: string;
+  visualPromptPrefix?: string;
 }
 
 interface Props {
@@ -62,24 +64,37 @@ export default function NicheSelector({ onChange }: Props) {
   const current = niches.find((n) => n.id === active);
 
   return (
-    <div className="flex items-center gap-2 bg-panel border border-line rounded-lg px-3 py-2">
-      <span className="text-xs text-subtext">채널/니치</span>
-      <select
-        className="bg-transparent text-text outline-none text-sm pr-2"
-        value={active}
-        onChange={(e) => switchNiche(e.target.value)}
-        disabled={busy || niches.length === 0}
-      >
-        {niches.map((n) => (
-          <option key={n.id} value={n.id}>
-            {n.channelName} ({n.id})
-          </option>
-        ))}
-      </select>
-      {current?.niche && (
-        <span className="text-[10px] text-subtext truncate max-w-[260px]" title={current.niche}>
-          — {current.niche}
-        </span>
+    <div className="flex flex-col items-end gap-1.5">
+      <div className="flex items-center gap-2 bg-panel border border-line rounded-lg px-3 py-2">
+        <span className="text-xs text-subtext">채널/니치</span>
+        <select
+          className="bg-transparent text-text outline-none text-sm pr-2"
+          value={active}
+          onChange={(e) => switchNiche(e.target.value)}
+          disabled={busy || niches.length === 0}
+        >
+          {niches.map((n) => (
+            <option key={n.id} value={n.id}>
+              {n.channelName} ({n.id})
+            </option>
+          ))}
+        </select>
+        {current?.niche && (
+          <span className="text-[10px] text-subtext truncate max-w-[260px]" title={current.niche}>
+            — {current.niche}
+          </span>
+        )}
+      </div>
+      {current?.visualConcept && (
+        <div
+          className="text-[10px] text-subtext bg-panel2 border border-line rounded-md px-2.5 py-1.5 max-w-[460px]"
+          title={current.visualPromptPrefix ?? ""}
+        >
+          🎨 비주얼 시그니처: <span className="text-text">{current.visualConcept}</span>
+          {current.visualPromptPrefix && (
+            <div className="opacity-60 mono truncate mt-0.5">{current.visualPromptPrefix}…</div>
+          )}
+        </div>
       )}
     </div>
   );

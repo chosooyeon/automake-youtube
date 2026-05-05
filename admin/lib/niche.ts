@@ -9,6 +9,8 @@ export interface NicheInfo {
   id: string;
   channelName: string;
   niche: string;
+  visualConcept?: string;
+  visualPromptPrefix?: string;
 }
 
 function readGlobalRaw(): any {
@@ -67,16 +69,21 @@ export function listNiches(rawIn?: any): NicheInfo[] {
     id: DEFAULT_NICHE,
     channelName: raw?.channel?.name ?? "엄마지갑",
     niche: raw?.channel?.niche ?? "",
+    visualConcept: raw?.visual_identity?.concept_name,
+    visualPromptPrefix: raw?.visual_identity?.prompt_prefix,
   });
   const niches = raw?.niches ?? {};
   for (const [id, val] of Object.entries(niches)) {
     if (id.startsWith("_")) continue;
     if (!isPlainObject(val)) continue;
-    const ch: any = (val as any).channel ?? {};
+    const v: any = val;
+    const ch: any = v.channel ?? {};
     out.push({
       id,
       channelName: ch.name ?? id,
       niche: ch.niche ?? "",
+      visualConcept: v.visual_identity?.concept_name,
+      visualPromptPrefix: v.visual_identity?.prompt_prefix,
     });
   }
   return out;

@@ -27,6 +27,7 @@
     "Read",
     "Write(./projects/{slug}/02-strategy/**)"
   ],
-  "model_tier": "sonnet",
+  "model_tier": "opus",
+  "_model_tier_reason": "전략 자체. 컨셉·제목·훅·인트로 결정 = 가장 전략적 단계. opus(4.7) 사용.",
   "max_turns": 25
 }
