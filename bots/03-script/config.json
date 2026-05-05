@@ -32,7 +32,8 @@
         "구어체, 한 호흡 짧게",
         "외래어/전문용어 풀어 쓰기",
         "수치는 정확히, 추측은 '추정'으로 표시",
-        "광고성 어휘 금지 (brand.ban_words)"
+        "광고성 어휘 금지 (brand.ban_words)",
+        "TTS 친화: narration 에 em-dash(—), 따옴표('\"), 영어 괄호((Loss Aversion)), 가운뎃점(·), 퍼센트 부호(%), 슬래시(A/B), 명사 단문(0원./2.25배.) 모두 금지. 자세한 룰은 prompt.md §2-1 참조"
       ]
     },
     {
@@ -41,7 +42,8 @@
       "auto_fail_when": [
         "ban_words 검출",
         "promise 미이행",
-        "씬 하나가 scene_max_seconds 초과"
+        "씬 하나가 scene_max_seconds 초과",
+        "narration 에 em-dash/따옴표/영어 괄호/가운뎃점/퍼센트 부호 검출 (tts_friendly false)"
       ]
     },
     {

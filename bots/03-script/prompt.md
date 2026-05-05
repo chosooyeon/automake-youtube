@@ -56,6 +56,28 @@ scene-YYY cta        : 다음 영상 예고 + outro_signature  (~15s)
 - 광고성 표현 금지 (`brand.ban_words`).
 - 첫 씬 narration 은 `02-strategy/output.json` 의 `hooks[0].text` 를 베이스로 사용.
 
+### 2-1. TTS 친화 룰 (필수, narration 한정)
+
+외부 TTS(Edge TTS / OpenAI TTS / ElevenLabs / CapCut)가 자연스럽게 끊김 없이 읽도록 다음을 모두 지킨다. **이 룰을 어기면 review 에서 자동 실패**(`tts_friendly: false`).
+
+| 금지 | 이유 | 대체 |
+|---|---|---|
+| em-dash `—` | 부자연스럽게 길게 멈춤 | 마침표 `.` 또는 쉼표 `,` |
+| 따옴표 `'…'` `"…"` | 강조 의도 못 살리고 호흡만 끊김 | 따옴표 빼고 자연 어조로 ("이게 처분 효과입니다" 식) |
+| 영어 괄호 `(Loss Aversion)` `(Disposition Effect)` | 한국어→영어 보이스 전환 시도, 흐름 깨짐 | 한국어만 ("처분 효과") 또는 한글 음차 ("디스포지션 이펙트") |
+| 영어 약어/브랜드 그대로 (`UI`, `StickK`, `MBTI`) | TTS 가 글자 단위로 읽거나 영어로 전환 | 한글 표기 ("화면 설계", "스틱케이"). MBTI 처럼 보편적으로 영어로 읽히는 약어는 예외 |
+| 퍼센트 부호 `%` | 처리 불안정 | "퍼센트" 한글 |
+| 가운뎃점 `·` | 어떻게 읽을지 몰라 어색한 침묵 | 쉼표 `,` 또는 "와/과", "이나" |
+| 명사 단문 (`0원.`, `2.25배.`, `처분 효과.`) | 호흡이 뚝뚝 끊겨 어색 | 완전 종결형 ("한 푼도 못 받습니다", "약 2.25배라는 결과입니다") |
+| 슬래시 `A/B` | "에이슬래시비" 로 잘못 읽음 | "A 와 B" 또는 풀어서 |
+| 콜론·세미콜론 `:` `;` | 의도 못 살림 | 마침표 또는 "는" 등 조사 |
+
+**원칙**: narration 은 누가 사람 앞에서 직접 말하듯이 자연 한국어 산문으로. 쓰기용 부호(괄호·따옴표·대시)는 narration 필드에 들어가면 안 된다. 시각 강조는 `headline` / `subtitle_lines` / 05-visual `text` 레이어에서 처리한다.
+
+### 2-2. headline 과 subtitle_lines 은 별개
+
+`headline` 과 `subtitle_lines` 는 화면에 박히는 텍스트라서 따옴표·`%`·`·` 사용 가능. 단 `narration` 만 위 룰을 강제로 따른다.
+
 ## 3. Phase C — Review (검수)
 
 다음 체크리스트를 모두 검사하고 `qa.checklist` 에 결과를 기록한다.
@@ -70,6 +92,9 @@ scene-YYY cta        : 다음 영상 예고 + outro_signature  (~15s)
 - `length_in_8_to_10_min`: 추정 총 길이가 480~600s 범위인가?
 - `intro_signature_used`: 두 번째 씬(intro)이 `brand.intro_signature` 를 자연스럽게 포함하는가?
 - `outro_signature_used`: cta 씬이 `brand.outro_signature` 를 포함하는가?
+- `tts_friendly`: 모든 씬 `narration` 에 §2-1 의 금지 부호/패턴(em-dash, 따옴표, 영어 괄호, %, 가운뎃점, 명사 단문, 영어 약어 미음차)이 **하나도 없는가**? 정규식으로 점검:
+  - `narration` 에 `[—'"·]` 또는 `\([A-Za-z][^)]+\)` 또는 `\d+%` 매칭 시 fail
+  - 마지막 어절이 명사 + `다`/`요`/`까`/`죠` 가 아니라 단순 명사 + 마침표면 fail (예: "...이득의 약 2.25배.")
 
 이슈가 있으면 `qa.issues[]` 에 `{scene_id, type, note, fixed:false}` 로 기록.
 
