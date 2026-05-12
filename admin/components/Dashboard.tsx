@@ -7,6 +7,7 @@ import TopicQueue from "./TopicQueue";
 import ShortsDashboard from "./ShortsDashboard";
 import NicheSelector from "./NicheSelector";
 import BlogGenerator from "./BlogGenerator";
+import BlogProgressBar from "./BlogProgressBar";
 
 type Tab = "topics" | "longform" | "shorts" | "instacard" | "blog";
 
@@ -24,6 +25,10 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      <BlogProgressBar
+        currentTabIsBlog={tab === "blog"}
+        onJumpToBlog={() => setTab("blog")}
+      />
       <div className="flex justify-end">
         <NicheSelector onChange={() => setNicheKey((k) => k + 1)} />
       </div>
@@ -74,7 +79,9 @@ export default function Dashboard() {
           difficultyNote="이미지 합성 자체는 쉬운데 Meta API 검수가 시간 듦. 검수 전엔 PNG 파일만 자동 생성하고 사람이 수동 업로드."
         />
       )}
-      {tab === "blog" && <BlogGenerator />}
+      <div className={tab === "blog" ? "" : "hidden"}>
+        <BlogGenerator />
+      </div>
     </div>
   );
 }

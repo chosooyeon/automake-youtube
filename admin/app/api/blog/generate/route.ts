@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server";
 import { spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import { REPO_ROOT } from "@/lib/paths";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
+
+const STYLE_FILE = path.join(REPO_ROOT, "admin", "data", "blog_style.md");
+
+function loadStyleSignature(): string | null {
+  try {
+    return fs.readFileSync(STYLE_FILE, "utf8");
+  } catch {
+    return null;
+  }
+}
 
 type Category =
   | "gov_support"
@@ -67,6 +79,7 @@ interface GenerateBody {
   region?: string;
   content: string;
   extraNote?: string;
+  useStyle?: boolean;
 }
 
 function buildPrompt(body: GenerateBody): string {
@@ -74,16 +87,30 @@ function buildPrompt(body: GenerateBody): string {
   const region = (body.region || "").trim();
   const userContent = body.content.trim();
   const extra = (body.extraNote || "").trim();
+  const styleDoc = body.useStyle ? loadStyleSignature() : null;
+
+  const toneBlock = styleDoc
+    ? [
+        "[작성자 스타일 — 반드시 이 톤으로 작성]",
+        "아래는 본인이 실제 쓴 글 4편에서 추출한 본인의 글쓰기 시그니처다.",
+        "이 톤·말버릇·문장 형태를 그대로 살려서 작성해야 한다. 일반적인 블로그 톤으로 평탄화하지 말 것.",
+        "",
+        styleDoc,
+        "",
+      ]
+    : [
+        "[채널 톤]",
+        "- 채널 컨셉: '찐또의 스마트 육아/결혼' (육아·결혼·정부지원금 정보를 솔직 톤으로)",
+        "- 1인칭 (~했어요, ~봤어요), 과한 이모지 금지, 광고 톤 금지",
+        "- 개발자가 README 쓰듯 소제목/리스트로 구조화",
+        "",
+      ];
 
   return [
     "너는 네이버 블로그 SEO에 능숙한 한국어 글쓰기 어시스턴트야.",
     "사용자가 직접 겪은 경험/메모를 바탕으로 네이버 블로그 1편을 초안 작성한다.",
     "",
-    "[채널 톤]",
-    "- 채널 컨셉: '찐또의 스마트 육아/결혼' (육아·결혼·정부지원금 정보를 솔직 톤으로)",
-    "- 1인칭 (~했어요, ~봤어요), 과한 이모지 금지, 광고 톤 금지",
-    "- 개발자가 README 쓰듯 소제목/리스트로 구조화",
-    "",
+    ...toneBlock,
     "[이번 편 카테고리]",
     `- 분류: ${guide.label}`,
     `- 의도: ${guide.intent}`,
@@ -103,7 +130,9 @@ function buildPrompt(body: GenerateBody): string {
     "- 사진 자리 표시: 본문 중간에 정확히 4곳 `[사진N: <어떤 사진을 넣어야 할지 한 줄 설명>]` 형식으로 삽입. N은 1~4.",
     "- 사용자가 입력하지 않은 사실은 절대 지어내지 말 것 (가격/날짜/주소 등). 사용자가 안 알려준 부분은 '<여기에 X를 적어주세요>' placeholder 로 비워둘 것.",
     "- 본문 마지막에 해시태그 8~12개.",
-    "- 마크다운 사용: ## 소제목, **강조**, - 리스트, | 표 | 가능. 단 네이버 블로그 호환을 위해 코드블록은 쓰지 말 것.",
+    styleDoc
+      ? "- 본문은 마크다운 헤더(##)와 표(|) 는 최소화하고, 본인 시그니처대로 '한 줄에 한 문장' + 빈 줄로 끊는 네이버 블로그 톤을 우선. 단 SEO를 위해 도입부 1~2줄과 마무리 1줄에는 핵심 키워드를 자연스럽게 포함."
+      : "- 마크다운 사용: ## 소제목, **강조**, - 리스트, | 표 | 가능. 단 네이버 블로그 호환을 위해 코드블록은 쓰지 말 것.",
     "",
     "[출력 형식]",
     "반드시 아래 JSON 한 덩어리만 출력 (앞뒤 설명·코드펜스 금지):",

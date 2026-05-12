@@ -3,3 +3,6 @@ node_modules
 *.log
 .DS_Store
 .env.local
+
+# 개인 스타일 시그니처/메모. 작성자 개인 정보 포함이라 커밋 X.
+data/
