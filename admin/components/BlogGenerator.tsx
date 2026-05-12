@@ -40,39 +40,23 @@ export default function BlogGenerator() {
   const { push } = useToast();
   const job = useBlogJob();
   const genElapsed = useElapsed(job.generate.startedAt);
-  const verElapsed = useElapsed(job.verify.startedAt);
 
   const busy = job.generate.status === "running";
   const result = job.generate.result;
   const errorRaw = job.generate.errorRaw ?? null;
-  const verifyBusy = job.verify.status === "running";
-  const verifyResult = job.verify.result;
 
   const resultRef = useRef<HTMLDivElement | null>(null);
-  const verifyRef = useRef<HTMLDivElement | null>(null);
   const [flashResult, setFlashResult] = useState(false);
-  const [flashVerify, setFlashVerify] = useState(false);
 
   // 결과 도착 시 자동 스크롤 + 잠깐 ring 강조
   useEffect(() => {
     if (job.generate.status !== "done" || !resultRef.current) return;
-    const focus = job.consumeFocusRequest();
-    // focus request 가 없어도 새로 도착한 결과니까 한번 스크롤
-    if (focus?.target !== "verify") {
-      resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      setFlashResult(true);
-      const t = setTimeout(() => setFlashResult(false), 2500);
-      return () => clearTimeout(t);
-    }
-  }, [job.generate.status, job.generate.finishedAt]);
-
-  useEffect(() => {
-    if (job.verify.status !== "done" || !verifyRef.current) return;
-    verifyRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    setFlashVerify(true);
-    const t = setTimeout(() => setFlashVerify(false), 2500);
+    job.consumeFocusRequest();
+    resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    setFlashResult(true);
+    const t = setTimeout(() => setFlashResult(false), 2500);
     return () => clearTimeout(t);
-  }, [job.verify.status, job.verify.finishedAt]);
+  }, [job.generate.status, job.generate.finishedAt]);
 
   // 에러 토스트
   useEffect(() => {
@@ -80,11 +64,6 @@ export default function BlogGenerator() {
       push({ kind: "error", title: "생성 실패", message: job.generate.error });
     }
   }, [job.generate.status, job.generate.error, push]);
-  useEffect(() => {
-    if (job.verify.status === "error" && job.verify.error) {
-      push({ kind: "error", title: "검증 실패", message: job.verify.error });
-    }
-  }, [job.verify.status, job.verify.error, push]);
 
   async function onGenerate() {
     if (busy) return;
@@ -92,21 +71,12 @@ export default function BlogGenerator() {
       push({ kind: "warn", title: "내용을 10자 이상 입력하세요" });
       return;
     }
-    job.clearVerify();
     await job.startGenerate({
       category,
       region: region.trim(),
       content,
       extraNote,
       useStyle,
-    });
-  }
-
-  async function onVerify() {
-    if (verifyBusy || !result) return;
-    await job.startVerify({
-      title: result.titles?.[0],
-      content: result.content_markdown,
     });
   }
 
@@ -240,14 +210,14 @@ export default function BlogGenerator() {
             className="w-full bg-accent text-bg font-semibold rounded-md py-3 disabled:opacity-50 disabled:cursor-wait hover:bg-accent2 transition"
           >
             {busy
-              ? `생성 중… ${formatMmSs(genElapsed)} 경과 (보통 60~120초)`
-              : "✨ 블로그 초안 생성"}
+              ? `생성 + 검증 중… ${formatMmSs(genElapsed)} 경과 (보통 90~180초)`
+              : "✨ 블로그 초안 + 사실 검증 생성"}
           </button>
-          {busy && (
-            <p className="text-[11px] text-subtext text-center">
-              다른 탭으로 이동해도 진행은 계속되고, 완료되면 상단 바가 알려줍니다.
-            </p>
-          )}
+          <p className="text-[11px] text-subtext text-center">
+            {busy
+              ? "본문 쓰기 전에 WebSearch 로 사실 확인 → 검증된 사실만 본문에 반영합니다. 다른 탭 이동 OK."
+              : "사용자 입력의 사실 주장을 자동 검색·검증한 후 본문에 반영합니다."}
+          </p>
         </div>
       </div>
 
@@ -292,14 +262,6 @@ export default function BlogGenerator() {
             right={
               <div className="flex gap-2 flex-wrap">
                 <button
-                  onClick={onVerify}
-                  disabled={verifyBusy}
-                  className="text-xs border border-warn/60 text-warn rounded px-2 py-1 hover:bg-warn/10 disabled:opacity-50"
-                  title="본문의 사실 주장을 WebSearch 로 1건씩 검증"
-                >
-                  {verifyBusy ? `검증 중… ${formatMmSs(verElapsed)}` : "🔍 사실 검증"}
-                </button>
-                <button
                   onClick={() => copy(result.content_markdown, "본문")}
                   className="text-xs border border-line rounded px-2 py-1 hover:bg-panel2"
                 >
@@ -327,30 +289,15 @@ export default function BlogGenerator() {
             </pre>
           </Card>
 
-          {verifyBusy && (
-            <Card title={`🔍 사실 검증 진행 중… ${formatMmSs(verElapsed)} 경과`}>
-              <p className="text-sm text-subtext">
-                본문에서 사실 주장을 뽑고 WebSearch 로 1건씩 확인 중입니다. 보통 60~120초.
-                다른 탭으로 가도 진행은 계속됩니다.
-              </p>
-            </Card>
-          )}
-
-          {verifyResult && (
-            <div
-              ref={verifyRef}
-              id="blog-verify-anchor"
-              className={
-                "scroll-mt-20 rounded-xl transition-shadow " +
-                (flashVerify ? "ring-2 ring-warn shadow-lg shadow-warn/20" : "")
-              }
+          {result.verify_items && result.verify_items.length > 0 && (
+            <Card
+              title={`🔍 사실 검증 (${result.verify_items.length}건 — 본문에 반영됨)`}
             >
-            <Card title={`🔍 사실 검증 결과 (${verifyResult.items?.length ?? 0}건)`}>
-              {verifyResult.summary && (
-                <p className="text-xs text-subtext mb-3">{verifyResult.summary}</p>
+              {result.verify_summary && (
+                <p className="text-xs text-subtext mb-3">{result.verify_summary}</p>
               )}
               <ul className="space-y-2">
-                {verifyResult.items?.map((it, i) => {
+                {result.verify_items.map((it, i) => {
                   const badge = VERIFY_BADGE[it.status] ?? VERIFY_BADGE.unknown;
                   return (
                     <li
@@ -395,7 +342,6 @@ export default function BlogGenerator() {
                 })}
               </ul>
             </Card>
-            </div>
           )}
 
           {result.photo_spots?.length > 0 && (

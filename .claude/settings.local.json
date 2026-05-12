@@ -9,7 +9,8 @@
       "Bash(node *)",
       "Bash(git rm *)",
       "Bash(pkill -f \"build-video.mjs\")",
-      "Bash(tee /tmp/build2.log)"
+      "Bash(tee /tmp/build2.log)",
+      "Bash(tee /tmp/build-jeong.log)"
     ]
   }
 }

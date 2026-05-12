@@ -11,9 +11,10 @@
 
 ## 1. Phase A — Plan (기획)
 
-목표 길이: `params.target_duration_sec` 가 null 이면 `global.video_defaults.duration_sec` (현재 540s).
-허용 범위: `global.video_defaults.duration_sec_min` ~ `duration_sec_max` (현재 480~600s, 즉 8~10분).
-**8분 미만으로 떨어지면 미드롤 광고 슬롯을 못 박으니까, narration 분량이 부족하면 body를 더 쪼개서 채운다.** (단, 같은 말 반복 금지)
+목표 길이: `params.target_duration_sec` 가 null 이면 `channel_config.video_defaults.duration_sec` 사용 (mom_wallet=540s, psychology 한 그릇=300s).
+허용 범위: `video_defaults.duration_sec_min` ~ `duration_sec_max`.
+**"한 그릇" 시리즈(5분/300s) 룰**: body 씬 2~3개로 압축. 같은 사례 반복 X. 한 가지 명언/법칙 → 배경(1분) → 학술 검증(1분) → 일상 적용(1분) → 요약 + CTA.
+**8~10분 영상 룰**: 미드롤 광고 슬롯 확보 위해 8분 미만 금지. body 부족하면 더 쪼개기.
 
 씬 구조를 다음 형태로 먼저 짠다 (출력은 아직 X):
 
