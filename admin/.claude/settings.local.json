@@ -7,7 +7,8 @@
       "Bash(npx tsc *)",
       "Bash(echo \"exit=$?\")",
       "Bash(git -C /Users/chosooyeon/Documents/automake-youtube/admin status --short)",
-      "Bash(git -C /Users/chosooyeon/Documents/automake-youtube/admin rm --cached data/blog_style.md)"
+      "Bash(git -C /Users/chosooyeon/Documents/automake-youtube/admin rm --cached data/blog_style.md)",
+      "Bash(npm install *)"
     ]
   }
 }

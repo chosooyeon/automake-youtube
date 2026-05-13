@@ -293,13 +293,30 @@ if (!validateClipHasAudio(finalMp4)) {
 
 const finalDur = getMediaDuration(finalMp4);
 const stats = fs.statSync(finalMp4);
+
+// 영상 제목 기반 파일명 복사
+function sanitizeFilename(s, maxLen = 100) {
+  return s
+    .replace(/[\/\\:*?"<>|]/g, "")
+    .replace(/[—–]/g, "-")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "")
+    .slice(0, maxLen);
+}
+const titledName = sanitizeFilename(scriptOut.title) + ".mp4";
+const titledPath = path.join(outDir, titledName);
+fs.copyFileSync(finalMp4, titledPath);
+
 console.log(`\n✅ Done`);
-console.log(`   path: ${finalMp4}`);
+console.log(`   📹 ${titledName}`);
+console.log(`   📁 ${outDir}`);
 console.log(`   size: ${(stats.size / 1024 / 1024).toFixed(1)} MB`);
 console.log(`   duration: ${finalDur.toFixed(1)}s (estimate was ${scriptOut.total_duration_sec}s)`);
 
 const buildMeta = {
   built_at: new Date().toISOString(),
+  output_file: titledName,
   total_scenes: sceneClips.length,
   total_duration_sec: finalDur,
   estimated_total_sec: scriptOut.total_duration_sec,
@@ -314,4 +331,111 @@ const buildMeta = {
   audio_validated: true,
 };
 fs.writeFileSync(path.join(outDir, "build_meta.json"), JSON.stringify(buildMeta, null, 2) + "\n");
-console.log(`   meta: ${path.join(outDir, "build_meta.json")}`);
+
+// upload_metadata.json 자동 생성 (이미 있으면 덮어쓰지 않음)
+const metaPath = path.join(outDir, "upload_metadata.json");
+if (!fs.existsSync(metaPath)) {
+  // 실제 빌드 길이 기준으로 챕터 시간 계산
+  let cursor = 0;
+  const chapters = [];
+  for (const clip of sceneClips) {
+    const mm = Math.floor(cursor / 60);
+    const ss = Math.floor(cursor % 60);
+    const tc = `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+    const scriptScene = scriptOut.scenes.find((s) => s.id === clip.id);
+    if (scriptScene?.headline) {
+      chapters.push(`${tc} ${scriptScene.headline}`);
+    }
+    cursor += clip.duration;
+  }
+
+  const ch = channelCfg.channel ?? {};
+  const brand = channelCfg.brand ?? {};
+  const channelName = (ch.name || "").replace(/\s*\(.*?\)/, "").trim();
+  const niche = ch.niche || "";
+  const aiDisc = brand.ai_disclosure?.include_in_description || "";
+  const outroSig = brand.outro_signature || "";
+
+  const hookScene = scriptOut.scenes.find((s) => s.role === "hook") || scriptOut.scenes[0];
+  const ctaScene = scriptOut.scenes.find((s) => s.role === "cta");
+  const nextHint = ctaScene?.narration?.match(/다음[^.?!]*?[.?!]/)?.[0]?.trim() || "";
+
+  const descParts = [
+    `안녕하세요, ${channelName}입니다.`,
+    "",
+    `오늘의 한 그릇 ─ ${scriptOut.title}.`,
+    "",
+  ];
+  if (chapters.length) {
+    descParts.push("[챕터]");
+    descParts.push(...chapters);
+    descParts.push("");
+  }
+  if (niche) {
+    descParts.push("[채널]");
+    descParts.push(niche);
+    descParts.push("");
+  }
+  if (nextHint) {
+    descParts.push(`▶ ${nextHint}`);
+    descParts.push("");
+  }
+  if (outroSig) {
+    descParts.push(outroSig);
+    descParts.push("");
+  }
+  // 해시태그 (네이밍은 채널 기본 + 첫 씬 키워드)
+  const hashSet = new Set(["심리식탁", "한그릇"]);
+  for (const sc of scriptOut.scenes.slice(0, 3)) {
+    for (const kw of sc.b_roll_keywords || []) {
+      const hangul = kw.match(/[가-힣]+/g);
+      if (hangul) hangul.forEach((w) => w.length >= 2 && hashSet.add(w));
+    }
+  }
+  // 카테고리 일반 태그도
+  ["심리학", "동양철학", "자기계발", "베스트셀러심리학"].forEach((t) => hashSet.add(t));
+  const hashtags = [...hashSet].slice(0, 12);
+  descParts.push(hashtags.map((h) => `#${h}`).join(" "));
+  descParts.push("");
+  if (aiDisc) {
+    descParts.push("---");
+    descParts.push(aiDisc);
+  }
+
+  // 고정 댓글 제안 (CTA 씬의 질문 추출 또는 폴백)
+  const ctaQuestion = ctaScene?.narration?.match(/[가-힣\s,]+[?]/)?.[0]?.trim() || "오늘 영상에서 가장 기억에 남은 한 줄은 무엇인가요? 댓글로 남겨주세요.";
+
+  const uploadMeta = {
+    title: scriptOut.title,
+    description: descParts.join("\n"),
+    tags: hashtags.map((h) => h.replace(/^#/, "")),
+    chapters,
+    pinned_comment_suggestion: ctaQuestion,
+    thumbnail_text_overlay_suggestion: hookScene?.headline || scriptOut.title.slice(0, 14),
+    category_id: "27",
+    _category_note: "27 = Education",
+    privacy: "private",
+    _privacy_note: "사람 검수 후 YouTube Studio 에서 public 전환",
+    made_for_kids: false,
+    synthetic_media_label: true,
+    channel: {
+      name: channelName,
+      handle: ch.handle || "",
+      niche_id: channelCfg._resolved_niche,
+    },
+    output_video_file: titledName,
+    _human_review_required: [
+      "썸네일 1장 제작 (인물 표정 + 굵은 한 단어)",
+      "title 더 클릭 잘 되는 후보 검토",
+      "description 의 챕터·해시태그 검수",
+      "pinned_comment_suggestion 그대로 댓글로 박을지 결정",
+    ],
+    generated_by: "build-video.mjs (auto)",
+    generated_at: new Date().toISOString(),
+  };
+
+  fs.writeFileSync(metaPath, JSON.stringify(uploadMeta, null, 2) + "\n");
+  console.log(`   📝 upload_metadata.json (자동 생성, 사람 검수 필요)`);
+} else {
+  console.log(`   📝 upload_metadata.json (이미 있음 — 보존)`);
+}

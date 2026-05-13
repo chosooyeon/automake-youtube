@@ -8,6 +8,15 @@ export const PROJECTS_DIR = path.join(REPO_ROOT, "projects");
 export const CONFIG_DIR = path.join(REPO_ROOT, "config");
 export const BOTS_DIR = path.join(REPO_ROOT, "bots");
 export const SHARED_DIR = path.join(REPO_ROOT, "shared");
+export const CINEMA_DIR = path.join(REPO_ROOT, "cinema");
+
+export function cinemaProjectDir(slug: string): string {
+  return path.join(CINEMA_DIR, slug);
+}
+
+export function cinemaFile(slug: string): string {
+  return path.join(cinemaProjectDir(slug), "project.json");
+}
 
 export const STAGES = [
   "01-benchmark",

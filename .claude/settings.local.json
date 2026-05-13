@@ -10,7 +10,12 @@
       "Bash(git rm *)",
       "Bash(pkill -f \"build-video.mjs\")",
       "Bash(tee /tmp/build2.log)",
-      "Bash(tee /tmp/build-jeong.log)"
+      "Bash(tee /tmp/build-jeong.log)",
+      "Bash(tee /tmp/build-jeong-v2.log)",
+      "Bash(curl -sI http://localhost:3000)",
+      "Bash(curl -s http://localhost:3000/api/cinema/projects)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(/Users/chosooyeon/Documents/automake-youtube/admin/node_modules/.bin/tsc --noEmit -p /Users/chosooyeon/Documents/automake-youtube/admin/tsconfig.json)"
     ]
   }
 }

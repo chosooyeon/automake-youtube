@@ -33,6 +33,14 @@ yarn-debug.log*
 .pnpm-debug.log*
 
 # === 생성 산출물 — 롱폼 ===
+# 03-script (봇이 brief.md 로부터 자동 생성하는 시나리오)
+projects/*/03-script/output.json
+projects/*/03-script/script.md
+projects/*/03-script/run.log.md
+# 05-visual (봇이 03-script 로부터 자동 생성하는 비주얼 명세)
+projects/*/05-visual/output.json
+projects/*/05-visual/storyboard.md
+projects/*/05-visual/run.log.md
 # 이미지 (Pollinations / Imagen 등으로 재생성 가능)
 projects/*/05-visual/scenes/*/bg.png
 projects/*/05-visual/scenes/*/bg.jpg
@@ -41,6 +49,7 @@ projects/*/05-visual/scenes/*/bg.webp
 projects/*/05-visual/scenes/*/img-*.png
 projects/*/05-visual/scenes/*/img-*.jpg
 # 오디오 (TTS 로 재생성 가능)
+projects/*/04-audio/output.json
 projects/*/04-audio/*.srt
 projects/*/04-audio/*.aiff
 projects/*/04-audio/*.wav

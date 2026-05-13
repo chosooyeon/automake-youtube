@@ -12,6 +12,7 @@ import UploadModal from "./UploadModal";
 import NewProjectModal from "./NewProjectModal";
 import BriefEditor from "./BriefEditor";
 import KeywordsEditor from "./KeywordsEditor";
+import BuildVideoButton from "./BuildVideoButton";
 import { useToast } from "./Toast";
 
 interface Summary {
@@ -101,6 +102,8 @@ export default function LongFormDashboard() {
                   onOpenKeywords={() => setOpenKeywords(true)}
                 />
               </div>
+
+              <BuildVideoButton slug={slug} />
 
               <ThumbnailGallery slug={slug} refreshKey={thumbKey} />
               <LogStream slug={slug} />

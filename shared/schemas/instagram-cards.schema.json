@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Instagram Card Feed Output",
+  "type": "object",
+  "required": ["category", "cards", "caption", "hashtags", "verify_summary"],
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": ["parenting_subsidy", "youth_subsidy", "stocks"]
+    },
+    "region": { "type": "string" },
+    "topic": { "type": "string" },
+    "cards": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "required": ["layout", "fields", "sources"],
+        "properties": {
+          "layout": {
+            "type": "string",
+            "enum": ["cover", "body", "comparison", "stat", "cta"]
+          },
+          "fields": {
+            "type": "object",
+            "description": "Layout-specific fields. cover: {kicker, headline, subhead}. body: {headline, bullets[]}. comparison: {headline, left_title, left_items[], right_title, right_items[]}. stat: {kicker, number, unit, caption}. cta: {headline, body, account_handle}."
+          },
+          "sources": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "format": "uri" },
+            "description": "공식 출처 URL. cover/CTA 제외하고는 최소 2개 권장."
+          },
+          "background_prompt": {
+            "type": "string",
+            "description": "Gemini Imagen 용 배경 이미지 프롬프트 (텍스트 없이)"
+          },
+          "footer_source_label": {
+            "type": "string",
+            "description": "푸터에 표시할 출처 라벨. 예: '출처: 정부24 (2026년 기준)'"
+          }
+        }
+      }
+    },
+    "caption": {
+      "type": "string",
+      "description": "인스타 포스트 본문 캡션 (해시태그 제외)"
+    },
+    "hashtags": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 30,
+      "items": { "type": "string", "pattern": "^#" }
+    },
+    "verify_summary": {
+      "type": "string",
+      "description": "출처 검증 요약. 예: '5장 모두 정부24/복지로 공식 출처 2개 이상 확인'"
+    },
+    "verify_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim", "status", "sources"],
+        "properties": {
+          "claim": { "type": "string" },
+          "status": { "type": "string", "enum": ["ok", "warn", "unknown", "bad"] },
+          "note": { "type": "string" },
+          "sources": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { ToastProvider } from "@/components/Toast";
 import { BlogJobProvider } from "@/components/BlogJobContext";
+import { InstagramJobProvider } from "@/components/InstagramJobContext";
 
 export const metadata: Metadata = {
   title: "automake-youtube · 관리자",
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ToastProvider>
          <BlogJobProvider>
+          <InstagramJobProvider>
           <div className="min-h-screen">
             <header className="border-b border-line bg-panel/60 backdrop-blur">
               <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -26,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </header>
             <main className="max-w-7xl mx-auto px-6 py-6">{children}</main>
           </div>
+          </InstagramJobProvider>
          </BlogJobProvider>
         </ToastProvider>
       </body>
