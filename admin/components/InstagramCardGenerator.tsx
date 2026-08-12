@@ -10,25 +10,79 @@ import {
   type VerifyStatus,
 } from "./InstagramJobContext";
 import InstagramCardPreview from "./InstagramCardPreview";
+import NewsFeedPanel from "./NewsFeedPanel";
 
-const CATEGORIES: { id: CategoryId; label: string; sub: string; accent: string }[] = [
+interface CategoryUi {
+  id: CategoryId;
+  label: string;
+  sub: string;
+  accent: string;
+  /** 지역 입력이 의미 있는 카테고리인지 */
+  hasRegion: boolean;
+  /** 출처 검증 안내 문구 */
+  verifyNote: string;
+  placeholder: string;
+}
+
+const CATEGORIES: CategoryUi[] = [
   {
     id: "parenting_subsidy",
     label: "육아 정부지원금",
     sub: "출산축하금 · 부모급여 · 첫만남이용권 · 어린이집 보육료",
     accent: "#F4A261",
+    hasRegion: true,
+    verifyNote: "카드당 공식 출처 ≥ 2개 (정부24·복지로·.go.kr) 미달 시 해당 카드 자동 제외.",
+    placeholder: `예시:
+- 2026년 첫만남이용권: 출생 시 200만원 (다자녀 추가 100만원)
+- 출생신고 후 자동 신청, 국민행복카드로 지급
+- 사용처: 어린이집, 산후조리원, 의료비, 유아용품
+- 부모급여랑 중복 수령 가능
+
+(잘 모르는 부분은 안 적어도 OK — WebSearch 가 자동으로 검색해서 보완)`,
   },
   {
     id: "youth_subsidy",
     label: "청년 정부지원금",
     sub: "청년도약계좌 · 청년월세 · 청년취업 · 국민취업지원",
     accent: "#14B8A6",
+    hasRegion: true,
+    verifyNote: "카드당 공식 출처 ≥ 2개 (정부24·청년센터·.go.kr) 미달 시 해당 카드 자동 제외.",
+    placeholder: `예시:
+- 청년도약계좌: 월 최대 70만원 납입, 5년 만기
+- 가입 자격: 만 19~34세, 개인소득 7,500만원 이하
+- 정부기여금 + 비과세 혜택
+- 신청: 취급 은행 앱에서 매월 초
+
+(잘 모르는 부분은 안 적어도 OK — WebSearch 가 자동으로 검색해서 보완)`,
   },
   {
     id: "stocks",
     label: "주식 정보",
     sub: "ETF · 배당 · 시장 동향 (정보 제공 / 투자 권유 아님)",
     accent: "#E0B14C",
+    hasRegion: false,
+    verifyNote: "카드당 출처 ≥ 2개 (KRX·금감원·한국은행·운용사 공식자료) 미달 시 해당 카드 자동 제외.",
+    placeholder: `예시:
+- 국내 상장 미국배당 ETF 최근 분배율 비교
+- 기준일과 수치는 반드시 같이 표기
+- 종목 추천이 아니라 '구조 설명' 관점으로
+
+(위 뉴스 수집 패널에서 기사를 담으면 자동으로 채워집니다)`,
+  },
+  {
+    id: "it_news",
+    label: "해외 IT·AI 뉴스",
+    sub: "빅테크 · AI 신모델 · 신제품 · 개발자 소식",
+    accent: "#6366F1",
+    hasRegion: false,
+    verifyNote:
+      "카드당 출처 ≥ 2개 (원문 기사 + 기업 공식 발표) 미달 시 해당 카드 자동 제외. 루머·유출 소식은 자동 제외.",
+    placeholder: `위 '뉴스 자동 수집' 에서 기사를 골라 담으면 여기가 자동으로 채워집니다.
+
+직접 쓸 수도 있어요:
+- 어떤 회사가 뭘 발표했는지
+- 한국 독자가 알아야 할 포인트
+- 강조하고 싶은 각도 (예: 개발자 관점 / 일반 사용자 관점)`,
   },
 ];
 
@@ -45,9 +99,12 @@ export default function InstagramCardGenerator() {
   const [content, setContent] = useState("");
   const [extraNote, setExtraNote] = useState("");
   const [cardCount, setCardCount] = useState(5);
+  const [sourceLinks, setSourceLinks] = useState<string[]>([]);
   const { push } = useToast();
   const job = useInstagramJob();
   const elapsed = useInstaElapsed(job.generate.startedAt);
+
+  const cat = CATEGORIES.find((c) => c.id === category) ?? CATEGORIES[0];
 
   const busy = job.generate.status === "running";
   const result = job.generate.result;
@@ -80,11 +137,18 @@ export default function InstagramCardGenerator() {
     }
     await job.startGenerate({
       category,
-      region: region.trim(),
+      region: cat.hasRegion ? region.trim() : "",
       content,
       cardCount,
       extraNote: extraNote.trim() || undefined,
+      sourceLinks: sourceLinks.length > 0 ? sourceLinks : undefined,
     });
+  }
+
+  /** 뉴스 패널에서 선택한 기사를 본문에 append + 원문 링크 누적 */
+  function insertNews(text: string, links: string[]) {
+    setContent((prev) => (prev.trim() ? `${prev.trimEnd()}\n\n${text}` : text));
+    setSourceLinks((prev) => Array.from(new Set([...prev, ...links])));
   }
 
   async function copy(text: string, label: string) {
@@ -112,9 +176,9 @@ export default function InstagramCardGenerator() {
         <div className="text-xs text-subtext uppercase tracking-widest mb-1">
           인스타그램 카드피드 생성기
         </div>
-        <h2 className="text-xl font-bold">🟪 정부지원금 카드뉴스 자동 생성</h2>
+        <h2 className="text-xl font-bold">🟪 카드뉴스 자동 생성</h2>
         <p className="text-sm text-subtext mt-2">
-          내용을 입력하면 <strong className="text-text">출처 검증 → 배경 이미지 생성 → 텍스트 오버레이</strong>까지 자동.
+          <strong className="text-text">뉴스 자동 수집 → 출처 검증 → 배경 이미지 생성 → 텍스트 오버레이</strong>까지 자동.
           한글 깨짐 없이 1080×1080 카드 5–10장 + 캡션을 만들어 줍니다.
         </p>
       </div>
@@ -153,20 +217,22 @@ export default function InstagramCardGenerator() {
             </div>
           </Card>
 
-          <Card title="2. 지역 (선택)">
-            <input
-              type="text"
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              placeholder="예: 서울, 남양주시"
-              className="w-full bg-bg border border-line rounded-md px-3 py-2 text-sm"
-            />
-            <p className="text-[11px] text-subtext mt-2">
-              비워두면 전국 단위 지원금만. 지역 입력 시 해당 지자체 지원금도 같이 검색.
-            </p>
-          </Card>
+          {cat.hasRegion && (
+            <Card title="2. 지역 (선택)">
+              <input
+                type="text"
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                placeholder="예: 서울, 남양주시"
+                className="w-full bg-bg border border-line rounded-md px-3 py-2 text-sm"
+              />
+              <p className="text-[11px] text-subtext mt-2">
+                비워두면 전국 단위 지원금만. 지역 입력 시 해당 지자체 지원금도 같이 검색.
+              </p>
+            </Card>
+          )}
 
-          <Card title="3. 카드 수">
+          <Card title={cat.hasRegion ? "3. 카드 수" : "2. 카드 수"}>
             <input
               type="range"
               min={3}
@@ -188,30 +254,43 @@ export default function InstagramCardGenerator() {
 
         {/* 우측: 입력 본문 */}
         <div className="lg:col-span-2 space-y-4">
-          <Card title="4. 주제 / 내가 알고 있는 내용">
+          <NewsFeedPanel category={category} accent={cat.accent} onInsert={insertNews} />
+
+          <Card
+            title={`${cat.hasRegion ? "4" : "3"}. 주제 / 내가 알고 있는 내용`}
+            right={
+              content.trim() ? (
+                <button
+                  onClick={() => {
+                    setContent("");
+                    setSourceLinks([]);
+                  }}
+                  className="text-xs border border-line rounded px-2 py-1 hover:bg-panel2 text-subtext"
+                >
+                  비우기
+                </button>
+              ) : undefined
+            }
+          >
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={10}
-              placeholder={`예시:
-- 2026년 첫만남이용권: 출생 시 200만원 (다자녀 추가 100만원)
-- 출생신고 후 자동 신청, 국민행복카드로 지급
-- 사용처: 어린이집, 산후조리원, 의료비, 유아용품
-- 사용기한: 출생일로부터 1년 (연장 신청 가능)
-- 부모급여랑 중복 수령 가능
-
-(잘 모르는 부분은 안 적어도 OK — WebSearch 가 자동으로 검색해서 보완)`}
+              placeholder={cat.placeholder}
               className="w-full bg-bg border border-line rounded-md px-3 py-2 text-sm mono leading-relaxed"
             />
-            <div className="flex justify-between items-center mt-2">
+            <div className="flex justify-between items-center mt-2 gap-3">
               <p className="text-[11px] text-subtext">
-                메모/들은 정보/주제 키워드 등. 자동으로 공식 출처 ≥ 2개 검색 후 확인된 사실만 카드에 반영됩니다.
+                메모/들은 정보/주제 키워드 등. 자동으로 출처 ≥ 2개 검색 후 확인된 사실만 카드에 반영됩니다.
               </p>
-              <span className="text-[11px] text-subtext mono">{content.length}자</span>
+              <span className="text-[11px] text-subtext mono shrink-0">
+                {sourceLinks.length > 0 && `원문 ${sourceLinks.length}건 · `}
+                {content.length}자
+              </span>
             </div>
           </Card>
 
-          <Card title="5. 추가 요청 (선택)">
+          <Card title={`${cat.hasRegion ? "5" : "4"}. 추가 요청 (선택)`}>
             <input
               type="text"
               value={extraNote}
@@ -224,8 +303,7 @@ export default function InstagramCardGenerator() {
           <div className="bg-panel border border-line rounded-xl p-3 flex items-center gap-2 text-xs text-subtext">
             <span className="inline-block h-2 w-2 rounded-full bg-good shrink-0" />
             <span>
-              <strong className="text-text">출처 검증 항상 ON</strong> — 카드당 공식 출처 ≥ 2개 (정부24·복지로·.go.kr) 미달 시 해당 카드 자동 제외.
-              모든 카드 푸터에 출처 + 연도 자동 표기.
+              <strong className="text-text">출처 검증 항상 ON</strong> — {cat.verifyNote} 모든 카드 푸터에 출처 + 연도 자동 표기.
             </span>
           </div>
 

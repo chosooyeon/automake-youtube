@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 
-export type CategoryId = "parenting_subsidy" | "youth_subsidy" | "stocks";
+export type CategoryId = "parenting_subsidy" | "youth_subsidy" | "stocks" | "it_news";
 export type LayoutType = "cover" | "body" | "comparison" | "stat" | "cta";
 export type VerifyStatus = "ok" | "warn" | "unknown" | "bad";
 
@@ -56,6 +56,8 @@ export interface InstagramGeneratePayload {
   content: string;
   cardCount: number;
   extraNote?: string;
+  /** 뉴스 수집 패널에서 담은 기사 원문 링크 */
+  sourceLinks?: string[];
 }
 
 interface InstaJobCtx {

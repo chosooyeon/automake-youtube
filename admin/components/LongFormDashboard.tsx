@@ -13,6 +13,7 @@ import NewProjectModal from "./NewProjectModal";
 import BriefEditor from "./BriefEditor";
 import KeywordsEditor from "./KeywordsEditor";
 import BuildVideoButton from "./BuildVideoButton";
+import UploadContentPanel from "./UploadContentPanel";
 import { useToast } from "./Toast";
 
 interface Summary {
@@ -104,6 +105,8 @@ export default function LongFormDashboard() {
               </div>
 
               <BuildVideoButton slug={slug} />
+
+              <UploadContentPanel slug={slug} refreshKey={refreshKey} />
 
               <ThumbnailGallery slug={slug} refreshKey={thumbKey} />
               <LogStream slug={slug} />

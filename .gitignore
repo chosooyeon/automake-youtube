@@ -95,3 +95,6 @@ topics/archive/*.log.md
 # === TS 빌드 캐시 ===
 admin/tsconfig.tsbuildinfo
 **/tsconfig.tsbuildinfo
+
+# === 뉴스 RSS 수집 캐시 ===
+.cache/

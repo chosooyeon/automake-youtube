@@ -15,7 +15,8 @@
       "Bash(curl -sI http://localhost:3000)",
       "Bash(curl -s http://localhost:3000/api/cinema/projects)",
       "Bash(pkill -f \"next dev\")",
-      "Bash(/Users/chosooyeon/Documents/automake-youtube/admin/node_modules/.bin/tsc --noEmit -p /Users/chosooyeon/Documents/automake-youtube/admin/tsconfig.json)"
+      "Bash(/Users/chosooyeon/Documents/automake-youtube/admin/node_modules/.bin/tsc --noEmit -p /Users/chosooyeon/Documents/automake-youtube/admin/tsconfig.json)",
+      "Bash(tee /tmp/build-jeong-v3.log)"
     ]
   }
 }

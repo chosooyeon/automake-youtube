@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { REPO_ROOT } from "@/lib/paths";
-import { type CategoryDef } from "./categories";
+import { type CategoryDef, type CategoryId } from "./categories";
 
 const STYLE_FILE = path.join(REPO_ROOT, "admin", "data", "instagram_style.md");
 
@@ -14,11 +14,13 @@ function loadStyle(): string | null {
 }
 
 export interface GenerateBody {
-  category: "parenting_subsidy" | "youth_subsidy" | "stocks";
+  category: CategoryId;
   region?: string;
   content: string;
   cardCount: number;
   extraNote?: string;
+  /** 뉴스 수집 패널에서 골라 넣은 기사 원문 링크 (검증 시작점) */
+  sourceLinks?: string[];
 }
 
 export function buildPrompt(body: GenerateBody, cat: CategoryDef): string {
@@ -27,9 +29,10 @@ export function buildPrompt(body: GenerateBody, cat: CategoryDef): string {
   const extra = (body.extraNote || "").trim();
   const styleDoc = loadStyle();
   const yearLabel = new Date().getFullYear() + "년 기준";
+  const links = (body.sourceLinks ?? []).filter((s) => /^https?:\/\//.test(s));
 
   return [
-    "너는 한국 정부지원금/제도 정보를 인스타그램 카드뉴스로 큐레이션하는 어시스턴트야.",
+    cat.domainIntro,
     "사용자가 준 메모/주제를 바탕으로 5~10장짜리 카드뉴스 1세트를 만든다.",
     "",
     "[카테고리]",
@@ -47,14 +50,22 @@ export function buildPrompt(body: GenerateBody, cat: CategoryDef): string {
     "```",
     userContent,
     "```",
+    links.length > 0
+      ? [
+          "[원문 링크 — 뉴스 수집 패널에서 선택된 기사]",
+          ...links.map((u) => `- ${u}`),
+          "이 링크들의 내용을 WebSearch 로 먼저 확인하고, 거기서 확인된 사실만 카드에 쓴다.",
+          "제목만 보고 내용을 추측해서 쓰지 말 것.",
+        ].join("\n")
+      : "",
     extra ? `[추가 요청] ${extra}` : "",
     `[카드 수] 총 ${body.cardCount}장 (cover 1 + body N-2 + cta 1, 필요시 사이에 comparison/stat 끼움)`,
     "",
     "[작업 순서 — 반드시 이 순서대로]",
-    "1) 사용자 입력에서 '검증 가능한 사실 주장' (지원금액·자격·기간·신청기관) 을 추려낸다.",
-    "2) WebSearch 도구로 각 주장의 공식 출처를 확인한다. 한국어 검색어로. 정부 공식 .go.kr 우선.",
+    "1) 사용자 입력에서 '검증 가능한 사실 주장' (금액·수치·자격·기간·주체·날짜) 을 추려낸다.",
+    `2) WebSearch 도구로 각 주장의 출처를 확인한다. ${cat.verifyRule}`,
     "3) 카드 본문에 들어갈 사실은 ok 인 것만. 출처 못 찾으면 카드에서 빼고 '~로 알려져 있음' 같은 추정 표현 절대 금지.",
-    `4) 카드별로 공식 출처 URL ≥ 2개 (cover/cta 제외). 미달 시 그 카드 자체를 만들지 말 것. 최종 카드 수가 ${body.cardCount} 미만으로 줄어들어도 OK — 차라리 적게 만들고 정확하게.`,
+    `4) 카드별로 출처 URL ≥ 2개 (cover/cta 제외). 미달 시 그 카드 자체를 만들지 말 것. 최종 카드 수가 ${body.cardCount} 미만으로 줄어들어도 OK — 차라리 적게 만들고 정확하게.`,
     `5) 각 카드 footer_source_label 자동 생성: 예) "${cat.defaultSourceLabel} (${yearLabel})"`,
     "6) 각 카드 background_prompt 생성. 텍스트 없는 추상 배경 전용. 다음 스타일을 반드시 포함:",
     `   "${cat.backgroundStyle}". 카드별로 약간씩 변주(컬러 위치, 형태) — 5장이 똑같이 안 보이게.`,

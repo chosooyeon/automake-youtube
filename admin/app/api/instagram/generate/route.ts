@@ -53,9 +53,8 @@ function todayStamp(): string {
 }
 
 function makeSlug(category: CategoryId): string {
-  const short = category === "parenting_subsidy" ? "parent" : category === "youth_subsidy" ? "youth" : "stocks";
   const rand = crypto.randomBytes(3).toString("hex");
-  return `insta-${todayStamp()}-${short}-${rand}`;
+  return `insta-${todayStamp()}-${getCategory(category).short}-${rand}`;
 }
 
 function runClaude(prompt: string): Promise<{ stdout: string; stderr: string; code: number | null }> {
