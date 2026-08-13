@@ -11,7 +11,8 @@ import { buildPrompt, type GenerateBody } from "@/lib/instagram/prompt";
 import type { CardSpec } from "@/lib/instagram/card-layouts";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300;
+// 뉴스 원문 링크를 WebSearch 로 교차검증하는 it_news 는 실측 285초까지 걸린다 → 여유 확보
+export const maxDuration = 600;
 
 interface ClaudeResult {
   category: CategoryId;
