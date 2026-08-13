@@ -29,7 +29,8 @@
 | 단계 순서·의존성 | `config/pipeline.json` |
 | 봇이 어떻게 호출되나 | `admin/lib/runBot.ts` (headless `claude -p`), `scripts/run-bot.sh` |
 | 모든 경로 상수·스테이지 ID | `admin/lib/paths.ts` ← **경로 추측 대신 여기 확인** |
-| 대시보드 탭 구성 | `admin/components/Dashboard.tsx` (탭 셸) |
+| 대시보드 탭 구성 | `admin/components/Dashboard.tsx` (탭 셸). 유튜브 탭은 `YoutubeWorkspace.tsx` 안에 주제큐·롱폼·숏폼 서브탭 |
+| 클로드 대화 탭 (일반 채팅) | `admin/app/api/chat/route.ts` (`claude -p --output-format stream-json` 스트리밍) + `admin/components/ChatPanel.tsx` + `Markdown.tsx`. 프로젝트 CLAUDE.md 오염을 피하려 빈 cwd `admin/data/chat/` 에서 실행 |
 | 색상·테마(라이트/다크) | `admin/app/globals.css` 의 `:root`/`.dark` 변수 ← **여기만 고치면 전 화면 반영**. 컴포넌트엔 `bg-panel`·`text-subtext` 같은 시맨틱 토큰만 쓰고 `gray-700` 류 하드코딩 금지 |
 | 인스타 카드 생성 | `admin/app/api/instagram/generate/route.ts` + `admin/lib/instagram/*` |
 | 뉴스 RSS 스크랩 | `admin/lib/news/{feeds,rss}.ts` (캐시 `.cache/news/`, TTL 30분) |
