@@ -5,7 +5,7 @@
  * 알림은 "상황이 바뀐 순간"에만 나간다 — 같은 신호를 매 스캔마다 다시 보내면 알림을 끄게 되니까.
  */
 
-import { fetchCandles, fetchQuote, stockUrl, type Quote } from "./naver";
+import { confirmedCandles, fetchCandles, fetchQuote, stockUrl, type Quote } from "./naver";
 import { analyze, VERDICT_EMOJI, VERDICT_LABEL, type Analysis } from "./signals";
 import {
   formatPrice,
@@ -125,7 +125,8 @@ export async function scanWatchlist(opts: ScanOptions): Promise<ScanSummary> {
 
   const results = await mapLimit<WatchItem, ScanResult>(targets, 3, async (item) => {
     try {
-      const [candles, quote] = await Promise.all([fetchCandles(item), fetchQuote(item)]);
+      const [raw, quote] = await Promise.all([fetchCandles(item), fetchQuote(item)]);
+      const candles = confirmedCandles(raw, quote, item.market);
       if (candles.length === 0) {
         return { item, quote, analysis: null, notified: false, error: "일봉 데이터 없음" };
       }

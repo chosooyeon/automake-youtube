@@ -1,0 +1,65 @@
+[
+  {
+    "symbol": "005930",
+    "code": "005930",
+    "name": "삼성전자",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-12T22:49:25.301Z",
+    "enabled": true
+  },
+  {
+    "symbol": "NVDA.O",
+    "code": "NVDA",
+    "name": "엔비디아",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-12T22:49:25.329Z",
+    "enabled": true
+  },
+  {
+    "symbol": "000660",
+    "code": "000660",
+    "name": "SK하이닉스",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-12T22:49:25.353Z",
+    "enabled": true
+  },
+  {
+    "symbol": "TSLA.O",
+    "code": "TSLA",
+    "name": "테슬라",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-12T22:49:25.382Z",
+    "enabled": true
+  },
+  {
+    "symbol": "066570",
+    "code": "066570",
+    "name": "LG전자",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-13T01:26:56.262Z",
+    "enabled": true
+  },
+  {
+    "symbol": "005380",
+    "code": "005380",
+    "name": "현대차",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-13T01:26:56.310Z",
+    "enabled": true
+  },
+  {
+    "symbol": "AAPL.O",
+    "code": "AAPL",
+    "name": "애플",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-13T01:26:56.354Z",
+    "enabled": true
+  }
+]

@@ -100,8 +100,14 @@ InstagramCardGenerator → /api/instagram/generate
 ```
 - 판정은 **확정된 일봉**만 쓴다 (장중 리페인팅 방지). 실시간가는 표시용.
 - 신호 `kind`: `primary`(매매 포인트) / `context`(추세 배경). context 만으로는 알림이 나가지 않는다.
-- 발송 이력은 `admin/data/stock/alert-state.json` 의 fingerprint(`판정|신호id들`)로 관리 —
+- 발송 이력은 `config/stock-alert-state.json` 의 fingerprint(`판정|신호id들`)로 관리 —
   날짜가 바뀌어도 신호 구성이 같으면 재발송하지 않는다.
+- **파일이 두 군데인 이유**: 맥이 꺼져 있어도 알림이 가도록 GitHub Actions 가 스캔하는데,
+  러너는 커밋된 파일만 본다. `config/stock-{watchlist,alert-state}.json` 은 커밋되고,
+  봇 토큰(`admin/data/stock/telegram.json`)만 git 제외 + CI 에선 Secrets 로 주입.
+- 상시 가동: `.github/workflows/stock-alert.yml` (평일 15:50 KST / 06:30 KST).
+  `scripts/stock-scan-ci.ts` 를 tsx 로 직접 실행 — admin 서버도 `npm ci` 도 필요 없다
+  (판정 로직이 node 내장 모듈만 쓰기 때문). 알림 이력은 러너가 커밋해 되돌려놓는다.
 - 데이터 소스가 네이버인 이유: Yahoo Finance 는 429, Stooq 는 JS 챌린지로 막힌다 (2026-08 확인).
 
 ## 5. admin 상세

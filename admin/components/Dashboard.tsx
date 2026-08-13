@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import YoutubeWorkspace from "./YoutubeWorkspace";
-import NicheSelector from "./NicheSelector";
 import BlogGenerator from "./BlogGenerator";
 import BlogProgressBar from "./BlogProgressBar";
 import EmoticonStudio from "./EmoticonStudio";
@@ -33,7 +32,6 @@ const TABS: { id: Tab; label: string; status: "live" | "planned" }[] = [
 
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("youtube");
-  const [nicheKey, setNicheKey] = useState(0);
 
   return (
     <div className="space-y-6">
@@ -45,9 +43,6 @@ export default function Dashboard() {
         currentTabIsInsta={tab === "instacard"}
         onJumpToInsta={() => setTab("instacard")}
       />
-      <div className="flex justify-end">
-        <NicheSelector onChange={() => setNicheKey((k) => k + 1)} />
-      </div>
       <div className="flex gap-1 border-b border-line overflow-x-auto">
         {TABS.map((t) => (
           <button

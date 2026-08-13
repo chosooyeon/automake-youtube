@@ -182,6 +182,41 @@ export async function fetchQuote(ref: StockRef): Promise<Quote | null> {
   }
 }
 
+/** 해당 시장의 "오늘" 날짜 (YYYYMMDD). 서버 시간대가 아니라 거래소 시간대 기준이어야 한다 */
+export function marketToday(market: Market): string {
+  const tz = market === "KR" ? "Asia/Seoul" : "America/New_York";
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+    .format(new Date())
+    .replace(/-/g, "");
+}
+
+/**
+ * 장 마감 전의 "오늘 봉"을 떼어낸다.
+ *
+ * 네이버 차트 API는 장이 열리면 당일 봉을 미완성 상태로 끼워 준다.
+ * 그 봉으로 지표를 돌리면 장중 내내 값이 흔들려 신호가 나타났다 사라진다(리페인팅).
+ * 그래서 마감이 확인된 봉만 판정에 넣는다.
+ */
+export function confirmedCandles(
+  candles: Candle[],
+  quote: Quote | null,
+  market: Market
+): Candle[] {
+  if (candles.length === 0) return candles;
+  const last = candles[candles.length - 1];
+  if (last.date !== marketToday(market)) return candles; // 애초에 오늘 봉이 아님
+
+  // 오늘 봉이라면 장이 확실히 끝났고 거래가 있었을 때만 신뢰한다.
+  // 시세를 못 받아왔으면 확인이 불가능하므로 보수적으로 버린다.
+  if (quote?.marketStatus === "CLOSE" && last.volume > 0) return candles;
+  return candles.slice(0, -1);
+}
+
 /** 네이버 종목 페이지 URL (알림 메시지에 첨부) */
 export function stockUrl(ref: StockRef): string {
   return ref.market === "KR"

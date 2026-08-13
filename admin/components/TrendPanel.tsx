@@ -4,6 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useToast } from "./Toast";
 import type { BlogCategory } from "@/lib/trends/blog-seeds";
 
+interface KeywordMetric {
+  total: number;
+  pc: number;
+  mobile: number;
+  masked: boolean;
+  competition: "높음" | "중간" | "낮음" | null;
+}
+
 interface Keyword {
   text: string;
   depth: number;
@@ -11,6 +19,28 @@ interface Keyword {
   rank: number;
   score: number;
   reasons: string[];
+  metric: KeywordMetric | null;
+}
+
+interface SearchAdStatus {
+  enabled: boolean;
+  missing: string[];
+  requests: number;
+  matched: number;
+  error: string | null;
+}
+
+const COMP_COLOR: Record<string, string> = {
+  낮음: "text-good",
+  중간: "text-warn",
+  높음: "text-bad",
+};
+
+function fmtCount(n: number, masked: boolean): string {
+  if (masked) return "<10";
+  if (n >= 10000) return `${(n / 10000).toFixed(1)}만`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}천`;
+  return String(n);
 }
 
 interface NewsItem {
@@ -43,6 +73,7 @@ export default function TrendPanel({ category, region, onInsert }: Props) {
   const [keywords, setKeywords] = useState<Keyword[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [seeds, setSeeds] = useState<string[]>([]);
+  const [searchAd, setSearchAd] = useState<SearchAdStatus | null>(null);
   const [fetchedAt, setFetchedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +86,7 @@ export default function TrendPanel({ category, region, onInsert }: Props) {
     setKeywords([]);
     setNews([]);
     setSeeds([]);
+    setSearchAd(null);
     setFetchedAt(null);
     setError(null);
     setPicked(new Set());
@@ -74,13 +106,26 @@ export default function TrendPanel({ category, region, onInsert }: Props) {
       setKeywords(j.keywords as Keyword[]);
       setNews((j.news ?? []) as NewsItem[]);
       setSeeds((j.seedsUsed ?? []) as string[]);
+      setSearchAd((j.searchAd ?? null) as SearchAdStatus | null);
       setFetchedAt(j.fetchedAt ?? null);
       setPicked(new Set());
-      push({
-        kind: "success",
-        title: `키워드 ${j.keywords.length}개 발굴`,
-        message: `시드 ${j.seedsUsed?.length ?? 0}개 → 자동완성 ${j.requests}회 조회`,
-      });
+
+      const sa = j.searchAd as SearchAdStatus | undefined;
+      if (sa?.error) {
+        push({
+          kind: "warn",
+          title: `키워드 ${j.keywords.length}개 (검색량 없음)`,
+          message: `검색광고 API: ${sa.error}`,
+        });
+      } else {
+        push({
+          kind: "success",
+          title: `키워드 ${j.keywords.length}개 발굴`,
+          message: sa?.matched
+            ? `검색량 ${sa.matched}개 조회됨 · 자동완성 ${j.requests}회`
+            : `시드 ${j.seedsUsed?.length ?? 0}개 → 자동완성 ${j.requests}회 조회`,
+        });
+      }
     } catch (e: any) {
       setError(e?.message || String(e));
     } finally {
@@ -106,8 +151,19 @@ export default function TrendPanel({ category, region, onInsert }: Props) {
     }
     const parts: string[] = [];
     if (kws.length > 0) {
+      // 검색량이 큰 것을 앞에 둬서 프롬프트가 주력 키워드를 알 수 있게 한다
+      const sorted = [...kws].sort((a, b) => (b.metric?.total ?? 0) - (a.metric?.total ?? 0));
       parts.push(
-        ["[노리는 검색 키워드]", ...kws.map((k) => `- ${k.text}`)].join("\n")
+        [
+          "[노리는 검색 키워드] (앞쪽일수록 주력)",
+          ...sorted.map((k) =>
+            k.metric
+              ? `- ${k.text} (월간검색 ${k.metric.total}${
+                  k.metric.competition ? `, 경쟁 ${k.metric.competition}` : ""
+                })`
+              : `- ${k.text}`
+          ),
+        ].join("\n")
       );
     }
     if (arts.length > 0) {
@@ -180,32 +236,64 @@ export default function TrendPanel({ category, region, onInsert }: Props) {
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-1.5 max-h-[280px] overflow-y-auto pr-1">
+          <div className="flex flex-wrap gap-1.5 max-h-[300px] overflow-y-auto pr-1">
             {keywords.map((k) => {
               const on = picked.has(k.text);
+              const m = k.metric;
+              const golden = k.reasons.includes("황금키워드");
               return (
                 <button
                   key={k.text}
                   onClick={() => toggle(k.text)}
-                  title={`점수 ${k.score} · ${k.reasons.join("·") || "일반"} · 시드: ${k.seed}`}
+                  title={
+                    `점수 ${k.score} · ${k.reasons.join("·") || "일반"} · 시드: ${k.seed}` +
+                    (m ? `\n월간검색 PC ${m.pc} / 모바일 ${m.mobile} · 경쟁 ${m.competition ?? "-"}` : "")
+                  }
                   className={
                     "text-xs rounded-full border px-3 py-1.5 transition text-left " +
                     (on
                       ? "border-accent bg-accent/15 text-text"
+                      : golden
+                      ? "border-good/50 bg-good/5 text-text hover:border-good"
                       : "border-line bg-bg/40 text-subtext hover:text-text hover:border-accent/50")
                   }
                 >
+                  {golden && <span className="mr-1">🏆</span>}
                   {k.text}
                   {k.reasons.includes("지역") && <span className="ml-1 text-accent">◆</span>}
-                  {k.reasons.includes("정보검색형") && <span className="ml-1 text-good">▲</span>}
+                  {m && (
+                    <span className="ml-1.5 mono text-[10px]">
+                      <span className="text-text">{fmtCount(m.total, m.masked)}</span>
+                      {m.competition && (
+                        <span className={`ml-1 ${COMP_COLOR[m.competition] ?? ""}`}>
+                          {m.competition}
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
 
-          <p className="text-[10px] text-subtext mt-2">
-            <span className="text-accent">◆</span> 지역 키워드(경쟁 낮음) ·{" "}
-            <span className="text-good">▲</span> 정보검색형(블로그가 먹히는 의도)
+          <p className="text-[10px] text-subtext mt-2 leading-relaxed">
+            🏆 황금키워드(검색량 100+ / 경쟁 안 높음) · <span className="text-accent">◆</span> 지역 ·
+            숫자 = 월간검색수 · <span className="text-good">낮음</span>/
+            <span className="text-warn">중간</span>/<span className="text-bad">높음</span> = 광고 경쟁도
+            {searchAd && !searchAd.enabled && (
+              <>
+                <br />
+                <span className="text-warn">
+                  검색량 표시 off — .env.local 에 {searchAd.missing.join(", ")} 설정 필요
+                </span>
+              </>
+            )}
+            {searchAd?.error && (
+              <>
+                <br />
+                <span className="text-bad">검색광고 API: {searchAd.error}</span>
+              </>
+            )}
           </p>
 
           {news.length > 0 && (

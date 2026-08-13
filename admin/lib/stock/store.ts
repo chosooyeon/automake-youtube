@@ -1,21 +1,24 @@
 /**
  * 관심종목 · 알림 상태 · 텔레그램 설정 저장소.
  *
- * admin/data/stock/ 아래 JSON 3개. admin/.gitignore 가 data/ 를 제외하므로
- * 봇 토큰이 커밋될 일은 없다 (이모티콘 스튜디오와 같은 방식 — admin/lib/emoticonStore.ts).
+ * 파일이 두 군데로 나뉜 이유는 GitHub Actions 때문이다.
+ * 맥이 꺼져 있어도 알림이 가려면 깃허브 러너가 관심종목을 읽고 알림 이력을 남겨야 하는데,
+ * 러너는 저장소에 커밋된 파일만 볼 수 있다.
+ *   config/        (커밋됨)   관심종목 · 알림 이력 — 비밀이 아니고, 러너가 읽고 써야 함
+ *   admin/data/    (git 제외) 텔레그램 봇 토큰 — 절대 커밋되면 안 됨. CI 에서는 Secrets 로 주입
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import { REPO_ROOT } from "../paths";
+import { CONFIG_DIR, REPO_ROOT } from "../paths";
 import { getEnv } from "../env";
 import type { Market, StockRef } from "./naver";
 import type { Verdict } from "./signals";
 
 export const STOCK_DATA_DIR = path.join(REPO_ROOT, "admin", "data", "stock");
 
-const WATCHLIST_FILE = path.join(STOCK_DATA_DIR, "watchlist.json");
-const ALERT_STATE_FILE = path.join(STOCK_DATA_DIR, "alert-state.json");
+const WATCHLIST_FILE = path.join(CONFIG_DIR, "stock-watchlist.json");
+const ALERT_STATE_FILE = path.join(CONFIG_DIR, "stock-alert-state.json");
 const TELEGRAM_FILE = path.join(STOCK_DATA_DIR, "telegram.json");
 
 export interface WatchItem extends StockRef {
@@ -37,10 +40,6 @@ export interface TelegramConfig {
   chatId: string;
 }
 
-function ensureDir(): void {
-  fs.mkdirSync(STOCK_DATA_DIR, { recursive: true });
-}
-
 function readJson<T>(file: string, fallback: T): T {
   try {
     return JSON.parse(fs.readFileSync(file, "utf8")) as T;
@@ -50,7 +49,7 @@ function readJson<T>(file: string, fallback: T): T {
 }
 
 function writeJson(file: string, data: unknown): void {
-  ensureDir();
+  fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
 }
 

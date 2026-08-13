@@ -36,7 +36,8 @@
 | 뉴스 RSS 스크랩 | `admin/lib/news/{feeds,rss}.ts` (캐시 `.cache/news/`, TTL 30분) |
 | 블로그 생성 | `admin/app/api/blog/generate/route.ts` + `admin/data/blog_style.md` |
 | 이모티콘 | `admin/lib/emoticon*.ts` |
-| 주식 매매신호·알림 | `admin/lib/stock/*` (naver=데이터·indicators=지표·signals=판정·scan=알림), `scripts/stock-watch.mjs` |
+| 주식 매매신호·알림 | `admin/lib/stock/*` (naver=데이터·indicators=지표·signals=판정·scan=알림). 관심종목·알림이력은 `config/stock-*.json` (커밋됨), 봇 토큰만 `admin/data/stock/telegram.json` (git 제외) |
+| 주식 알림 상시 가동 | `.github/workflows/stock-alert.yml` → `scripts/stock-scan-ci.ts` (tsx, admin 서버 불필요). 맥 켜둔 채 돌릴 땐 `scripts/stock-watch.mjs` |
 | 주제 큐 | `topics/queue/`, `admin/lib/topics.ts` |
 | 영상 렌더링 | `scripts/build-video.mjs`(롱폼), `scripts/render-shorts.mjs`(숏폼), `tools/ffmpeg` |
 | 입출력 계약 | `shared/schemas/*.json` |

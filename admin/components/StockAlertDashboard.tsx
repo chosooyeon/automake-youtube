@@ -357,6 +357,10 @@ export default function StockAlertDashboard() {
         판정은 <span className="text-text">확정된 일봉</span>(전 거래일 종가)의 RSI·이동평균·MACD·볼린저밴드·거래량으로
         계산합니다. 장중에 신호가 나타났다 사라지는 현상을 피하려는 설계이며, 표시되는 현재가는 참고용입니다.
         <br />
+        맥이 꺼져 있어도 알림이 가도록 GitHub Actions 가 평일 하루 2번(한국장·미국장 마감 후) 대신 스캔합니다.
+        종목을 추가·삭제했다면 <span className="mono text-text">config/stock-watchlist.json</span> 을 커밋·푸시해야
+        깃허브 쪽에도 반영됩니다.
+        <br />
         <span className="text-warn">기술적 지표 참고용입니다. 투자 판단과 그 결과에 대한 책임은 본인에게 있습니다.</span>
       </p>
     </div>
