@@ -5,29 +5,54 @@
 > 자동화하는 하네스. 매번 프롬프트를 새로 짜는 게 아니라, **설정 파일을 한 번 세팅**하면
 > 그 다음부터는 슬러그 하나만 주고 봇을 돌리면 됩니다.
 
+> **에이전트(Claude Code)로 이 저장소를 여는 경우**: `CLAUDE.md` 하나만 읽으면 전체 지도가 나옵니다.
+> 더 자세한 구조는 `docs/ARCHITECTURE.md`. 이 README는 사람이 손으로 돌릴 때의 사용법입니다.
+
+## 0. 지금 들어있는 것 (트랙 5개)
+
+| 트랙 | 무엇 | 어디서 돌리나 |
+|---|---|---|
+| 유튜브 롱폼 | 봇 00~06 | 대시보드 "롱폼" 탭 / `scripts/run-bot.sh` |
+| 유튜브 숏폼 | 봇 S1~S4 (부모 롱폼 필요) | "숏폼" 탭 |
+| 인스타 카드뉴스 | RSS 수집 → 문안 → 카드 PNG | "인스타" 탭 |
+| 블로그 글 | 카테고리 + 문체 시그니처로 초안 생성 | "블로그" 탭 |
+| 이모티콘 / 시나리오 | Gemini 이미지, 씬·캐릭터 관리 | "이모티콘" · "시나리오" 탭 |
+
 ## 1. 한눈에 보는 구조
 
 ```
 automake-youtube/
-├─ AGENTS.md              ← Claude Code가 가장 먼저 읽는 운영 매뉴얼
+├─ CLAUDE.md              ← 에이전트가 읽는 전체 지도 (+ docs/ARCHITECTURE.md 상세)
+├─ AGENTS.md              ← 봇 실행 규칙 요약
 ├─ README.md              ← (이 파일) 사람이 읽는 사용 가이드
 ├─ .claude/settings.json  ← Claude Code 권한·도구·로깅 설정
+├─ admin/                 ← 로컬 대시보드 (Next.js 14, :3000) — 모든 트랙의 실행 버튼
 ├─ config/
-│  ├─ global.json         ← 채널·브랜드·언어·API 키 placeholder (전역)
+│  ├─ global.json         ← 채널·브랜드·API + active_niche / niches.*
+│  ├─ channels.json       ← 채널 목록
 │  └─ pipeline.json       ← 봇 실행 순서·의존성
 ├─ shared/
 │  ├─ schemas/            ← 봇 간 입출력 JSON 스키마(계약서)
-│  └─ templates/          ← 썸네일 베이스
+│  ├─ templates/          ← 썸네일·CapCut 베이스
+│  ├─ fonts/              ← Pretendard (카드·자막)
+│  └─ references/         ← 니치별 리서치 자료
 ├─ bots/
+│  ├─ 00-topic/           ← 다음에 만들 주제 5개 추천 (파이프라인 외부)
 │  ├─ 01-benchmark/       ← 레퍼런스 수집 + 분석
 │  ├─ 02-strategy/        ← 컨셉·제목·훅·인트로
 │  ├─ 03-script/          ← 기획·집필·검수·리비전
 │  ├─ 04-audio/           ← TTS·자막·무음 압축
 │  ├─ 05-visual/          ← 씬 설계·이미지·영상 명세
-│  └─ 06-edit-upload/     ← ffmpeg 렌더링·썸네일 5장·YouTube 업로드
+│  ├─ 06-edit-upload/     ← ffmpeg 렌더링·썸네일 5장·YouTube 업로드
+│  └─ S1~S4-shorts-*/     ← 숏폼 4단계
+├─ scripts/               ← 렌더·업로드·봇 실행 wrapper
+├─ tools/ffmpeg           ← libass 포함 정적 빌드 (시스템 설치 불필요)
+├─ topics/                ← 주제 큐(queue) / 사용한 주제(archive)
+├─ cinema/                ← 시나리오 트랙 프로젝트
 └─ projects/
    ├─ _example/           ← 새 영상 시작 템플릿 (복사해서 사용)
-   └─ <slug>/             ← 영상 1편 = 폴더 1개
+   ├─ _example-short/     ← 숏폼 템플릿
+   └─ <slug>/             ← 영상(또는 카드뉴스) 1건 = 폴더 1개
 ```
 
 각 봇 폴더는 항상 다음 3개 파일로 구성됩니다.
@@ -46,6 +71,10 @@ automake-youtube/
 - `brand.tone`, `brand.ban_words`, `brand.intro_signature`, `brand.outro_signature`
 - `brand.color_palette`, `brand.font_pair`
 - `video_defaults.duration_sec` (롱폼 기본 길이)
+
+**여러 채널(니치)을 돌린다면**: `niches.<id>` 에 덮어쓸 값만 적고 `active_niche` 로 전환합니다
+(대시보드 상단 니치 셀렉터도 같은 일을 합니다). 전환하면 진행 중인 프로젝트에
+`00-input/channel_config.json` 스냅샷이 남아, 과거 프로젝트는 예전 설정을 그대로 씁니다.
 
 ### 2-2. 모델·API 설정
 `config/global.json.apis` 에서 placeholder 들을 채웁니다.
@@ -84,13 +113,16 @@ cp -R projects/_example projects/deep-focus-01
 ### Step 2. brief 작성
 `projects/deep-focus-01/00-input/brief.md` 채우기 (주제·타겟·길이·금지어)
 
-### Step 3. Claude Code에 명령
+### Step 3. 실행 (대시보드 권장)
+```bash
+cd admin && npm run dev    # → http://localhost:3000, "롱폼" 탭에서 단계별 [실행]
 ```
-deep-focus-01 풀 파이프라인 시작해. 5번까지만.
-```
+대시보드 사용법·트러블슈팅은 `admin/README.md`.
 
-Claude Code는 `AGENTS.md` → `config/pipeline.json` → 각 봇 `prompt.md` 순으로 읽고
-01 → 02 → 03 → 04 → 05 까지 순서대로 돌립니다.
+> **한 번에 한 단계만 돕니다.** 풀 파이프라인 자동 실행은 정책상 꺼져 있습니다
+> (`config/pipeline.json.step_by_step_only`). 각 단계 결과를 보고 다음 단계를 누르세요.
+
+Claude Code 대화로 시킬 수도 있습니다: `deep-focus-01 의 01번 봇 실행해`
 
 #### 또는 터미널 wrapper 사용 (admin 안 거치고 바로)
 ```bash
@@ -206,7 +238,7 @@ cp -R projects/_example-short projects/my-slug-short
 
 | 의도 | 한 줄 |
 |---|---|
-| 새 영상 시작 | `<slug> 풀 파이프라인 시작, 5번까지만` |
+| 새 영상 시작 | `<slug> 01번 봇 실행` (이후 단계별로 하나씩) |
 | 특정 봇만 재실행 | `<slug> 의 03번 봇 다시` |
 | 비주얼 실제 생성 | `<slug> 의 05번 generate 모드로` |
 | 6번 진행 (업로드 X) | `<slug> 06번, 업로드는 skip` |
@@ -215,7 +247,9 @@ cp -R projects/_example-short projects/my-slug-short
 
 ## 7. 더 깊이
 
+- 저장소 전체 구조·데이터 흐름·함정: `docs/ARCHITECTURE.md`
+- 에이전트용 지도 + 실행 규칙: `CLAUDE.md`, `AGENTS.md`
+- 대시보드 사용법·트러블슈팅: `admin/README.md`
 - 봇이 정확히 뭘 하는지: 각 `bots/<번호>/prompt.md`
 - 입출력 계약: `shared/schemas/*.json`
-- 에이전트 운영 규칙: `AGENTS.md`
 - 권한·로깅: `.claude/settings.json`

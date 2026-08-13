@@ -27,6 +27,13 @@ export interface FeedFetchResult {
   error?: string;
 }
 
+/**
+ * Google 뉴스 RSS 는 저품질 매체의 도배 글도 같이 물어온다
+ * (실제로 "포커 토토사이트" 류가 육아 지원금 쿼리에 섞여 들어옴).
+ * 제목에 이게 걸리면 통째로 버린다.
+ */
+const SPAM = /(토토|카지노|바카라|슬롯|먹튀|betting|파워볼|성인용품|비아그라|대출\s*상담|출장\s*(마사지|안마))/i;
+
 const ENTITIES: Record<string, string> = {
   amp: "&",
   lt: "<",
@@ -118,7 +125,7 @@ export function parseFeed(xml: string, fallbackSource: string): NewsItem[] {
 
   for (const [, , block] of blocks) {
     const title = clean(tagText(block, "title"));
-    if (!title) continue;
+    if (!title || SPAM.test(title)) continue;
 
     const linkRaw = clean(tagText(block, "link")) || atomLink(block) || "";
     const link = linkRaw.trim();
@@ -192,12 +199,17 @@ export async function collectFeeds(
 ): Promise<{ items: NewsItem[]; results: FeedFetchResult[] }> {
   const settled = await Promise.all(feeds.map((f) => fetchFeed(f.url, f.label)));
 
-  const seen = new Set<string>();
+  // 링크 기준만으로는 부족하다: 같은 기사가 여러 Google 뉴스 쿼리에서
+  // 서로 다른 리다이렉트 URL 로 오기 때문에 제목 기준 중복도 같이 걸러야 한다.
+  const seenLink = new Set<string>();
+  const seenTitle = new Set<string>();
   const merged: NewsItem[] = [];
   for (const s of settled) {
     for (const it of s.items) {
-      if (seen.has(it.key)) continue;
-      seen.add(it.key);
+      const titleKey = it.title.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+      if (seenLink.has(it.key) || seenTitle.has(titleKey)) continue;
+      seenLink.add(it.key);
+      seenTitle.add(titleKey);
       merged.push(it);
     }
   }

@@ -8,13 +8,8 @@ import {
   formatMmSs,
   type VerifyStatus,
 } from "./BlogJobContext";
-
-type Category =
-  | "gov_support"
-  | "baby_review"
-  | "newlywed_diary"
-  | "food_cafe"
-  | "wedding_prep";
+import TrendPanel from "./TrendPanel";
+import type { BlogCategory as Category } from "@/lib/trends/blog-seeds";
 
 const CATEGORIES: { id: Category; label: string; sub: string }[] = [
   { id: "gov_support", label: "정부지원금 & 꿀팁", sub: "출산축하금 · 부모급여 · 임산부 혜택 (정보성 / C-Rank)" },
@@ -78,6 +73,11 @@ export default function BlogGenerator() {
       extraNote,
       useStyle,
     });
+  }
+
+  /** 트렌드 패널에서 고른 키워드/기사를 본문 입력란에 append */
+  function insertTrend(text: string) {
+    setContent((prev) => (prev.trim() ? `${prev.trimEnd()}\n\n${text}` : text));
   }
 
   async function copy(text: string, label: string) {
@@ -154,7 +154,21 @@ export default function BlogGenerator() {
 
         {/* 입력 본문 */}
         <div className="lg:col-span-2 space-y-4">
-          <Card title="3. 내가 입력하는 내용">
+          <TrendPanel category={category} region={region} onInsert={insertTrend} />
+
+          <Card
+            title="3. 내가 입력하는 내용"
+            right={
+              content.trim() ? (
+                <button
+                  onClick={() => setContent("")}
+                  className="text-xs border border-line rounded px-2 py-1 hover:bg-panel2 text-subtext"
+                >
+                  비우기
+                </button>
+              ) : undefined
+            }
+          >
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}

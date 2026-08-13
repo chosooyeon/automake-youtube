@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { ToastProvider } from "@/components/Toast";
 import { BlogJobProvider } from "@/components/BlogJobContext";
 import { InstagramJobProvider } from "@/components/InstagramJobContext";
+import ThemeToggle from "@/components/ThemeToggle";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 export const metadata: Metadata = {
   title: "automake-youtube · 관리자",
@@ -11,7 +13,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
         <ToastProvider>
          <BlogJobProvider>
@@ -23,7 +28,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <div className="text-xs text-subtext uppercase tracking-widest">automake-youtube</div>
                   <h1 className="text-xl font-bold">관리자 대시보드</h1>
                 </div>
-                <div className="text-xs text-subtext mono">localhost:3000 · 로컬 전용</div>
+                <div className="flex items-center gap-3">
+                  <div className="text-xs text-subtext mono">localhost:3000 · 로컬 전용</div>
+                  <ThemeToggle />
+                </div>
               </div>
             </header>
             <main className="max-w-7xl mx-auto px-6 py-6">{children}</main>

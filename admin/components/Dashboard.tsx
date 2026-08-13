@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import LongFormDashboard from "./LongFormDashboard";
-import TopicQueue from "./TopicQueue";
-import ShortsDashboard from "./ShortsDashboard";
+import YoutubeWorkspace from "./YoutubeWorkspace";
 import NicheSelector from "./NicheSelector";
 import BlogGenerator from "./BlogGenerator";
 import BlogProgressBar from "./BlogProgressBar";
@@ -11,21 +9,30 @@ import EmoticonStudio from "./EmoticonStudio";
 import InstagramCardGenerator from "./InstagramCardGenerator";
 import InstagramProgressBar from "./InstagramProgressBar";
 import CinemaStudio from "./CinemaStudio";
+import ChatPanel from "./ChatPanel";
+import StockAlertDashboard from "./StockAlertDashboard";
 
-type Tab = "topics" | "longform" | "shorts" | "instacard" | "blog" | "emoticon" | "cinema";
+type Tab =
+  | "youtube"
+  | "instacard"
+  | "blog"
+  | "emoticon"
+  | "cinema"
+  | "stock"
+  | "chat";
 
 const TABS: { id: Tab; label: string; status: "live" | "planned" }[] = [
-  { id: "topics", label: "💡 주제 큐 (0번)", status: "live" },
-  { id: "longform", label: "🎬 롱폼 (YouTube 8~10분)", status: "live" },
-  { id: "shorts", label: "📱 숏폼 (YouTube Shorts)", status: "live" },
+  { id: "youtube", label: "🎬 유튜브", status: "live" },
   { id: "instacard", label: "🟪 인스타 카드 피드", status: "live" },
   { id: "blog", label: "📝 블로그 글 (네이버)", status: "live" },
   { id: "emoticon", label: "🎨 이모티콘 (마켓 등록)", status: "live" },
   { id: "cinema", label: "🎭 시나리오 (감독 모드)", status: "live" },
+  { id: "stock", label: "📈 주식 매매 알림", status: "live" },
+  { id: "chat", label: "💬 클로드 대화", status: "live" },
 ];
 
 export default function Dashboard() {
-  const [tab, setTab] = useState<Tab>("topics");
+  const [tab, setTab] = useState<Tab>("youtube");
   const [nicheKey, setNicheKey] = useState(0);
 
   return (
@@ -63,9 +70,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {tab === "topics" && <TopicQueue />}
-      {tab === "longform" && <LongFormDashboard />}
-      {tab === "shorts" && <ShortsDashboard />}
+      {tab === "youtube" && <YoutubeWorkspace />}
       <div className={tab === "instacard" ? "" : "hidden"}>
         <InstagramCardGenerator />
       </div>
@@ -74,6 +79,11 @@ export default function Dashboard() {
       </div>
       {tab === "emoticon" && <EmoticonStudio />}
       {tab === "cinema" && <CinemaStudio />}
+      {tab === "stock" && <StockAlertDashboard />}
+      {/* 스트리밍 중 탭을 옮겨도 대화가 끊기지 않도록 언마운트하지 않는다 */}
+      <div className={tab === "chat" ? "" : "hidden"}>
+        <ChatPanel />
+      </div>
     </div>
   );
 }
