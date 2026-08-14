@@ -1,0 +1,434 @@
+[
+  {
+    "id": "i_ef58ed77",
+    "title": "클립 제작 자동화",
+    "note": "[관리 엔진] 숏폼을 손으로 만들다 지쳐서 유튜브가 멈췄다. 게을러서가 아니라 수작업이라서다. render-shorts.mjs 가 이미 있으니 소재→렌더→업로드 준비까지 잇는다. 이게 되면 유튜브 재개도 공짜로 따라온다.",
+    "category": "automation",
+    "status": "shortlist",
+    "createdAt": "2026-08-14T00:27:53.034Z",
+    "updatedAt": "2026-08-14T00:27:53.034Z"
+  },
+  {
+    "id": "i_83341780",
+    "category": "automation",
+    "title": "발행한 제휴링크 위생 점검",
+    "note": "[나중] 상품이 품절되면 링크가 죽어 수익이 0이 된다. 주기적으로 점검해 교체 알림. 글이 쌓인 뒤에 의미 있으므로 지금은 이름.",
+    "status": "parked",
+    "createdAt": "2026-08-13T23:37:16.238Z",
+    "updatedAt": "2026-08-13T23:37:16.238Z"
+  },
+  {
+    "id": "i_d27216b5",
+    "category": "automation",
+    "title": "관심 상품 가격 감시 → 알림",
+    "note": "[나중] 주식 알림 봇 구조를 그대로 재활용 가능(watchlist → scan → 텔레그램). 소재 발굴용으로 쓰거나, 아예 '육아용품 최저가 알림' 텔레그램 채널로. 팔로워 없이도 수익이 나는 구조라 초반에 셈. 토스·쿠팡 어느 쪽이든 됨.",
+    "status": "parked",
+    "createdAt": "2026-08-13T23:37:16.238Z",
+    "updatedAt": "2026-08-13T23:37:16.238Z"
+  },
+  {
+    "id": "i_28c6af95",
+    "category": "content",
+    "title": "카테고리 베스트 → 주간 랭킹 콘텐츠",
+    "note": "[나중] 'TOP 10' 형식은 검색·저장 유입이 오래 간다. 플랫폼 무관 — 쿠팡 상품검색 API로도 같은 걸 만들 수 있다.",
+    "status": "parked",
+    "createdAt": "2026-08-13T23:37:16.238Z",
+    "updatedAt": "2026-08-13T23:37:16.238Z"
+  },
+  {
+    "id": "i_98d538f8",
+    "category": "automation",
+    "title": "하루특가 → 매일 자동 카드뉴스",
+    "note": "[나중] 하루특가는 소재가 매일 새로 오고 시의성이 있어 전환율이 높다. 휘발성 포맷(스토리·릴스)에만. 영구 보존되는 글엔 가격이 틀려져서 안 맞음. 토스는 사용자 규모가 미지수라 쿠팡 API가 열린 뒤 비교하고 결정.",
+    "status": "parked",
+    "createdAt": "2026-08-13T23:37:16.238Z",
+    "updatedAt": "2026-08-13T23:37:16.238Z"
+  },
+  {
+    "id": "i_d4af1460",
+    "title": "책 추천 콘텐츠",
+    "note": "카드뉴스로 자동화 — 이미 있는 인스타 파이프라인 재활용",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_d21d42ea",
+    "title": "게임 추천 콘텐츠",
+    "note": "브랜드 축과 무관하고 수익 경로가 없다. 취향 배출은 10% 코너로 충분.",
+    "category": "content",
+    "status": "icebox",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_09a072c7",
+    "title": "AI · IT 활용법 콘텐츠",
+    "note": "[블로그 트랙에 흡수됨] 별도 트랙이 아니라 네이버 블로그에 쓰는 글 주제로. 영상으로 만들려다 멈췄던 게 이 트랙이 죽은 이유였다.",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-14T00:27:53.034Z"
+  },
+  {
+    "id": "i_080fe3e3",
+    "title": "음악 플레이리스트 콘텐츠",
+    "note": "음악은 저작권 리스크 + 애드센스 단가 최하위. 서브수입 목표와 정면으로 어긋난다.",
+    "category": "content",
+    "status": "icebox",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_08059323",
+    "title": "오늘 뭐 샀지",
+    "note": "[대기] 육아용품 숏츠가 자리잡으면 같은 포맷으로 확장. 지금 동시에 벌리면 둘 다 흐려진다.",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_821bf1c7",
+    "title": "오늘 어디 갔지",
+    "note": "카페 방문 · 산책 · 맛집 기록",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_95601859",
+    "title": "오늘 뭐 먹었지",
+    "note": "간단 요리 과정 · 배달음식 리뷰 · 임산부 식단 기록",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_509fe76b",
+    "title": "다이소에서 발견한 갓성비 템 3가지",
+    "note": "[대기] 위와 동일 포맷. 파트너스 전환율은 육아용품이 더 높다.",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_9501eb2e",
+    "title": "임신 확인 후 처음 구매한 것들 (솔직후기)",
+    "note": "[대기] 육아용품 숏츠의 한 에피소드로 쓰면 된다. 별도 트랙 아님.",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_87866c68",
+    "title": "집순이의 평범한 주말 브이로그",
+    "note": "오늘 뭐하지?",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_50b4b542",
+    "title": "해외 타겟 감성문구 · 동기부여 숏츠",
+    "note": "레드오션 + 브랜드 축적 0. 남는 게 없다.",
+    "category": "content",
+    "status": "icebox",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_5730b18f",
+    "title": "명언 · 건강 정보 · 트로트 소식",
+    "note": "타겟이 중장년이라 육아/개발 축과 겹치지 않는다. 하려면 별도 계정이 필요한데 계정은 안 늘리기로 했다.",
+    "category": "content",
+    "status": "icebox",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_aa035887",
+    "title": "AI 아바타 숏폼",
+    "note": "위와 동일. 포맷 실험은 AI/IT 트랙 안에서 하면 된다.",
+    "category": "content",
+    "status": "icebox",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_026d313b",
+    "title": "저작권 없는 만화 쇼츠",
+    "note": "단가 낮고 채널 정체성을 흐린다.",
+    "category": "content",
+    "status": "icebox",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_bdec7f3a",
+    "title": "Suno AI 노래 플레이리스트",
+    "note": "위와 동일. 재밌지만 돈이 안 되고 브랜드도 안 쌓인다.",
+    "category": "content",
+    "status": "icebox",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_97ca35d7",
+    "title": "육아일기 웹툰",
+    "note": "",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_9c8efb09",
+    "title": "유아 동화책 읽어주기 롱폼",
+    "note": "동화책 저작권 + 아동용 설정 시 맞춤광고가 막혀 수익이 급감한다. 서브수입 목표와 안 맞는다.",
+    "category": "content",
+    "status": "icebox",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_22fc361d",
+    "title": "예능짤 · 연예인짤 덧글 모음",
+    "note": "저작권. 계정 정지 리스크가 수익보다 크다. [알아볼 것] 결론이 나기 전엔 손대지 않는다.",
+    "category": "content",
+    "status": "icebox",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_2b9b2627",
+    "title": "주식 뉴스",
+    "note": "",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_46d50183",
+    "title": "정부 지원금 정보",
+    "note": "[대기 1순위] 육아 타겟과 정확히 겹치고 검색 수요가 크다(출산장려금·아동수당·첫만남이용권). 네이버 블로그 검색 유입 + 애드포스트에 최적. 시즌2 0순위.",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_5bfb5551",
+    "title": "내가 확인할 경제뉴스",
+    "note": "",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_8a4f4a31",
+    "title": "경제 · 과학 · 심리학 · 역사",
+    "note": "지식 채널 축. 현재 니치가 psychology 라 여기서 이어짐",
+    "category": "content",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_8f23b46a",
+    "title": "육아용품 숏폼 → 네이버 클립 우선",
+    "note": "[수익 엔진] 네이버 클립 우선. 유튜브 숏츠와 달리 바로 4,000원이 들어오고 이미 주 2~3개 하고 있다. 같은 영상을 나중에 유튜브 숏츠로 재활용하면 되므로 손해가 없다.",
+    "category": "content",
+    "status": "shortlist",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-14T00:27:53.034Z"
+  },
+  {
+    "id": "i_7253889b",
+    "title": "카드뉴스 공장 돌리기",
+    "note": "[대기] 인스타는 지금 복돌이 영상 개그용으로만 쓰고 있어 우선순위가 아니다. 클립 자동화가 돌기 시작하면 같은 부품을 재활용해 여기로 확장.",
+    "category": "automation",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-14T00:27:53.034Z"
+  },
+  {
+    "id": "i_4a49a4e9",
+    "title": "숏츠 제품 하나 캡쳐 → 양산화 숏츠",
+    "note": "",
+    "category": "automation",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_26d95545",
+    "title": "4×4 이모티콘 제작",
+    "note": "[대기] 자산형 수입. 통과하면 계속 들어오고 관리 부담 0. OGQ(네이버)가 카카오보다 승인 쉽다. 짬짬이 쌓기.",
+    "category": "automation",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_89a510d4",
+    "title": "사진 찍은 걸로 이미지화해서 이모티콘",
+    "note": "[대기] 이모티콘 승인 경험이 쌓인 뒤.",
+    "category": "automation",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_6b716da2",
+    "title": "레퍼런스 수집 → 자동 전략·기획·검수·제작",
+    "note": "[시즌4] 이 저장소의 최종 목표. 앞의 것들이 돌아간 뒤에 얹는 층.",
+    "category": "automation",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_7b51fa48",
+    "title": "이모티콘 제작 + 마켓 업로드 자동화",
+    "note": "[대기] 위와 세트. 승인 뒤에 자동화해도 늦지 않다.",
+    "category": "automation",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_6538be12",
+    "title": "육아 기록 앱",
+    "note": "만들어 파는 순간 시간이 다 간다. [만드는 과정]을 AI/IT 트랙 소재로만 쓴다.",
+    "category": "product",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_b7c52b3c",
+    "title": "내 TODO 기록 웹",
+    "note": "2026-08-13 admin 데일리 퀘스트 탭으로 완성",
+    "category": "product",
+    "status": "done",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_2ec7a263",
+    "title": "이유식 앱",
+    "note": "본인이 유저인 게 강점. 다만 제품이 아니라 소재로. 만드는 3일을 콘텐츠 5편으로 바꾼다.",
+    "category": "product",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_586796dc",
+    "title": "토스 앱 미니게임",
+    "note": "동일. 완성이 목표가 아니라 과정이 콘텐츠.",
+    "category": "product",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_8036127e",
+    "title": "타로 수익화",
+    "note": "전문성이 없고 브랜드가 정면 충돌. 신뢰 쌓는 데만 1년.",
+    "category": "money",
+    "status": "icebox",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_b1080412",
+    "title": "전자책 자동화 수익구조",
+    "note": "[시즌3~4] 단가는 제일 높지만 채널 신뢰가 먼저다. 구독자 없이 내놓으면 안 팔린다. AI/IT 트랙이 커진 뒤.",
+    "category": "money",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_dfac554b",
+    "title": "이모티콘 자동화 프로그램 판매",
+    "note": "[시즌3~4] 단가는 제일 높지만 채널 신뢰가 먼저다. 구독자 없이 내놓으면 안 팔린다. AI/IT 트랙이 커진 뒤.",
+    "category": "money",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_26f13fb9",
+    "title": "인스타 카드뉴스 자동 업로드 프로그램 판매",
+    "note": "[시즌3~4] 단가는 제일 높지만 채널 신뢰가 먼저다. 구독자 없이 내놓으면 안 팔린다. AI/IT 트랙이 커진 뒤.",
+    "category": "money",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_606d2988",
+    "title": "네이버 블로그 + 쿠팡 파트너스",
+    "note": "[수익 + 브랜드 엔진] 이미 거의 매일 쓰고 있고 파트너스도 붙어 있다. 검색 유입이라 누적되고, 쿠팡 최종승인(누적 15만원)이 나올 확률이 제일 높은 곳. AI/IT 활용법도 영상 말고 여기에 글로 쓴다 — 개발자에게 글이 영상보다 훨씬 빠르다.",
+    "category": "money",
+    "status": "shortlist",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-14T00:27:53.034Z"
+  },
+  {
+    "id": "i_7bb0b47a",
+    "title": "브랜드를 어떻게 만드는가",
+    "note": "축 확정: 육아휴직 개발자가 자동화로 서브수입 만드는 기록. 주제가 아니라 사람으로 정의했으므로 소재는 갈아껴도 된다.",
+    "category": "brand",
+    "status": "doing",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_bab6a1d4",
+    "title": "비주얼 톤앤매너 — 폰트·자막 위치 고정",
+    "note": "이번 주 세팅. 폰트·자막위치·색을 한 번 고정하면 브랜드 인식의 대부분이 해결된다. 30분 작업.",
+    "category": "brand",
+    "status": "doing",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_988a40d1",
+    "title": "AI 나레이션 · 썸네일 통일감",
+    "note": "이번 주 세팅. 목소리 1개·썸네일 레이아웃 1개로 고정.",
+    "category": "brand",
+    "status": "doing",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:44:22.208Z"
+  },
+  {
+    "id": "i_28009b4d",
+    "title": "AI 일감 중개 업체 구조",
+    "note": "영업으로 일 따옴 → 블로그 외주 → 수수료? 실제로 그런 업체가 있는지, 마진 구조가 어떤지",
+    "category": "research",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  },
+  {
+    "id": "i_ea0c670e",
+    "title": "예능짤 · 연예인짤 덧글 모음 소스",
+    "note": "어디서 가져오는지 + 저작권이 되는지부터",
+    "category": "research",
+    "status": "parked",
+    "createdAt": "2026-08-13T09:38:33.007Z",
+    "updatedAt": "2026-08-13T09:38:33.007Z"
+  }
+]

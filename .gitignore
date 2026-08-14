@@ -98,3 +98,14 @@ admin/tsconfig.tsbuildinfo
 
 # === 뉴스 RSS 수집 캐시 ===
 .cache/
+
+# === 대용량 바이너리 (공식 사이트에서 내려받는 것, 커밋 대상 아님) ===
+tools/ffmpeg
+tools/ffmpeg.exe
+tools/*.zip
+
+# === 인스타 카드 생성 산출물 (admin 에서 언제든 재생성 가능) ===
+projects/*/instagram-cards/
+
+# === 런타임 상태 (실행할 때마다 바뀜 — 설정이 아니라 실행 흔적) ===
+config/stock-alert-state.json

@@ -17,6 +17,8 @@ export interface NewsItem {
   publishedAt: string | null;
   /** 본문 요약 (태그 제거·280자 컷) */
   summary: string;
+  /** 정렬 가중치. 높을수록 위. 키워드 전용 피드가 여기에 해당 */
+  priority: number;
 }
 
 export interface FeedFetchResult {
@@ -60,7 +62,12 @@ function stripTags(s: string): string {
 function clean(raw: string | null, maxLen = 0): string {
   if (!raw) return "";
   let s = raw.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1");
-  s = decodeEntities(stripTags(s)).replace(/\s+/g, " ").trim();
+  // 순서가 중요하다: Google 뉴스 description 은 태그가 &lt;a&gt; 로 인코딩돼 온다.
+  // 태그부터 벗기면 인코딩된 태그가 안 걸리고, 그 뒤 디코딩에서 <a href> 가 본문에 튀어나온다.
+  // → 디코딩 → 태그 제거 → 남은 엔티티(&nbsp; 등) 디코딩 순으로 두 번 돈다.
+  s = decodeEntities(s);
+  s = stripTags(s);
+  s = decodeEntities(s).replace(/\s+/g, " ").trim();
   if (maxLen > 0 && s.length > maxLen) s = s.slice(0, maxLen).trimEnd() + "…";
   return s;
 }
@@ -119,7 +126,7 @@ function trimSourceSuffix(title: string, source: string): string {
   return title.endsWith(suffix) ? title.slice(0, -suffix.length).trim() : title;
 }
 
-export function parseFeed(xml: string, fallbackSource: string): NewsItem[] {
+export function parseFeed(xml: string, fallbackSource: string, priority = 0): NewsItem[] {
   const blocks = [...xml.matchAll(/<(item|entry)(?:\s[^>]*)?>([\s\S]*?)<\/\1>/gi)];
   const items: NewsItem[] = [];
 
@@ -155,6 +162,7 @@ export function parseFeed(xml: string, fallbackSource: string): NewsItem[] {
       source,
       publishedAt,
       summary,
+      priority,
     });
   }
   return items;
@@ -163,6 +171,7 @@ export function parseFeed(xml: string, fallbackSource: string): NewsItem[] {
 export async function fetchFeed(
   url: string,
   label: string,
+  priority = 0,
   timeoutMs = 9000
 ): Promise<{ items: NewsItem[]; result: FeedFetchResult }> {
   const ctrl = new AbortController();
@@ -182,7 +191,7 @@ export async function fetchFeed(
       return { items: [], result: { label, url, ok: false, count: 0, error: `HTTP ${res.status}` } };
     }
     const xml = await res.text();
-    const items = parseFeed(xml, label);
+    const items = parseFeed(xml, label, priority);
     return { items, result: { label, url, ok: true, count: items.length } };
   } catch (e) {
     const msg = (e as Error)?.name === "AbortError" ? "timeout" : (e as Error)?.message || "fetch failed";
@@ -192,12 +201,12 @@ export async function fetchFeed(
   }
 }
 
-/** 여러 피드를 병렬 수집 → 중복 제거 → 최신순 정렬 */
+/** 여러 피드를 병렬 수집 → 중복 제거 → 우선순위·최신순 정렬 */
 export async function collectFeeds(
-  feeds: Array<{ label: string; url: string }>,
+  feeds: Array<{ label: string; url: string; priority?: number }>,
   limit: number
 ): Promise<{ items: NewsItem[]; results: FeedFetchResult[] }> {
-  const settled = await Promise.all(feeds.map((f) => fetchFeed(f.url, f.label)));
+  const settled = await Promise.all(feeds.map((f) => fetchFeed(f.url, f.label, f.priority ?? 0)));
 
   // 링크 기준만으로는 부족하다: 같은 기사가 여러 Google 뉴스 쿼리에서
   // 서로 다른 리다이렉트 URL 로 오기 때문에 제목 기준 중복도 같이 걸러야 한다.
@@ -214,7 +223,10 @@ export async function collectFeeds(
     }
   }
 
+  // 키워드 전용 피드(priority>0)를 먼저 올린다.
+  // 순수 최신순으로 두면 기간을 넓게 잡은 관련 기사가 일반 최신 기사에 밀린다.
   merged.sort((a, b) => {
+    if (a.priority !== b.priority) return b.priority - a.priority;
     const ta = a.publishedAt ? Date.parse(a.publishedAt) : 0;
     const tb = b.publishedAt ? Date.parse(b.publishedAt) : 0;
     return tb - ta;

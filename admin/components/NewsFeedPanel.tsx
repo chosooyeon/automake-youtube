@@ -24,6 +24,8 @@ interface FeedResult {
 interface Props {
   category: CategoryId;
   accent: string;
+  /** 사용자가 친 키워드 — 전용 뉴스 검색 피드로 추가된다 */
+  keyword: string;
   /** 선택한 기사들을 부모의 입력란 + sourceLinks 로 넘긴다 */
   onInsert: (text: string, links: string[]) => void;
 }
@@ -41,7 +43,7 @@ function relTime(iso: string | null): string {
   return `${day}일 전`;
 }
 
-export default function NewsFeedPanel({ category, accent, onInsert }: Props) {
+export default function NewsFeedPanel({ category, accent, keyword, onInsert }: Props) {
   const [items, setItems] = useState<NewsItem[]>([]);
   const [feeds, setFeeds] = useState<FeedResult[]>([]);
   const [fetchedAt, setFetchedAt] = useState<string | null>(null);
@@ -51,14 +53,14 @@ export default function NewsFeedPanel({ category, accent, onInsert }: Props) {
   const [showFeeds, setShowFeeds] = useState(false);
   const { push } = useToast();
 
-  // 카테고리를 바꾸면 이전 카테고리 뉴스는 버린다
+  // 카테고리나 키워드가 바뀌면 이전 결과는 무효
   useEffect(() => {
     setItems([]);
     setFeeds([]);
     setFetchedAt(null);
     setError(null);
     setSelected(new Set());
-  }, [category]);
+  }, [category, keyword]);
 
   const load = useCallback(
     async (refresh: boolean) => {
@@ -66,9 +68,8 @@ export default function NewsFeedPanel({ category, accent, onInsert }: Props) {
       setError(null);
       try {
         const r = await fetch(
-          `/api/news/collect?category=${encodeURIComponent(category)}&limit=30${
-            refresh ? "&refresh=1" : ""
-          }`
+          `/api/news/collect?category=${encodeURIComponent(category)}` +
+            `&q=${encodeURIComponent(keyword.trim())}&limit=30${refresh ? "&refresh=1" : ""}`
         );
         const j = await r.json();
         if (!r.ok || !j.ok) {
@@ -95,7 +96,7 @@ export default function NewsFeedPanel({ category, accent, onInsert }: Props) {
         setLoading(false);
       }
     },
-    [category, push]
+    [category, keyword, push]
   );
 
   function toggle(key: string) {
@@ -137,6 +138,8 @@ export default function NewsFeedPanel({ category, accent, onInsert }: Props) {
               ? `${relTime(fetchedAt)} 수집 · ${items.length}건${
                   failedCount > 0 ? ` · 소스 ${failedCount}개 실패` : ""
                 }`
+              : keyword.trim()
+              ? `'${keyword.trim()}' 전용 검색 + 카테고리 기본 소스`
               : "RSS 로 최신 소재를 끌어옵니다 (30분 캐시)"}
           </p>
         </div>

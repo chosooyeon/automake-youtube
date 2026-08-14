@@ -6,18 +6,20 @@ import type { CategoryId } from "@/lib/instagram/categories";
 export interface FeedSource {
   label: string;
   url: string;
+  /** 정렬 가중치. 키워드 전용 피드만 >0 */
+  priority?: number;
 }
 
 /** Google 뉴스 RSS 검색 (공식 엔드포인트, 크롤링 아님) */
-function googleNewsKo(query: string): string {
+function googleNewsKo(query: string, window = "7d"): string {
   return `https://news.google.com/rss/search?q=${encodeURIComponent(
-    query + " when:7d"
+    `${query} when:${window}`
   )}&hl=ko&gl=KR&ceid=KR:ko`;
 }
 
-function googleNewsEn(query: string): string {
+function googleNewsEn(query: string, window = "7d"): string {
   return `https://news.google.com/rss/search?q=${encodeURIComponent(
-    query + " when:7d"
+    `${query} when:${window}`
   )}&hl=en-US&gl=US&ceid=US:en`;
 }
 
@@ -57,6 +59,23 @@ const DEFAULT_FEEDS: Record<CategoryId, FeedSource[]> = {
   ],
 };
 
+/**
+ * 키워드 뉴스 검색에 붙일 카테고리 맥락.
+ * '남양주' 만 검색하면 공공택지·공연 같은 일반 뉴스가 나온다.
+ *
+ * 한정어는 반드시 1단어여야 한다 — 실측 결과 '남양주 출산 육아 지원금' 은 0건,
+ * '남양주 출산' 은 18건이었다. 조합이 길수록 Google 뉴스가 못 찾는다.
+ * 지역 단위 소식은 자주 안 나오므로 기간도 90일로 넓힌다.
+ */
+const KEYWORD_QUALIFIER: Record<CategoryId, string[]> = {
+  parenting_subsidy: ["출산", "육아"],
+  youth_subsidy: ["청년"],
+  stocks: ["증시"],
+  it_news: ["AI"],
+};
+
+const KEYWORD_WINDOW = "90d";
+
 const OVERRIDE_FILE = path.join(REPO_ROOT, "admin", "data", "news_feeds.json");
 
 function loadOverrides(): Partial<Record<CategoryId, FeedSource[]>> {
@@ -77,9 +96,34 @@ function loadOverrides(): Partial<Record<CategoryId, FeedSource[]>> {
   }
 }
 
-export function feedsFor(category: CategoryId): FeedSource[] {
+/**
+ * 카테고리 기본 피드 + (선택) 사용자가 친 키워드 전용 피드.
+ *
+ * 기본 피드는 카테고리 고정이라 '남양주' 를 입력해도 결과가 안 바뀐다.
+ * 그래서 키워드가 들어오면 그 키워드 전용 뉴스 검색 피드를 맨 앞에 붙인다.
+ */
+export function feedsFor(category: CategoryId, keyword = ""): FeedSource[] {
   const overrides = loadOverrides();
-  return overrides[category] ?? DEFAULT_FEEDS[category] ?? [];
+  const base = overrides[category] ?? DEFAULT_FEEDS[category] ?? [];
+
+  const q = keyword.trim();
+  if (!q) return base;
+
+  const extra: FeedSource[] = [
+    // 카테고리 맥락을 묶은 검색을 먼저 — 주제에 맞는 소재가 여기서 나온다
+    // 카테고리 맥락이 붙은 검색이 가장 정확 → priority 2
+    ...(KEYWORD_QUALIFIER[category] ?? []).map((qual) => ({
+      label: `🔍 ${q} ${qual}`,
+      url: googleNewsKo(`${q} ${qual}`, KEYWORD_WINDOW),
+      priority: 2,
+    })),
+    { label: `🔍 ${q}`, url: googleNewsKo(q), priority: 1 },
+  ];
+  // 해외 IT 는 영문 검색도 같이 걸어야 원문 기사가 잡힌다
+  if (category === "it_news") {
+    extra.push({ label: `🔍 ${q} (EN)`, url: googleNewsEn(q), priority: 1 });
+  }
+  return [...extra, ...base];
 }
 
 export { DEFAULT_FEEDS, OVERRIDE_FILE };

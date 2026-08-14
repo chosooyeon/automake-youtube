@@ -142,13 +142,23 @@ export default function StockAlertDashboard() {
     return (j.items ?? []) as WatchItem[];
   }, []);
 
+  /**
+   * 기본은 조회만 한다 (notify 없음).
+   *
+   * 화면에서도 발송하면 GitHub Actions 와 발송 주체가 둘이 된다.
+   * 알림 이력 파일이 맥과 깃허브에 따로 존재하는데 서로 동기화되지 않아
+   * 같은 신호가 두 번 갈 수 있다 — 그래서 정기 발송은 깃허브에만 맡긴다.
+   * 손으로 지금 보내고 싶을 때만 notify: true 로 부른다.
+   */
   const scan = useCallback(
-    async (opts: { silent?: boolean } = {}) => {
+    async (opts: { silent?: boolean; notify?: boolean } = {}) => {
       if (scanningRef.current) return;
       scanningRef.current = true;
       setScanning(true);
       try {
-        const r = await fetch("/api/stock/scan?notify=1", { method: "POST" });
+        const r = await fetch(`/api/stock/scan${opts.notify ? "?notify=1" : ""}`, {
+          method: "POST",
+        });
         const j = await r.json();
         if (!r.ok || !j.ok) throw new Error(j.message || `HTTP ${r.status}`);
 
@@ -166,10 +176,16 @@ export default function StockAlertDashboard() {
               title: `${j.results.length}종목 분석 (${errs.length}건 실패)`,
               message: errs.map((e) => `${e.item.name}: ${e.error}`).join(" / "),
             });
-          } else if (j.notifiedCount > 0) {
-            push({ kind: "success", title: `신호 ${j.notifiedCount}건 → 텔레그램 발송됨` });
+          } else if (opts.notify) {
+            push({
+              kind: j.notifiedCount > 0 ? "success" : "info",
+              title:
+                j.notifiedCount > 0
+                  ? `신호 ${j.notifiedCount}건 → 텔레그램 발송됨`
+                  : "보낼 새 신호가 없습니다 (이미 보냈거나 관망 구간)",
+            });
           } else {
-            push({ kind: "info", title: `${j.results.length}종목 분석 완료 · 새 신호 없음` });
+            push({ kind: "info", title: `${j.results.length}종목 분석 완료 (알림 미발송)` });
           }
         }
       } catch (e) {
@@ -321,7 +337,7 @@ export default function StockAlertDashboard() {
                 onChange={(e) => setAutoScan(e.target.checked)}
                 className="accent-accent"
               />
-              10분마다 자동 감시
+              10분마다 화면 갱신
             </label>
             <button
               onClick={() => scan()}
@@ -329,6 +345,18 @@ export default function StockAlertDashboard() {
               className="text-xs border border-line rounded px-3 py-1.5 hover:bg-panel2 disabled:opacity-50"
             >
               {scanning ? "분석 중…" : "↻ 지금 스캔"}
+            </button>
+            <button
+              onClick={() => scan({ notify: true })}
+              disabled={scanning || items.length === 0 || !telegramReady}
+              title={
+                telegramReady
+                  ? "지금 잡힌 신호를 텔레그램으로 보냅니다 (평소엔 깃허브가 자동 발송)"
+                  : "텔레그램을 먼저 연결하세요"
+              }
+              className="text-xs border border-line rounded px-3 py-1.5 hover:bg-panel2 disabled:opacity-40"
+            >
+              🔔 지금 알림 보내기
             </button>
           </div>
         </div>
@@ -357,7 +385,10 @@ export default function StockAlertDashboard() {
         판정은 <span className="text-text">확정된 일봉</span>(전 거래일 종가)의 RSI·이동평균·MACD·볼린저밴드·거래량으로
         계산합니다. 장중에 신호가 나타났다 사라지는 현상을 피하려는 설계이며, 표시되는 현재가는 참고용입니다.
         <br />
-        맥이 꺼져 있어도 알림이 가도록 GitHub Actions 가 평일 하루 2번(한국장·미국장 마감 후) 대신 스캔합니다.
+        <span className="text-text">이 화면은 조회만 합니다 — 들어오거나 새로고침해도 텔레그램은 가지 않습니다.</span>{" "}
+        알림은 GitHub Actions 가 평일 하루 2번(한국장·미국장 마감 후) 보냅니다. 발송 주체를 하나로 두어야 같은 신호가
+        두 번 가지 않기 때문입니다. 당장 받아보고 싶으면 위의 [🔔 지금 알림 보내기] 를 누르세요.
+        <br />
         종목을 추가·삭제했다면 <span className="mono text-text">config/stock-watchlist.json</span> 을 커밋·푸시해야
         깃허브 쪽에도 반영됩니다.
         <br />

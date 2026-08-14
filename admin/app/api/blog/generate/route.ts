@@ -17,12 +17,7 @@ function loadStyleSignature(): string | null {
   }
 }
 
-type Category =
-  | "gov_support"
-  | "baby_review"
-  | "newlywed_diary"
-  | "food_cafe"
-  | "wedding_prep";
+import type { BlogCategory as Category } from "@/lib/trends/blog-seeds";
 
 const CATEGORY_GUIDE: Record<Category, { label: string; intent: string; hooks: string[] }> = {
   gov_support: {
@@ -61,6 +56,17 @@ const CATEGORY_GUIDE: Record<Category, { label: string; intent: string; hooks: s
       "제목 패턴: '[지역명] OOO 맛집 / 카페 (내돈내산)' / '[지역명] 아이랑 가기 좋은 OOO'",
       "본문은 위치/주차 → 분위기 → 주문메뉴 + 가격 → 맛 평가 → 재방문 의사 → 영업정보(영업시간/휴무일)",
       "지도 위치 + 주소 끝에 별도 줄로 명시",
+    ],
+  },
+  hospital_review: {
+    label: "병원·의원 방문 후기",
+    intent: "지역 검색 유입 최상위. [지역명+진료과] 롱테일이 핵심.",
+    hooks: [
+      "제목 패턴: '[지역명] OOO과 방문 후기' / '[지역명] OOO 주말진료 되는 곳' / '[지역명] OOO 야간진료'",
+      "본문은 방문 계기/증상 → 위치·주차 → 접수·대기시간 → 진료 과정 → 비용 → 재방문 의사 순서",
+      "진료비는 '2026년 X월 방문 기준' 명시, 비급여는 병원마다 다름을 한 줄 덧붙일 것",
+      "의학적 효과·치료 결과를 단정하지 말 것. '나는 이랬다' 개인 경험으로만 서술",
+      "특정 병원을 비방하거나 의료법상 과장광고로 읽힐 표현(최고·유일·100%)은 금지",
     ],
   },
   wedding_prep: {

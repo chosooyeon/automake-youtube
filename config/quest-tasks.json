@@ -1,0 +1,108 @@
+[
+  {
+    "id": "q_38d3dcec",
+    "name": "네이버 클립 1개 업로드",
+    "track": "clip",
+    "days": [
+      2,
+      4
+    ],
+    "mini": "소재 1개 찍어두기",
+    "order": 0,
+    "startDate": "2026-08-14",
+    "archivedDate": null,
+    "createdAt": "2026-08-13T05:07:00.334Z"
+  },
+  {
+    "id": "q_9df5e3a8",
+    "name": "블로그 글 1편 발행",
+    "track": "blog",
+    "days": [
+      1,
+      3,
+      5
+    ],
+    "mini": "개요 3줄 쓰기",
+    "order": 1,
+    "startDate": "2026-08-14",
+    "archivedDate": null,
+    "createdAt": "2026-08-13T05:07:00.334Z"
+  },
+  {
+    "id": "q_658999f8",
+    "name": "30분 독서 (인풋)",
+    "track": "etc",
+    "days": [],
+    "mini": "1페이지",
+    "order": 2,
+    "startDate": "2026-08-14",
+    "archivedDate": null,
+    "createdAt": "2026-08-13T05:07:00.334Z"
+  },
+  {
+    "id": "q_1d5d1fbd",
+    "name": "롱폼 주제 확정 · 대본 작성",
+    "track": "youtube",
+    "days": [
+      1
+    ],
+    "mini": "주제 1개만 정해두기",
+    "order": 3,
+    "startDate": "2026-08-13",
+    "archivedDate": "2026-08-14",
+    "createdAt": "2026-08-13T05:07:00.334Z"
+  },
+  {
+    "id": "q_10c82361",
+    "name": "롱폼 1편 발행",
+    "track": "youtube",
+    "days": [
+      3
+    ],
+    "mini": "대본 3줄 쓰기",
+    "order": 4,
+    "startDate": "2026-08-13",
+    "archivedDate": "2026-08-14",
+    "createdAt": "2026-08-13T05:07:00.334Z"
+  },
+  {
+    "id": "q_bcc4f588",
+    "name": "숏츠 1개 발행",
+    "track": "shorts",
+    "days": [
+      2,
+      5
+    ],
+    "mini": "소재 1개 찍어두기",
+    "order": 5,
+    "startDate": "2026-08-13",
+    "archivedDate": "2026-08-14",
+    "createdAt": "2026-08-13T05:07:00.334Z"
+  },
+  {
+    "id": "q_6c75c483",
+    "name": "인스타 카드뉴스 1건 발행",
+    "track": "instagram",
+    "days": [
+      4
+    ],
+    "mini": "카드 문구 1줄 쓰기",
+    "order": 6,
+    "startDate": "2026-08-13",
+    "archivedDate": "2026-08-14",
+    "createdAt": "2026-08-13T05:07:00.334Z"
+  },
+  {
+    "id": "q_99a7b596",
+    "name": "다음 주 주제 큐 채우기",
+    "track": "etc",
+    "days": [
+      0
+    ],
+    "mini": "",
+    "order": 7,
+    "startDate": "2026-08-13",
+    "archivedDate": "2026-08-13",
+    "createdAt": "2026-08-13T05:07:00.334Z"
+  }
+]

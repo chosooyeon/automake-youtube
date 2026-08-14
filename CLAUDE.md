@@ -20,6 +20,7 @@
 | 블로그 글 | admin API → `claude` 프로세스 | 응답으로 반환 (파일 저장 안 함) |
 | 이모티콘 / 시나리오(cinema) | admin API + Gemini 이미지 | `admin/data/emoticons/`, `cinema/{slug}/project.json` |
 | 주식 매매 알림 | admin API가 직접 처리 (콘텐츠 트랙 아님) | 텔레그램 메시지, `admin/data/stock/` |
+| 데일리 퀘스트 | admin 탭에서 체크 (콘텐츠 트랙 아님 — 실행 관리) | `config/quest-{tasks,log}.json` |
 
 ## 어디를 볼까
 | 하려는 일 | 파일 |
@@ -38,6 +39,9 @@
 | 이모티콘 | `admin/lib/emoticon*.ts` |
 | 주식 매매신호·알림 | `admin/lib/stock/*` (naver=데이터·indicators=지표·signals=판정·scan=알림). 관심종목·알림이력은 `config/stock-*.json` (커밋됨), 봇 토큰만 `admin/data/stock/telegram.json` (git 제외) |
 | 주식 알림 상시 가동 | `.github/workflows/stock-alert.yml` → `scripts/stock-scan-ci.ts` (tsx, admin 서버 불필요). 맥 켜둔 채 돌릴 땐 `scripts/stock-watch.mjs` |
+| 데일리 퀘스트 (일/월/년 달성 관리) | `admin/lib/quest.ts`(순수 집계·클라이언트 공용) + `questStore.ts`(파일 IO) + `components/QuestBoard.tsx`·`QuestCharts.tsx`. 기록은 `config/quest-{tasks,log,season}.json` (커밋됨). 미니 퀘스트·코치 배너·시즌 진행바 포함 |
+| 아이디어 파킹판 | `admin/lib/idea.ts` + `ideaStore.ts` + `components/IdeaBoard.tsx` (퀘스트 탭의 서브뷰). 목록은 `config/ideas.json` (커밋됨) ← **새 트랙 제안 전에 여기부터 확인** |
+| 차트 색 (트랙 8색·달성률 램프) | `admin/app/globals.css` 의 `--c-series-1..8` / `--c-heat-0..4` ← **순서가 색약 안전장치라 섞지 말 것** |
 | 주제 큐 | `topics/queue/`, `admin/lib/topics.ts` |
 | 영상 렌더링 | `scripts/build-video.mjs`(롱폼), `scripts/render-shorts.mjs`(숏폼), `tools/ffmpeg` |
 | 입출력 계약 | `shared/schemas/*.json` |

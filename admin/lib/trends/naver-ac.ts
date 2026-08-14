@@ -124,9 +124,16 @@ export interface CollectOptions {
   limit: number;
 }
 
+export interface SeedStat {
+  seed: string;
+  count: number;
+}
+
 export interface CollectResult {
   keywords: Keyword[];
   seedsUsed: string[];
+  /** 시드별 자동완성 결과 수 — 0건 시드를 UI 에 드러내기 위함 */
+  seedStats: SeedStat[];
   /** 실제로 보낸 자동완성 요청 수 */
   requests: number;
 }
@@ -152,6 +159,10 @@ export async function collectKeywords(opts: CollectOptions): Promise<CollectResu
     requests++;
     return { seed: s, results: await suggest(s) };
   });
+  const seedStats: SeedStat[] = lvl1.map(({ seed, results }) => ({
+    seed,
+    count: results.length,
+  }));
   for (const { seed, results } of lvl1) {
     results.forEach((r, i) => add(r, 1, seed, i));
   }
@@ -177,5 +188,5 @@ export async function collectKeywords(opts: CollectOptions): Promise<CollectResu
     .sort((a, b) => b.score - a.score || a.text.length - b.text.length)
     .slice(0, limit);
 
-  return { keywords, seedsUsed: seeds, requests };
+  return { keywords, seedsUsed: seeds, seedStats, requests };
 }

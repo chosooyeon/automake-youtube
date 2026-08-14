@@ -73,6 +73,7 @@ export default function TrendPanel({ category, region, onInsert }: Props) {
   const [keywords, setKeywords] = useState<Keyword[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [seeds, setSeeds] = useState<string[]>([]);
+  const [deadSeeds, setDeadSeeds] = useState<string[]>([]);
   const [searchAd, setSearchAd] = useState<SearchAdStatus | null>(null);
   const [fetchedAt, setFetchedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -86,6 +87,7 @@ export default function TrendPanel({ category, region, onInsert }: Props) {
     setKeywords([]);
     setNews([]);
     setSeeds([]);
+    setDeadSeeds([]);
     setSearchAd(null);
     setFetchedAt(null);
     setError(null);
@@ -106,6 +108,7 @@ export default function TrendPanel({ category, region, onInsert }: Props) {
       setKeywords(j.keywords as Keyword[]);
       setNews((j.news ?? []) as NewsItem[]);
       setSeeds((j.seedsUsed ?? []) as string[]);
+      setDeadSeeds((j.deadSeeds ?? []) as string[]);
       setSearchAd((j.searchAd ?? null) as SearchAdStatus | null);
       setFetchedAt(j.fetchedAt ?? null);
       setPicked(new Set());
@@ -337,6 +340,20 @@ export default function TrendPanel({ category, region, onInsert }: Props) {
           >
             {total === 0 ? "키워드를 선택하세요" : `⬇ 선택 ${total}건 → 아래 입력란에 넣기`}
           </button>
+
+          {deadSeeds.length > 0 && (
+            <div className="mt-3 text-[11px] text-warn bg-warn/10 border border-warn/40 rounded-md px-3 py-2 leading-relaxed">
+              시드 {seeds.length}개 중 <strong>{deadSeeds.length}개가 검색결과 0건</strong>이라
+              결과에 반영되지 않았습니다.
+              {deadSeeds.length === seeds.length ? (
+                <> 입력한 키워드로는 자동완성이 안 잡힙니다 — 더 일반적인 말로 바꿔보세요.</>
+              ) : (
+                <> 나머지 시드 결과만 나온 상태입니다.</>
+              )}
+              <br />
+              <span className="text-subtext">0건: {deadSeeds.join(" · ")}</span>
+            </div>
+          )}
 
           {seeds.length > 0 && (
             <div className="mt-3">

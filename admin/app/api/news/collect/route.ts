@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { REPO_ROOT } from "@/lib/paths";
@@ -19,13 +20,16 @@ interface CacheShape {
   feeds: FeedFetchResult[];
 }
 
-function cacheFile(category: CategoryId): string {
-  return path.join(CACHE_DIR, `${category}.json`);
+/** 키워드가 다르면 결과도 다르다 → 캐시 파일도 분리 */
+function cacheFile(category: CategoryId, keyword: string): string {
+  if (!keyword) return path.join(CACHE_DIR, `${category}.json`);
+  const slug = crypto.createHash("sha1").update(keyword).digest("hex").slice(0, 10);
+  return path.join(CACHE_DIR, `${category}--${slug}.json`);
 }
 
-function readCache(category: CategoryId): CacheShape | null {
+function readCache(category: CategoryId, keyword: string): CacheShape | null {
   try {
-    const raw = JSON.parse(fs.readFileSync(cacheFile(category), "utf8")) as CacheShape;
+    const raw = JSON.parse(fs.readFileSync(cacheFile(category, keyword), "utf8")) as CacheShape;
     if (!raw?.fetchedAt || !Array.isArray(raw.items)) return null;
     if (Date.now() - Date.parse(raw.fetchedAt) > CACHE_TTL_MS) return null;
     return raw;
@@ -34,10 +38,10 @@ function readCache(category: CategoryId): CacheShape | null {
   }
 }
 
-function writeCache(data: CacheShape): void {
+function writeCache(data: CacheShape, keyword: string): void {
   try {
     fs.mkdirSync(CACHE_DIR, { recursive: true });
-    fs.writeFileSync(cacheFile(data.category), JSON.stringify(data, null, 2));
+    fs.writeFileSync(cacheFile(data.category, keyword), JSON.stringify(data, null, 2));
   } catch (e) {
     console.warn("[news/collect] cache write failed:", (e as Error).message);
   }
@@ -46,6 +50,7 @@ function writeCache(data: CacheShape): void {
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const category = url.searchParams.get("category") as CategoryId | null;
+  const keyword = (url.searchParams.get("q") ?? "").trim();
   const refresh = url.searchParams.get("refresh") === "1";
   const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") ?? "30", 10) || 30, 5), 60);
 
@@ -55,11 +60,12 @@ export async function GET(req: Request) {
   }
 
   if (!refresh) {
-    const cached = readCache(category);
+    const cached = readCache(category, keyword);
     if (cached) {
       return NextResponse.json({
         ok: true,
         category,
+        keyword: keyword || null,
         cached: true,
         fetchedAt: cached.fetchedAt,
         items: cached.items.slice(0, limit),
@@ -68,7 +74,7 @@ export async function GET(req: Request) {
     }
   }
 
-  const feeds = feedsFor(category);
+  const feeds = feedsFor(category, keyword);
   if (feeds.length === 0) {
     return NextResponse.json(
       { ok: false, error: "no_feeds", message: `${category} 에 등록된 뉴스 소스가 없습니다.` },
@@ -96,11 +102,12 @@ export async function GET(req: Request) {
     items,
     feeds: results,
   };
-  writeCache(payload);
+  writeCache(payload, keyword);
 
   return NextResponse.json({
     ok: true,
     category,
+    keyword: keyword || null,
     cached: false,
     fetchedAt: payload.fetchedAt,
     items: items.slice(0, limit),

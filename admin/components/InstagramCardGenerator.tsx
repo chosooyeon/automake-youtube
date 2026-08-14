@@ -17,8 +17,8 @@ interface CategoryUi {
   label: string;
   sub: string;
   accent: string;
-  /** 지역 입력이 의미 있는 카테고리인지 */
-  hasRegion: boolean;
+  /** 키워드 입력란 placeholder */
+  keywordPlaceholder: string;
   /** 출처 검증 안내 문구 */
   verifyNote: string;
   placeholder: string;
@@ -30,7 +30,7 @@ const CATEGORIES: CategoryUi[] = [
     label: "육아 정부지원금",
     sub: "출산축하금 · 부모급여 · 첫만남이용권 · 어린이집 보육료",
     accent: "#F4A261",
-    hasRegion: true,
+    keywordPlaceholder: "예: 남양주시 / 첫만남이용권 / 다자녀",
     verifyNote: "카드당 공식 출처 ≥ 2개 (정부24·복지로·.go.kr) 미달 시 해당 카드 자동 제외.",
     placeholder: `예시:
 - 2026년 첫만남이용권: 출생 시 200만원 (다자녀 추가 100만원)
@@ -45,7 +45,7 @@ const CATEGORIES: CategoryUi[] = [
     label: "청년 정부지원금",
     sub: "청년도약계좌 · 청년월세 · 청년취업 · 국민취업지원",
     accent: "#14B8A6",
-    hasRegion: true,
+    keywordPlaceholder: "예: 남양주시 / 청년도약계좌 / 월세지원",
     verifyNote: "카드당 공식 출처 ≥ 2개 (정부24·청년센터·.go.kr) 미달 시 해당 카드 자동 제외.",
     placeholder: `예시:
 - 청년도약계좌: 월 최대 70만원 납입, 5년 만기
@@ -60,7 +60,7 @@ const CATEGORIES: CategoryUi[] = [
     label: "주식 정보",
     sub: "ETF · 배당 · 시장 동향 (정보 제공 / 투자 권유 아님)",
     accent: "#E0B14C",
-    hasRegion: false,
+    keywordPlaceholder: "예: 배당 ETF / 반도체 / 금리인하",
     verifyNote: "카드당 출처 ≥ 2개 (KRX·금감원·한국은행·운용사 공식자료) 미달 시 해당 카드 자동 제외.",
     placeholder: `예시:
 - 국내 상장 미국배당 ETF 최근 분배율 비교
@@ -74,7 +74,7 @@ const CATEGORIES: CategoryUi[] = [
     label: "해외 IT·AI 뉴스",
     sub: "빅테크 · AI 신모델 · 신제품 · 개발자 소식",
     accent: "#6366F1",
-    hasRegion: false,
+    keywordPlaceholder: "예: OpenAI / 애플 신제품 / AI 규제",
     verifyNote:
       "카드당 출처 ≥ 2개 (원문 기사 + 기업 공식 발표) 미달 시 해당 카드 자동 제외. 루머·유출 소식은 자동 제외.",
     placeholder: `위 '뉴스 자동 수집' 에서 기사를 골라 담으면 여기가 자동으로 채워집니다.
@@ -137,7 +137,7 @@ export default function InstagramCardGenerator() {
     }
     await job.startGenerate({
       category,
-      region: cat.hasRegion ? region.trim() : "",
+      region: region.trim(),
       content,
       cardCount,
       extraNote: extraNote.trim() || undefined,
@@ -217,22 +217,21 @@ export default function InstagramCardGenerator() {
             </div>
           </Card>
 
-          {cat.hasRegion && (
-            <Card title="2. 지역 (선택)">
-              <input
-                type="text"
-                value={region}
-                onChange={(e) => setRegion(e.target.value)}
-                placeholder="예: 서울, 남양주시"
-                className="w-full bg-bg border border-line rounded-md px-3 py-2 text-sm"
-              />
-              <p className="text-[11px] text-subtext mt-2">
-                비워두면 전국 단위 지원금만. 지역 입력 시 해당 지자체 지원금도 같이 검색.
-              </p>
-            </Card>
-          )}
+          <Card title="2. 키워드 / 지역 (선택)">
+            <input
+              type="text"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              placeholder={cat.keywordPlaceholder}
+              className="w-full bg-bg border border-line rounded-md px-3 py-2 text-sm"
+            />
+            <p className="text-[11px] text-subtext mt-2">
+              여기에 친 말이 <strong className="text-text">뉴스 검색어로 그대로</strong> 쓰이고,
+              카드 주제의 중심이 됩니다. 지역명·회사명·이슈 뭐든 OK. 비워두면 카테고리 전체 소식.
+            </p>
+          </Card>
 
-          <Card title={cat.hasRegion ? "3. 카드 수" : "2. 카드 수"}>
+          <Card title="3. 카드 수">
             <input
               type="range"
               min={3}
@@ -254,10 +253,15 @@ export default function InstagramCardGenerator() {
 
         {/* 우측: 입력 본문 */}
         <div className="lg:col-span-2 space-y-4">
-          <NewsFeedPanel category={category} accent={cat.accent} onInsert={insertNews} />
+          <NewsFeedPanel
+            category={category}
+            accent={cat.accent}
+            keyword={region}
+            onInsert={insertNews}
+          />
 
           <Card
-            title={`${cat.hasRegion ? "4" : "3"}. 주제 / 내가 알고 있는 내용`}
+            title="4. 주제 / 내가 알고 있는 내용"
             right={
               content.trim() ? (
                 <button
@@ -290,7 +294,7 @@ export default function InstagramCardGenerator() {
             </div>
           </Card>
 
-          <Card title={`${cat.hasRegion ? "5" : "4"}. 추가 요청 (선택)`}>
+          <Card title="5. 추가 요청 (선택)">
             <input
               type="text"
               value={extraNote}

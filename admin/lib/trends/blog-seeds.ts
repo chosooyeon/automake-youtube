@@ -5,7 +5,8 @@ export type BlogCategory =
   | "baby_review"
   | "newlywed_diary"
   | "food_cafe"
-  | "wedding_prep";
+  | "wedding_prep"
+  | "hospital_review";
 
 export const BLOG_CATEGORIES: BlogCategory[] = [
   "gov_support",
@@ -13,6 +14,7 @@ export const BLOG_CATEGORIES: BlogCategory[] = [
   "newlywed_diary",
   "food_cafe",
   "wedding_prep",
+  "hospital_review",
 ];
 
 interface SeedDef {
@@ -51,16 +53,35 @@ const SEEDS: Record<BlogCategory, SeedDef> = {
     regional: ["웨딩홀", "스튜디오"],
     general: ["결혼준비", "상견례", "청첩장", "신혼가전", "스드메", "예단"],
   },
+  hospital_review: {
+    regional: [
+      "병원",
+      "산부인과",
+      "소아과",
+      "치과",
+      "한의원",
+      "정형외과",
+      "피부과",
+      "이비인후과",
+      "건강검진",
+    ],
+    general: [],
+  },
 };
 
 export function seedsFor(category: BlogCategory, region: string): string[] {
   const def = SEEDS[category];
   if (!def) return [];
   const r = region.trim();
-  const regional = r ? def.regional.map((s) => `${r} ${s}`) : [];
-  // 지역이 없는데 regional 시드만 있는 카테고리(맛집 등)는 시드가 비므로 일반형으로 대체
+
+  // 지역 원문 자체를 시드로 쓴다.
+  // '남양주 병원' 처럼 이미 의미가 완성된 입력은 조합("남양주 병원 출산지원금")하면
+  // 자동완성에서 0건이 나오지만, 원문 그대로는 10건이 나온다.
+  const regional = r ? [r, ...def.regional.map((s) => `${r} ${s}`)] : [];
+
+  // 지역이 없는데 regional 시드만 있는 카테고리(맛집·병원 등)는 시드가 비므로 일반형으로 대체
   const fallback = !r && def.general.length === 0 ? def.regional : [];
-  return [...regional, ...def.general, ...fallback];
+  return [...new Set([...regional, ...def.general, ...fallback])];
 }
 
 export function newsCategoryFor(category: BlogCategory): NewsCategoryId | null {

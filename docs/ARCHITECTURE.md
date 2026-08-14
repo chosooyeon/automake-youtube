@@ -105,17 +105,59 @@ InstagramCardGenerator → /api/instagram/generate
 - **파일이 두 군데인 이유**: 맥이 꺼져 있어도 알림이 가도록 GitHub Actions 가 스캔하는데,
   러너는 커밋된 파일만 본다. `config/stock-{watchlist,alert-state}.json` 은 커밋되고,
   봇 토큰(`admin/data/stock/telegram.json`)만 git 제외 + CI 에선 Secrets 로 주입.
+- **발송 주체는 깃허브 하나뿐이다.** admin 화면의 스캔은 `notify` 없이 부르므로 조회만 한다
+  (손으로 보내는 [🔔 지금 알림 보내기] 버튼만 `?notify=1`). 화면에서도 자동 발송하면
+  알림 이력 파일이 맥과 깃허브에 따로 쌓여 같은 신호가 두 번 간다.
 - 상시 가동: `.github/workflows/stock-alert.yml` (평일 15:50 KST / 06:30 KST).
   `scripts/stock-scan-ci.ts` 를 tsx 로 직접 실행 — admin 서버도 `npm ci` 도 필요 없다
   (판정 로직이 node 내장 모듈만 쓰기 때문). 알림 이력은 러너가 커밋해 되돌려놓는다.
 - 데이터 소스가 네이버인 이유: Yahoo Finance 는 429, Stooq 는 JS 챌린지로 막힌다 (2026-08 확인).
 
+### 데일리 퀘스트 (콘텐츠 트랙 아님 — 실행 관리)
+```
+config/quest-tasks.json   퀘스트 정의 (이름·트랙·반복요일·mini·startDate·archivedDate)
+config/quest-log.json     완료 기록  date → taskId → { at, mini? }
+config/quest-season.json  시즌 (이름·시작일·주수)
+  → lib/questStore.ts  파일 입출력 (서버 전용)
+  → lib/quest.ts       타입 + 순수 집계 함수 (클라이언트에서도 import)
+  → components/QuestBoard.tsx / QuestCharts.tsx
+```
+- `/api/quest` GET 한 번으로 정의+기록을 통째로 내려주고 **집계는 전부 클라이언트**.
+  1년치가 수백 KB 라, 일/월/년 뷰를 오갈 때마다 서버를 왕복하는 것보다 빠르다.
+- **미완료는 기록하지 않는다.** 로그엔 완료한 것만 남고, 분모(예정)는 정의에서 매번 다시 계산한다.
+  그래서 퀘스트에 `startDate`/`archivedDate` 가 있다 — 오늘 만든 퀘스트 때문에
+  지난 1월이 통째로 "미달성"으로 물드는 걸 막는다. 삭제 대신 **보관**을 쓰면 과거 통계가 보존된다.
+- 달성률 분모는 `clampToToday()` 로 오늘까지만 센다 (안 온 날을 넣으면 연간 달성률이 늘 처참하게 나온다).
+- 스트릭은 예정이 없는 날(쉬는 날)을 건너뛰고, 오늘은 미완이어도 끊지 않는다.
+- **미니 퀘스트(`Quest.mini`)**: 컨디션 나쁜 날 최소 버전만 해도 완료로 친다.
+  `QuestCheck = { at, mini? }` 로 기록하고 달성률·스트릭에는 **똑같이 완료로 센다** — 0인 날을 안 만드는 게 목적이다.
+  통계에서만 `miniDone` 으로 따로 보여준다. 이 동등성을 깨면 기능의 존재 이유가 사라진다.
+  (초기 버전은 로그 값이 ISO 문자열이었다. `normalizeCheck()` 가 읽는 쪽에서 흡수한다.)
+- **코치 배너(`coachMessage`)**: 오늘 날짜를 볼 때만 뜬다. 원칙은 *못 한 걸 지적하지 않고 다음 한 걸음만 제시*.
+  하루 놓치면 "이틀 연속만 아니면 된다", **일주일 넘게 비면 일수를 말하지 않는다**(큰 숫자는 격려가 아니라 처벌).
+- **시즌(`config/quest-season.json`)**: 12주 단위. 진행바에 중간 지점 눈금이 있고,
+  중간 주차에만 점검 안내가 뜬다 — 12주는 길어서 여기쯤 한 번 꺾이기 때문.
+- 차트는 외부 라이브러리 없이 SVG/CSS. 색은 `globals.css` 의 `--c-series-1..8`(트랙 식별)과
+  `--c-heat-0..4`(달성률 램프). **series 순서 자체가 색약 안전장치**라 순서를 섞거나 중간에 끼워넣지 말 것
+  (인접쌍 CVD ΔE 9.1 light / 8.4 dark 로 검증됨). 9번째 계열이 필요하면 "기타" 로 접는다.
+
+### 아이디어 파킹판 (퀘스트 탭의 서브뷰)
+```
+config/ideas.json  → lib/ideaStore.ts (파일 IO) → lib/idea.ts (타입·집계)
+                   → components/IdeaBoard.tsx
+```
+- 카테고리 6개(콘텐츠/자동화/제품/수익화/브랜드/알아볼것) × 상태 5개(파킹·시즌후보·진행중·완료·보류).
+- **이 화면의 목적은 아이디어 관리가 아니라 착수 억제다.** 새 갈래가 떠오르면 시작하는 대신
+  파킹하고 시즌이 끝날 때만 꺼낸다. 그래서 시즌 후보에 상한(`SHORTLIST_MAX = 3`)이 있고,
+  넘치면 화면이 경고색으로 바뀐다. 이 상한을 늘리는 방향의 수정은 도구의 목적을 무너뜨린다.
+- 카테고리 색도 `--c-series-*`. 항상 이모지+이름을 같이 달아 색만으로 구분하지 않는다.
+
 ## 5. admin 상세
 
 - 진입: `app/page.tsx` → `components/Dashboard.tsx` (탭 셸)
-- 탭: 롱폼(`LongFormDashboard`) · 주제큐(`TopicQueue`) · 숏폼(`ShortsDashboard`) ·
+- 탭: 데일리 퀘스트(`QuestBoard`, 기본 탭) · 유튜브(`YoutubeWorkspace` 안에 롱폼/주제큐/숏폼) ·
   블로그(`BlogGenerator`) · 이모티콘(`EmoticonStudio`) · 인스타(`InstagramCardGenerator`) · 시나리오(`CinemaStudio`) ·
-  주식(`StockAlertDashboard` + `TelegramSetupCard`)
+  주식(`StockAlertDashboard` + `TelegramSetupCard`) · 클로드 대화(`ChatPanel`)
 - 니치 전환: `NicheSelector` → `/api/system/niche` → `lib/niche.ts`
 
 ### API 라우트 (`admin/app/api/`)
@@ -129,6 +171,8 @@ InstagramCardGenerator → /api/instagram/generate
 | blog | `/blog/generate` | 블로그 초안 |
 | emoticon | `/emoticon/{projects,concept,expressions,generate,batch/[id],export/[id],image/...}` | 이모티콘 |
 | cinema | `/cinema/projects`, `/cinema/projects/[slug]{,/generate}` | 시나리오 |
+| quest | `/quest`(GET 전체), `/quest/tasks`(POST·PATCH·DELETE), `/quest/check`(POST 토글·mini), `/quest/season`(PATCH) | 데일리 퀘스트 |
+| ideas | `/ideas` (GET·POST·PATCH·DELETE) | 아이디어 파킹판 |
 | stock | `/stock/{search,watchlist,scan,telegram}` | 관심종목 검색·CRUD, 신호 스캔(`?notify=1`), 텔레그램 연결 |
 | system | `/system/{api-status,channels,keywords,kpi,niche}` | 상태·설정 |
 

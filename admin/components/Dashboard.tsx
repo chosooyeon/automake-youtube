@@ -10,8 +10,10 @@ import InstagramProgressBar from "./InstagramProgressBar";
 import CinemaStudio from "./CinemaStudio";
 import ChatPanel from "./ChatPanel";
 import StockAlertDashboard from "./StockAlertDashboard";
+import QuestBoard from "./QuestBoard";
 
 type Tab =
+  | "quest"
   | "youtube"
   | "instacard"
   | "blog"
@@ -21,6 +23,7 @@ type Tab =
   | "chat";
 
 const TABS: { id: Tab; label: string; status: "live" | "planned" }[] = [
+  { id: "quest", label: "✅ 데일리 퀘스트", status: "live" },
   { id: "youtube", label: "🎬 유튜브", status: "live" },
   { id: "instacard", label: "🟪 인스타 카드 피드", status: "live" },
   { id: "blog", label: "📝 블로그 글 (네이버)", status: "live" },
@@ -31,7 +34,7 @@ const TABS: { id: Tab; label: string; status: "live" | "planned" }[] = [
 ];
 
 export default function Dashboard() {
-  const [tab, setTab] = useState<Tab>("youtube");
+  const [tab, setTab] = useState<Tab>("quest");
 
   return (
     <div className="space-y-6">
@@ -65,6 +68,7 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {tab === "quest" && <QuestBoard />}
       {tab === "youtube" && <YoutubeWorkspace />}
       <div className={tab === "instacard" ? "" : "hidden"}>
         <InstagramCardGenerator />

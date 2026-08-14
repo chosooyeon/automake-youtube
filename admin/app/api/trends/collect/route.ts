@@ -152,6 +152,8 @@ export async function GET(req: Request) {
     fetchedAt: new Date().toISOString(),
     keywords,
     seedsUsed: kw.seedsUsed,
+    seedStats: kw.seedStats,
+    deadSeeds: kw.seedStats.filter((s) => s.count === 0).map((s) => s.seed),
     requests: kw.requests,
     news: news.items,
     searchAd: {

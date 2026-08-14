@@ -17,6 +17,7 @@ const CATEGORIES: { id: Category; label: string; sub: string }[] = [
   { id: "newlywed_diary", label: "신혼/일상 기록", sub: "신혼집 · 결혼 N개월차 (체류시간 · 이웃 소통)" },
   { id: "food_cafe", label: "맛집 & 카페 투어", sub: "[지역명] 키즈존 · 한정식 · 카페 (유입량 확보)" },
   { id: "wedding_prep", label: "결혼 준비", sub: "상견례 장소 · 청첩장 · 신혼가전 견적 (고단가 키워드)" },
+  { id: "hospital_review", label: "병원·의원 후기", sub: "[지역명] 산부인과 · 소아과 · 치과 (지역 검색유입 최상위)" },
 ];
 
 const VERIFY_BADGE: Record<VerifyStatus, { label: string; cls: string }> = {
@@ -138,16 +139,17 @@ export default function BlogGenerator() {
             </div>
           </Card>
 
-          <Card title="2. 지역명 (선택)">
+          <Card title="2. 키워드 / 지역 (선택)">
             <input
               type="text"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
-              placeholder="예: 남양주시, 구리시, 강남역"
+              placeholder="예: 남양주 병원, 남양주시, 구리 소아과"
               className="w-full bg-bg border border-line rounded-md px-3 py-2 text-sm"
             />
             <p className="text-[11px] text-subtext mt-2">
-              [지역명+정보] 패턴은 네이버 검색 유입에 가장 효과적입니다. 비워두면 일반 글로 작성.
+              여기에 친 말이 <strong className="text-text">네이버 자동완성 검색어로 그대로</strong> 들어갑니다.
+              [지역명+정보] 패턴이 검색 유입에 가장 효과적입니다. 비워두면 일반 글로 작성.
             </p>
           </Card>
         </div>
