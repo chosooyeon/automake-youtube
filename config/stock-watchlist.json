@@ -61,5 +61,527 @@
     "exchange": "NASDAQ",
     "addedAt": "2026-08-13T01:26:56.354Z",
     "enabled": true
+  },
+  {
+    "symbol": "373220",
+    "code": "373220",
+    "name": "LG에너지솔루션",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "207940",
+    "code": "207940",
+    "name": "삼성바이오로직스",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "000270",
+    "code": "000270",
+    "name": "기아",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "068270",
+    "code": "068270",
+    "name": "셀트리온",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "105560",
+    "code": "105560",
+    "name": "KB금융",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "005490",
+    "code": "005490",
+    "name": "POSCO홀딩스",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "035420",
+    "code": "035420",
+    "name": "NAVER",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "012330",
+    "code": "012330",
+    "name": "현대모비스",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "055550",
+    "code": "055550",
+    "name": "신한지주",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "034020",
+    "code": "034020",
+    "name": "두산에너빌리티",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "329180",
+    "code": "329180",
+    "name": "HD현대중공업",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "035720",
+    "code": "035720",
+    "name": "카카오",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "015760",
+    "code": "015760",
+    "name": "한국전력",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "006400",
+    "code": "006400",
+    "name": "삼성SDI",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "051910",
+    "code": "051910",
+    "name": "LG화학",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "086790",
+    "code": "086790",
+    "name": "하나금융지주",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "010130",
+    "code": "010130",
+    "name": "고려아연",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "259960",
+    "code": "259960",
+    "name": "크래프톤",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "316140",
+    "code": "316140",
+    "name": "우리금융지주",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "009540",
+    "code": "009540",
+    "name": "HD한국조선해양",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "018260",
+    "code": "018260",
+    "name": "삼성에스디에스",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "032830",
+    "code": "032830",
+    "name": "삼성생명",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "011200",
+    "code": "011200",
+    "name": "HMM",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "003670",
+    "code": "003670",
+    "name": "포스코퓨처엠",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "267250",
+    "code": "267250",
+    "name": "HD현대",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "010140",
+    "code": "010140",
+    "name": "삼성중공업",
+    "market": "KR",
+    "exchange": "KOSPI",
+    "addedAt": "2026-08-16T00:00:00.000Z",
+    "enabled": true
+  },
+  {
+    "symbol": "MSFT.O",
+    "code": "MSFT",
+    "name": "마이크로소프트",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:25.598Z",
+    "enabled": true
+  },
+  {
+    "symbol": "GOOGL.O",
+    "code": "GOOGL",
+    "name": "알파벳 Class A",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:25.872Z",
+    "enabled": true
+  },
+  {
+    "symbol": "AMZN.O",
+    "code": "AMZN",
+    "name": "아마존닷컴",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:26.142Z",
+    "enabled": true
+  },
+  {
+    "symbol": "META.O",
+    "code": "META",
+    "name": "메타",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:26.419Z",
+    "enabled": true
+  },
+  {
+    "symbol": "AVGO.O",
+    "code": "AVGO",
+    "name": "브로드컴",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:26.690Z",
+    "enabled": true
+  },
+  {
+    "symbol": "AMD.O",
+    "code": "AMD",
+    "name": "AMD(어드밴스드 마이크로 디바이시스)",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:26.960Z",
+    "enabled": true
+  },
+  {
+    "symbol": "NFLX.O",
+    "code": "NFLX",
+    "name": "넷플릭스",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:27.245Z",
+    "enabled": true
+  },
+  {
+    "symbol": "COST.O",
+    "code": "COST",
+    "name": "코스트코 홀세일",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:27.521Z",
+    "enabled": true
+  },
+  {
+    "symbol": "JPM",
+    "code": "JPM",
+    "name": "제이피모간체이스",
+    "market": "US",
+    "exchange": "NYSE",
+    "addedAt": "2026-08-16T12:44:27.792Z",
+    "enabled": true
+  },
+  {
+    "symbol": "V",
+    "code": "V",
+    "name": "비자",
+    "market": "US",
+    "exchange": "NYSE",
+    "addedAt": "2026-08-16T12:44:28.063Z",
+    "enabled": true
+  },
+  {
+    "symbol": "MA",
+    "code": "MA",
+    "name": "마스터카드",
+    "market": "US",
+    "exchange": "NYSE",
+    "addedAt": "2026-08-16T12:44:28.339Z",
+    "enabled": true
+  },
+  {
+    "symbol": "UNH",
+    "code": "UNH",
+    "name": "유나이티드헬스 그룹",
+    "market": "US",
+    "exchange": "NYSE",
+    "addedAt": "2026-08-16T12:44:28.615Z",
+    "enabled": true
+  },
+  {
+    "symbol": "LLY",
+    "code": "LLY",
+    "name": "일라이 릴리",
+    "market": "US",
+    "exchange": "NYSE",
+    "addedAt": "2026-08-16T12:44:28.883Z",
+    "enabled": true
+  },
+  {
+    "symbol": "WMT.O",
+    "code": "WMT",
+    "name": "월마트",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:29.216Z",
+    "enabled": true
+  },
+  {
+    "symbol": "ORCL.K",
+    "code": "ORCL",
+    "name": "오라클",
+    "market": "US",
+    "exchange": "NYSE",
+    "addedAt": "2026-08-16T12:44:29.491Z",
+    "enabled": true
+  },
+  {
+    "symbol": "CRM",
+    "code": "CRM",
+    "name": "세일즈포스",
+    "market": "US",
+    "exchange": "NYSE",
+    "addedAt": "2026-08-16T12:44:29.760Z",
+    "enabled": true
+  },
+  {
+    "symbol": "QCOM.O",
+    "code": "QCOM",
+    "name": "퀄컴",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:30.029Z",
+    "enabled": true
+  },
+  {
+    "symbol": "MU.O",
+    "code": "MU",
+    "name": "마이크론 테크놀로지",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:30.300Z",
+    "enabled": true
+  },
+  {
+    "symbol": "PLTR.O",
+    "code": "PLTR",
+    "name": "팔란티어 테크놀로지스",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:30.566Z",
+    "enabled": true
+  },
+  {
+    "symbol": "XOM",
+    "code": "XOM",
+    "name": "엑슨모빌 홀딩스",
+    "market": "US",
+    "exchange": "NYSE",
+    "addedAt": "2026-08-16T12:44:30.832Z",
+    "enabled": true
+  },
+  {
+    "symbol": "SPY",
+    "code": "SPY",
+    "name": "State Street SPDR S&P 500 ETF Trust",
+    "market": "US",
+    "exchange": "AMEX",
+    "addedAt": "2026-08-16T12:44:31.102Z",
+    "enabled": true
+  },
+  {
+    "symbol": "QQQM.O",
+    "code": "QQQM",
+    "name": "Invesco NASDAQ 100 ETF",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:44:31.370Z",
+    "enabled": true
+  },
+  {
+    "symbol": "VOO",
+    "code": "VOO",
+    "name": "뱅가드 S&P500 ETF",
+    "market": "US",
+    "exchange": "AMEX",
+    "addedAt": "2026-08-16T12:46:39.124Z",
+    "enabled": true
+  },
+  {
+    "symbol": "QQQ.O",
+    "code": "QQQ",
+    "name": "인베스코 나스닥100 ETF",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:46:39.150Z",
+    "enabled": true
+  },
+  {
+    "symbol": "VTI",
+    "code": "VTI",
+    "name": "뱅가드 미국 전체시장 ETF",
+    "market": "US",
+    "exchange": "AMEX",
+    "addedAt": "2026-08-16T12:46:39.166Z",
+    "enabled": true
+  },
+  {
+    "symbol": "DIA",
+    "code": "DIA",
+    "name": "SPDR 다우존스 ETF",
+    "market": "US",
+    "exchange": "AMEX",
+    "addedAt": "2026-08-16T12:46:39.183Z",
+    "enabled": true
+  },
+  {
+    "symbol": "SCHD.K",
+    "code": "SCHD",
+    "name": "슈왑 미국 배당 ETF",
+    "market": "US",
+    "exchange": "AMEX",
+    "addedAt": "2026-08-16T12:46:39.198Z",
+    "enabled": true
+  },
+  {
+    "symbol": "JEPQ.O",
+    "code": "JEPQ",
+    "name": "JP모간 나스닥 커버드콜 ETF",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:46:39.214Z",
+    "enabled": true
+  },
+  {
+    "symbol": "JEPI.K",
+    "code": "JEPI",
+    "name": "JP모간 S&P 커버드콜 ETF",
+    "market": "US",
+    "exchange": "AMEX",
+    "addedAt": "2026-08-16T12:46:39.229Z",
+    "enabled": true
+  },
+  {
+    "symbol": "GLDM.K",
+    "code": "GLDM",
+    "name": "SPDR 골드 미니셰어 ETF",
+    "market": "US",
+    "exchange": "AMEX",
+    "addedAt": "2026-08-16T12:46:39.244Z",
+    "enabled": true
+  },
+  {
+    "symbol": "IAU",
+    "code": "IAU",
+    "name": "아이셰어즈 골드 ETF",
+    "market": "US",
+    "exchange": "AMEX",
+    "addedAt": "2026-08-16T12:46:39.260Z",
+    "enabled": true
+  },
+  {
+    "symbol": "TLT.O",
+    "code": "TLT",
+    "name": "아이셰어즈 20년+ 미국채 ETF",
+    "market": "US",
+    "exchange": "NASDAQ",
+    "addedAt": "2026-08-16T12:46:39.277Z",
+    "enabled": true
   }
 ]

@@ -98,6 +98,48 @@ export function macd(
   return out;
 }
 
+/** ATR 계산에 필요한 최소 캔들 형태 (naver.Candle 과 호환) */
+export interface OhlcBar {
+  high: number;
+  low: number;
+  close: number;
+}
+
+/**
+ * ATR (Average True Range, Wilder 평활).
+ *
+ * 손절폭을 "−7%" 같은 고정 비율로 잡으면 종목마다 뜻이 달라진다.
+ * 하루 1% 움직이는 종목의 −7% 와 하루 5% 움직이는 종목의 −7% 는 전혀 다른 사건이다.
+ * ATR 배수로 잡으면 "그 종목 기준으로 비정상적인 하락"에서만 잘리므로
+ * 변동성이 다른 종목을 같은 규칙으로 다룰 수 있다.
+ */
+export function atr(bars: OhlcBar[], period = 14): (number | null)[] {
+  const out: (number | null)[] = new Array(bars.length).fill(null);
+  if (bars.length <= period || period <= 0) return out;
+
+  const tr: number[] = new Array(bars.length).fill(0);
+  tr[0] = bars[0].high - bars[0].low;
+  for (let i = 1; i < bars.length; i++) {
+    const prevClose = bars[i - 1].close;
+    tr[i] = Math.max(
+      bars[i].high - bars[i].low,
+      Math.abs(bars[i].high - prevClose),
+      Math.abs(bars[i].low - prevClose)
+    );
+  }
+
+  let sum = 0;
+  for (let i = 1; i <= period; i++) sum += tr[i];
+  let prev = sum / period;
+  out[period] = prev;
+
+  for (let i = period + 1; i < bars.length; i++) {
+    prev = (prev * (period - 1) + tr[i]) / period;
+    out[i] = prev;
+  }
+  return out;
+}
+
 export interface BollingerPoint {
   mid: number | null;
   upper: number | null;

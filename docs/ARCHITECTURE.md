@@ -113,6 +113,74 @@ InstagramCardGenerator → /api/instagram/generate
   (판정 로직이 node 내장 모듈만 쓰기 때문). 알림 이력은 러너가 커밋해 되돌려놓는다.
 - 데이터 소스가 네이버인 이유: Yahoo Finance 는 429, Stooq 는 JS 챌린지로 막힌다 (2026-08 확인).
 
+### 주식 자동매매 — 백테스트 (알림 트랙의 확장, 1단계만 구현)
+```
+config/stock-trading.json  정책 (원금·진입·청산·리스크·비용) + markets.{KR,US} 덮어쓰기
+  → lib/stock/tradingConfig.ts  로더(공통값 위에 시장층) + 설정 모순 검사 + 규칙 비교표
+       → app/api/stock/method/route.ts     두 시장 규칙 + 워크포워드 상태 서빙
+       → components/MethodBoard.tsx        주식 탭 [📐 방법론] (다른 항목만 색으로)
+  → lib/stock/backtest.ts       하루씩 시뮬레이션 → 성적표
+  ← lib/stock/signals.ts        진입/청산 신호 (알림과 **같은 엔진**)
+  ← lib/stock/indicators.ts     ATR 추가 (손절폭 산정)
+  → scripts/backtest.ts         CLI 1회 실행 (cd admin && npx tsx ../scripts/backtest.ts)
+  → scripts/backtest-sweep.ts   설정 × 종목군을 한 번에 → admin/data/stock/backtest/sweep-{market}.json
+  ← config/stock-groups.json    자산군 분류 (지수ETF·커버드콜·금채권, 나머지는 '개별주' 자동)
+       → app/api/stock/backtest/route.ts   그룹목록 / 그룹요약 / 매매내역 세 갈래로 서빙
+       → components/BacktestBoard.tsx      주식 탭 [🧪 백테스트] 서브탭 (시장→종목군→설정 3단)
+```
+- **국내와 미국은 같은 규칙으로 굴지 않는다.** 국내 설정을 그대로 미국에 들고 갔더니
+  PF 0.88 / -13.1% 로 돈을 잃었다(STOCK-TRADING 8-4). 그래서 설정이 2층이 됐고,
+  **`loadTradingConfig(market)` 에 시장을 넘기지 않으면 공통값으로 돈다** — 그 상태가 바로
+  미국을 국내 규칙으로 굴리는 상태다. CLI 셋(`backtest`·`backtest-sweep`·`walk-forward`)은
+  전부 `--market` 을 그대로 로더에 넘긴다.
+- **알림 엔진과의 차이**: `signals.ts` 는 "지금 살까"만 답한다. 백테스트는 여기에
+  청산 규칙·포지션 크기·거래비용을 얹어 "그렇게 매매했으면 벌었나"를 답한다.
+  이 셋이 없으면 신호가 좋아 보여도 돈을 버는지 알 수 없다.
+- **판정 로직을 재구현하지 않고 `analyze()` 를 그대로 부른다.** 백테스트에서 검증한 규칙과
+  실제로 나갈 주문이 갈라지면 검증이 무의미해지기 때문. 실매매(추후 `broker/*`)도 같은 설정을 읽는다.
+- **미래 참조 방지가 이 엔진의 핵심 계약**: 신호는 `analyze(candles.slice(0, i))` 로 어제 종가까지만,
+  체결은 오늘 시가, 손절·익절은 오늘 고/저가, 한 봉에 둘 다 닿으면 손절 우선(보수적).
+  속도를 포기하고 매 봉 `analyze()` 를 다시 부르는 것도 같은 이유 —
+  지표를 통째로 미리 계산해 인덱싱하면 미래 값을 참조하기 쉽다.
+- 성적표는 5개 기준으로 자동 채점한다: 표본 100회 · 기대값 >0R · PF ≥1.3 · MDD ≤25% · 단순보유 초과.
+  **단순보유(benchmark)를 항상 같이 계산**하는 이유는, 못 이기면 매매할 이유가 없기 때문.
+- **스윕(`backtest-sweep.ts`)은 일봉을 1회만 받아 모든 변형·종목군이 공유한다.** 변형마다 다시 받으면
+  데이터가 미묘하게 달라져 비교 자체가 무의미해지고, 네이버 호출도 조합 수만큼 늘어난다.
+  변형 목록(`VARIANTS`)은 그 스크립트에 하드코딩돼 있고 **배열 순서가 곧 차트의 색 순서**다.
+- **종목군을 나누는 이유**: 같은 규칙이라도 지수 ETF(완만한 우상향)와 개별주(변동성 큼)에서
+  결과가 정반대로 나온다. 실제로 국내 개별주에서 +16%인 설정이 미국 개별주에선 -1.3%다.
+  섞어 돌리면 어느 쪽이 성적을 만들었는지 알 수 없어 진단이 불가능해진다.
+- 종목군이 작으면(3종목 등) 거래가 수십 회에 그쳐 PF·기대값이 크게 튄다.
+  `verdictLines()` 의 표본 100회 기준이 그 경우를 ❌ 로 잡아주므로 **숫자만 보고 좋아하지 말 것**.
+- **스윕 결과를 실전 설정으로 승격하기 전에 `scripts/walk-forward.ts` 를 통과해야 한다.**
+  스윕은 전 구간을 보고 고르므로 구조적으로 과최적화다 — 실제로 스윕 1등(`minNetScore 6`)은
+  학습구간만 보면 기대값 +0.018R 로 우위가 없었고, 그 성적은 검증구간이 만든 것이었다.
+  승자 선택을 사람이 아니라 `pickWinner()` 가 하는 이유도 같다: 손으로 하면 검증 성적을 본 뒤
+  되돌아가 고르게 되고, 그 순간 검증구간이 학습구간으로 오염된다.
+- 판정에 **비율(검증÷학습)만 쓰면 안 된다.** 학습 기대값이 0 근처면 작은 검증값도 몇백 %로 찍힌다.
+  검증 거래 30회 미만이거나 학습 기대값 0.1R 미만이면 `held = null`(판정 불가)로 빠진다.
+- **페이퍼 트레이딩(`lib/stock/paper.ts`)은 증분이 아니라 재생(replay)이다.** 어제 상태를 읽어
+  오늘 판정을 이어붙이려면 진입·청산·수량 로직을 `backtest.ts` 와 한 벌 더 쓰게 되고,
+  그 순간 검증한 규칙과 기록되는 매매가 갈라진다. 그래서 시작일부터 매번 통째로 다시 굴린다 —
+  과거 일봉은 안 바뀌므로 결과는 항상 같고, 상태 파일이 없으니 상태가 썩지도 않는다.
+- `runBacktest` 는 기간 끝에 남은 포지션을 `open_at_end` 로 강제 청산해 `trades` 에 넣는다.
+  페이퍼에서는 그게 **아직 들고 있는 것**이라 갈라내고 실현 성적을 따로 센다 —
+  안 그러면 팔지도 않은 평가이익이 성적표에 섞인다.
+- **기록(보유·실현)과 예고(매수 후보)를 절대 같은 표에 넣지 않는다.** 섞이면 며칠 뒤에
+  그게 실제 가상매매였는지 후보였는지 구분할 수 없다. `previewEntryCandidates()` 의 진입 조건은
+  `backtest.ts` 의 판정과 같아야 하고(점수·uptrend), 슬롯·현금 한도는 일부러 적용하지 않는다.
+- **백테스트 유니버스는 관심종목과 분리한다** (`lib/stock/universe.ts`).
+  관심종목은 곧 텔레그램 알림 대상이라 표본을 늘리려고 100종목을 넣으면 알림이 못 쓰게 된다.
+  유니버스는 네이버 시총 랭킹에서 받아오고 `.cache/stock/` 에 12시간 캐시한다.
+  거래대금 상위는 별도 엔드포인트가 없어 **넓은 시총 풀을 받아 거래대금으로 재정렬**해 구한다.
+  ⚠ 어느 쪽이든 **오늘 기준 스냅샷**이라 선택 편향이 있다 — 그 사이 망한 종목은 목록에 없다.
+- 합격 기준은 `backtest.ts` 의 `verdictLines()` 하나가 정한다. UI 는 그 문자열을 표시만 하고
+  기준을 복제하지 않는다 — 복제하면 CLI 와 화면의 판정이 갈라진다.
+- 통화 환산을 하지 않으므로 국내/미국은 `--market` 으로 나눠 돌린다.
+- 설정 항목 의미·합격 기준·증권사 키 발급 절차는 `docs/STOCK-TRADING.md`.
+- 다음 단계(모의→실전)는 미구현. `.env.example` 에 `STOCK_MODE` 와 KIS/토스 키 이름만 잡아뒀다.
+  KIS 는 모의계좌를 지원하지만(도메인·앱키·tr_id 전부 별개) **토스는 샌드박스가 없다** — 발급 즉시 실계좌.
+
 ### 데일리 퀘스트 (콘텐츠 트랙 아님 — 실행 관리)
 ```
 config/quest-tasks.json   퀘스트 정의 (이름·트랙·반복요일·mini·startDate·archivedDate)
@@ -141,6 +209,17 @@ config/quest-season.json  시즌 (이름·시작일·주수)
   `--c-heat-0..4`(달성률 램프). **series 순서 자체가 색약 안전장치**라 순서를 섞거나 중간에 끼워넣지 말 것
   (인접쌍 CVD ΔE 9.1 light / 8.4 dark 로 검증됨). 9번째 계열이 필요하면 "기타" 로 접는다.
 
+### 메인 퀘스트 (퀘스트 탭의 서브뷰 — 12주 수익화 플랜)
+```
+config/missions.json → lib/missionStore.ts (파일 IO) → lib/mission.ts (타입·집계)
+                     → components/MissionBoard.tsx
+```
+- 데일리 퀘스트가 **반복**이라면 이쪽은 **일회성**이다. "한 번 하면 끝나지만 안 하면 다음이 안 열리는 일".
+- 챕터 4개(문 열기 → 첫 수익 → 리듬 만들기 → 회수)로 묶고, 앞 챕터를 다 끝내면 다음이 `unlocked` 된다.
+- **잠금은 시각적 안내일 뿐 체크를 막지 않는다.** 도구가 사람을 막아서면 판을 안 열게 되고
+  그게 이 프로젝트가 막으려는 실패 경로다. 잠금을 강제로 바꾸지 말 것.
+- 미션마다 `reward`(끝내면 얻는 것)를 붙인다 — 동기를 눈에 보이게 하는 게 이 화면의 존재 이유.
+
 ### 아이디어 파킹판 (퀘스트 탭의 서브뷰)
 ```
 config/ideas.json  → lib/ideaStore.ts (파일 IO) → lib/idea.ts (타입·집계)
@@ -155,9 +234,13 @@ config/ideas.json  → lib/ideaStore.ts (파일 IO) → lib/idea.ts (타입·집
 ## 5. admin 상세
 
 - 진입: `app/page.tsx` → `components/Dashboard.tsx` (탭 셸)
-- 탭: 데일리 퀘스트(`QuestBoard`, 기본 탭) · 유튜브(`YoutubeWorkspace` 안에 롱폼/주제큐/숏폼) ·
-  블로그(`BlogGenerator`) · 이모티콘(`EmoticonStudio`) · 인스타(`InstagramCardGenerator`) · 시나리오(`CinemaStudio`) ·
-  주식(`StockAlertDashboard` + `TelegramSetupCard`) · 클로드 대화(`ChatPanel`)
+- 탭: **주식(`StockAlertDashboard`, 기본 탭)** · 데일리 퀘스트(`QuestBoard`) ·
+  유튜브(`YoutubeWorkspace` 안에 롱폼/주제큐/숏폼) · 블로그(`BlogGenerator`) · 이모티콘(`EmoticonStudio`) ·
+  인스타(`InstagramCardGenerator`) · 시나리오(`CinemaStudio`) · 클로드 대화(`ChatPanel`)
+  → `Dashboard.tsx` 의 `TABS` 배열 **순서가 곧 화면 순서이고 첫 항목이 기본 탭**이다.
+- 주식 탭은 축이 둘이다: **시장**(🌍 전체 · 🇰🇷 국내 · 🇺🇸 미국) × **화면**(신호 스캔 · 방법론 · 백테스트).
+  시장을 위로 올린 이유는 두 시장이 다른 규칙으로 굴러서, 섞어 보면 어느 쪽 규칙으로 본
+  숫자인지 알 수 없기 때문. '전체'는 스캔에서만 의미가 있다 (백테스트는 통화를 환산하지 않는다).
 - 니치 전환: `NicheSelector` → `/api/system/niche` → `lib/niche.ts`
 
 ### API 라우트 (`admin/app/api/`)
@@ -173,6 +256,7 @@ config/ideas.json  → lib/ideaStore.ts (파일 IO) → lib/idea.ts (타입·집
 | cinema | `/cinema/projects`, `/cinema/projects/[slug]{,/generate}` | 시나리오 |
 | quest | `/quest`(GET 전체), `/quest/tasks`(POST·PATCH·DELETE), `/quest/check`(POST 토글·mini), `/quest/season`(PATCH) | 데일리 퀘스트 |
 | ideas | `/ideas` (GET·POST·PATCH·DELETE) | 아이디어 파킹판 |
+| missions | `/missions` (GET·POST·PATCH·DELETE) | 메인 퀘스트 (12주 플랜) |
 | stock | `/stock/{search,watchlist,scan,telegram}` | 관심종목 검색·CRUD, 신호 스캔(`?notify=1`), 텔레그램 연결 |
 | system | `/system/{api-status,channels,keywords,kpi,niche}` | 상태·설정 |
 
@@ -217,6 +301,9 @@ config/ideas.json  → lib/ideaStore.ts (파일 IO) → lib/idea.ts (타입·집
 | `tools/ffmpeg` | 렌더링 | 저장소 동봉, 시스템 ffmpeg 불필요 |
 | `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | 주식 알림 | 선택. 탭 UI로 설정하면 `admin/data/stock/telegram.json` 에 저장 |
 | 네이버 금융 (비공식) | 주식 시세·일봉 | API 키 불필요. 비공식이라 스키마 변경 가능 |
+| `STOCK_MODE` (`dry`\|`paper`\|`live`) | 자동매매 안전장치 | 기본 `dry` = 주문 안 나감. **백테스트는 이 값과 무관하게 키 없이 돈다** |
+| `KIS_PAPER_*` / `KIS_LIVE_*` | 한국투자증권 주문 | 모의·실전 앱키가 별개. 도메인·`tr_id` 도 다름. 미구현 |
+| `TOSS_CLIENT_ID` / `TOSS_CLIENT_SECRET` / `TOSS_ACCOUNT` | 토스증권 주문 | 샌드박스 없음 = 발급 즉시 실계좌. 미구현 |
 | npm: `@napi-rs/canvas`, `sharp`, `googleapis`, `archiver`(admin) / `msedge-tts`, `googleapis`(루트) | | |
 
 키는 루트 `.env` 에만 둔다 (`admin/.env.local` 불필요).

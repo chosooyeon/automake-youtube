@@ -1,10 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "./Toast";
 import TelegramSetupCard from "./TelegramSetupCard";
+import BacktestBoard from "./BacktestBoard";
+import MethodBoard from "./MethodBoard";
+import PaperBoard from "./PaperBoard";
+import {
+  MARKET_FLAG,
+  MARKET_SHORT,
+  type Market,
+  type MarketFilter,
+  type MarketMethod,
+  type MethodPayload,
+} from "./stockTypes";
 
-type Market = "KR" | "US";
 type Verdict = "STRONG_BUY" | "BUY" | "HOLD" | "SELL" | "STRONG_SELL";
 
 interface StockRef {
@@ -120,7 +130,193 @@ function bandPosition(s: Snapshot): number | null {
   return Math.max(0, Math.min(100, pct));
 }
 
+type StockView = "scan" | "method" | "backtest" | "paper";
+
+const STOCK_VIEWS: Array<{ id: StockView; label: string; hint: string }> = [
+  { id: "scan", label: "🔔 신호 스캔", hint: "지금 무엇을 볼까 — 관심종목 실시간 판정" },
+  { id: "method", label: "📐 방법론", hint: "국내와 미국이 어떤 규칙으로 다르게 굴러가나" },
+  { id: "backtest", label: "🧪 백테스트", hint: "그 규칙이 과거에 통했나 — 설정별 성적" },
+  { id: "paper", label: "📝 페이퍼", hint: "그 규칙이 지금도 통하나 — 실시간 가상매매 기록" },
+];
+
+const MARKET_TABS: Array<{ id: MarketFilter; label: string }> = [
+  { id: "ALL", label: "🌍 전체" },
+  { id: "KR", label: "🇰🇷 국내" },
+  { id: "US", label: "🇺🇸 미국" },
+];
+
+/**
+ * 주식 탭 셸.
+ *
+ * 축이 둘이다: **어느 시장을 보나**(위) × **무엇을 보나**(아래).
+ * 시장을 위로 올린 이유는 국내와 미국이 같은 규칙으로 굴지 않기 때문이다 —
+ * 두 시장을 한 화면에 섞어 놓으면 어느 쪽 규칙으로 본 숫자인지 알 수 없다.
+ *
+ * '전체'는 스캔에서만 의미가 있다. 백테스트는 통화(원/달러)를 환산하지 않으므로
+ * 섞으면 금액 지표가 헛것이 되고, 그래서 전체를 고르면 국내부터 보여준다.
+ */
 export default function StockAlertDashboard() {
+  const [market, setMarket] = useState<MarketFilter>("ALL");
+  const [view, setView] = useState<StockView>("scan");
+  const [methods, setMethods] = useState<MethodPayload | null>(null);
+
+  // 시장별 규칙은 요약 스트립·방법론 화면이 함께 쓰므로 여기서 한 번만 받는다
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/stock/method", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => {
+        if (alive && j.ok) setMethods(j as MethodPayload);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const focus: Market | null = market === "ALL" ? null : market;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-1">
+          <span className="text-[11px] text-subtext mr-1">시장</span>
+          {MARKET_TABS.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => setMarket(m.id)}
+              className={
+                "px-3 py-1.5 text-sm rounded-lg border transition " +
+                (market === m.id
+                  ? "bg-accent/15 border-accent/50 text-text"
+                  : "bg-panel border-line text-subtext hover:text-text")
+              }
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-1">
+          <span className="text-[11px] text-subtext mr-1">화면</span>
+          {STOCK_VIEWS.map((v) => (
+            <button
+              key={v.id}
+              onClick={() => setView(v.id)}
+              title={v.hint}
+              className={
+                "px-3 py-1.5 text-sm rounded-lg border transition " +
+                (view === v.id
+                  ? "bg-accent/15 border-accent/50 text-text"
+                  : "bg-panel border-line text-subtext hover:text-text")
+              }
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {view === "scan" && (
+        <ScanView market={market} methods={methods} onPickMarket={setMarket} onOpenMethod={() => setView("method")} />
+      )}
+      {view === "method" && <MethodBoard data={methods} focus={focus} />}
+      {view === "backtest" && <BacktestBoard market={focus} />}
+      {view === "paper" && <PaperBoard market={focus} />}
+    </div>
+  );
+}
+
+/** 판정을 급한 순으로 — 관망 20종목을 스크롤해서 매수 신호를 찾게 만들면 안 된다 */
+const VERDICT_RANK: Record<Verdict, number> = {
+  STRONG_BUY: 0,
+  BUY: 1,
+  STRONG_SELL: 2,
+  SELL: 3,
+  HOLD: 4,
+};
+
+/** 요약 스트립에 쓰는 3분류 — 🟢 살 때 / 🔴 팔 때 / ⚪ 그 외 */
+function verdictBucket(v: Verdict): "buy" | "sell" | "hold" {
+  if (v === "STRONG_BUY" || v === "BUY") return "buy";
+  if (v === "STRONG_SELL" || v === "SELL") return "sell";
+  return "hold";
+}
+
+/**
+ * "한눈에" 스트립 — 시장 한 줄에 종목 수·신호 분포·그 시장의 매매 규칙까지 담는다.
+ * 규칙을 여기 같이 적는 이유: 같은 🟢라도 국내는 20일 안에 정리하고 미국은 40일을
+ * 들고 가는데, 그걸 모르면 두 시장의 초록색을 같은 뜻으로 읽는다.
+ */
+function MarketSummaryRow({
+  market,
+  total,
+  counts,
+  method,
+  active,
+  onClick,
+  onOpenMethod,
+}: {
+  market: Market;
+  total: number;
+  counts: { buy: number; sell: number; hold: number; nodata: number; paused: number };
+  method?: MarketMethod;
+  active: boolean;
+  onClick: () => void;
+  onOpenMethod: () => void;
+}) {
+  return (
+    <div
+      className={
+        "border rounded-xl p-3 transition " +
+        (active ? "bg-panel border-accent/50" : "bg-panel border-line hover:border-subtext/40")
+      }
+    >
+      <div className="flex items-center gap-3 flex-wrap">
+        <button onClick={onClick} className="flex items-center gap-2 min-w-0 text-left">
+          <span className="text-base">{MARKET_FLAG[market]}</span>
+          <span className="text-sm font-semibold text-text">{MARKET_SHORT[market]}</span>
+          <span className="text-[11px] text-subtext">{total}종목</span>
+        </button>
+
+        <div className="flex items-center gap-3 text-xs mono">
+          <span className={counts.buy > 0 ? "text-good font-semibold" : "text-subtext"}>
+            🟢 {counts.buy}
+          </span>
+          <span className={counts.sell > 0 ? "text-bad font-semibold" : "text-subtext"}>
+            🔴 {counts.sell}
+          </span>
+          <span className="text-subtext">⚪ {counts.hold}</span>
+          {counts.nodata > 0 && <span className="text-subtext">· 미분석 {counts.nodata}</span>}
+          {counts.paused > 0 && <span className="text-subtext">· 중지 {counts.paused}</span>}
+        </div>
+
+        {method && (
+          <button
+            onClick={onOpenMethod}
+            title="이 시장의 매매 규칙 전체 보기"
+            className="ml-auto text-[10px] text-subtext hover:text-text border border-line rounded-full px-2 py-1 flex items-center gap-1.5"
+          >
+            <span className="mono">{method.summary}</span>
+            {!method.verifiedAt && <span className="text-warn">⚠ 검증 전</span>}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ScanView({
+  market: marketFilter,
+  methods,
+  onPickMarket,
+  onOpenMethod,
+}: {
+  market: MarketFilter;
+  methods: MethodPayload | null;
+  onPickMarket: (m: MarketFilter) => void;
+  onOpenMethod: () => void;
+}) {
   const [items, setItems] = useState<WatchItem[]>([]);
   const [results, setResults] = useState<Record<string, ScanResult>>({});
   const [scannedAt, setScannedAt] = useState<string | null>(null);
@@ -282,9 +478,82 @@ export default function StockAlertDashboard() {
 
   const enabledCount = items.filter((i) => i.enabled).length;
 
+  const methodByMarket = useMemo(() => {
+    const m = new Map<Market, MarketMethod>();
+    for (const x of methods?.markets ?? []) m.set(x.market, x);
+    return m;
+  }, [methods]);
+
+  /**
+   * 시장별 신호 분포 — 스트립이 쓴다. 관심종목이 없는 시장은 줄을 만들지 않는다.
+   * 일시중지한 종목은 애초에 스캔하지 않으므로 '미분석'이 아니라 따로 센다 —
+   * 안 그러면 꺼둔 종목이 "분석 실패"처럼 보인다.
+   */
+  const perMarket = useMemo(() => {
+    const out: Array<{
+      market: Market;
+      total: number;
+      counts: { buy: number; sell: number; hold: number; nodata: number; paused: number };
+    }> = [];
+    for (const mk of ["KR", "US"] as Market[]) {
+      const list = items.filter((i) => i.market === mk);
+      if (list.length === 0) continue;
+      const counts = { buy: 0, sell: 0, hold: 0, nodata: 0, paused: 0 };
+      for (const it of list) {
+        if (!it.enabled) {
+          counts.paused++;
+          continue;
+        }
+        const a = results[it.symbol]?.analysis;
+        if (!a || a.insufficientData) counts.nodata++;
+        else counts[verdictBucket(a.verdict)]++;
+      }
+      out.push({ market: mk, total: list.length, counts });
+    }
+    return out;
+  }, [items, results]);
+
+  /**
+   * 화면에 그릴 목록 — 시장으로 거른 뒤 급한 판정 순으로 세운다.
+   * 정렬을 안 하면 관심종목이 늘어날수록 매수 신호가 관망 카드 사이에 묻힌다.
+   */
+  const visible = useMemo(() => {
+    const list = items.filter((i) => marketFilter === "ALL" || i.market === marketFilter);
+    return [...list].sort((a, b) => {
+      const aa = results[a.symbol]?.analysis;
+      const ba = results[b.symbol]?.analysis;
+      const rank = (x?: Analysis | null) =>
+        !x || x.insufficientData ? 5 : VERDICT_RANK[x.verdict];
+      const d = rank(aa) - rank(ba);
+      if (d !== 0) return d;
+      const score = (x?: Analysis | null) => (x ? Math.abs(x.netScore) : 0);
+      const s = score(ba) - score(aa);
+      if (s !== 0) return s;
+      return a.name.localeCompare(b.name, "ko");
+    });
+  }, [items, results, marketFilter]);
+
   return (
     <div className="space-y-6">
       <TelegramSetupCard onReadyChange={setTelegramReady} />
+
+      {/* 한눈에 — 시장별 신호 분포 + 그 시장의 규칙 한 줄 */}
+      {perMarket.length > 0 && (
+        <div className="space-y-2">
+          {perMarket.map((p) => (
+            <MarketSummaryRow
+              key={p.market}
+              market={p.market}
+              total={p.total}
+              counts={p.counts}
+              method={methodByMarket.get(p.market)}
+              active={marketFilter === p.market}
+              onClick={() => onPickMarket(marketFilter === p.market ? "ALL" : p.market)}
+              onOpenMethod={onOpenMethod}
+            />
+          ))}
+        </div>
+      )}
 
       {/* 종목 추가 */}
       <div className="bg-panel border border-line rounded-xl p-4">
@@ -362,14 +631,21 @@ export default function StockAlertDashboard() {
         </div>
       </div>
 
-      {/* 종목 카드 */}
+      {/* 종목 카드 — 급한 판정(적극매수 → 매수 → 매도 → 관망) 순 */}
       {items.length === 0 ? (
         <div className="bg-panel border border-line rounded-xl p-8 text-center text-sm text-subtext">
           관심종목이 없습니다. 위에서 종목을 검색해 추가하세요.
         </div>
+      ) : visible.length === 0 ? (
+        <div className="bg-panel border border-line rounded-xl p-8 text-center text-sm text-subtext">
+          {marketFilter === "US" ? "미국" : "국내"} 관심종목이 없습니다.{" "}
+          <button onClick={() => onPickMarket("ALL")} className="text-accent hover:underline">
+            전체 보기
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {items.map((item) => (
+          {visible.map((item) => (
             <StockCard
               key={item.symbol}
               item={item}
@@ -384,6 +660,9 @@ export default function StockAlertDashboard() {
       <p className="text-[11px] text-subtext leading-relaxed">
         판정은 <span className="text-text">확정된 일봉</span>(전 거래일 종가)의 RSI·이동평균·MACD·볼린저밴드·거래량으로
         계산합니다. 장중에 신호가 나타났다 사라지는 현상을 피하려는 설계이며, 표시되는 현재가는 참고용입니다.
+        <br />
+        <span className="text-text">이 신호 판정은 두 시장이 같습니다.</span> 시장별로 갈리는 것은 그 신호를 받아
+        얼마를 걸고 언제 자르느냐이며, 위 [📐 방법론] 에서 국내·미국 규칙을 나란히 볼 수 있습니다.
         <br />
         <span className="text-text">이 화면은 조회만 합니다 — 들어오거나 새로고침해도 텔레그램은 가지 않습니다.</span>{" "}
         알림은 GitHub Actions 가 평일 하루 2번(한국장·미국장 마감 후) 보냅니다. 발송 주체를 하나로 두어야 같은 신호가

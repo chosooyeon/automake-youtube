@@ -1,0 +1,69 @@
+{
+  "_설명": [
+    "자동매매 정책. 수익률은 여기서 계산되어 나오는 결과값이다. 각 항목 의미는 docs/STOCK-TRADING.md 참고.",
+    "",
+    "구조는 2층이다: 아래 공통 기본값 위에 markets.KR / markets.US 가 자기 몫만 덮어쓴다.",
+    "국내 설정을 그대로 미국에 들고 갔더니 PF 0.88 / -13.1% 로 돈을 잃었기 때문이다 (8-4절).",
+    "loadTradingConfig('US') 가 두 층을 합쳐서 돌려주고, 백테스트·스윕·워크포워드가 그걸 쓴다.",
+    "",
+    "verifiedAt 이 null 이면 아직 '가설'이다. 스윕 표에서 제일 좋은 줄을 골라 여기 적는 것은",
+    "과최적화다 (8-5절: 학습구간 1위가 검증구간 꼴찌였다). 워크포워드를 통과한 날만 적는다."
+  ],
+
+  "capital": 3000000,
+
+  "entry": {
+    "minNetScore": 4,
+    "requireUptrend": true,
+    "maxOpenPositions": 5,
+    "cooldownDays": 5
+  },
+
+  "exit": {
+    "stopLossAtrMult": 2,
+    "takeProfitAtrMult": 4,
+    "trailingAtrMult": null,
+    "maxHoldDays": 20,
+    "exitOnSellVerdict": true
+  },
+
+  "risk": {
+    "riskPerTradePct": 1,
+    "maxPositionPct": 20,
+    "dailyLossLimitPct": 3
+  },
+
+  "costs": {
+    "commissionBps": 1.5,
+    "slippageBps": 10,
+    "sellTaxBps": { "KR": 15, "US": 0 }
+  },
+
+  "warmupBars": 60,
+
+  "markets": {
+    "KR": {
+      "label": "국내 (코스피·코스닥)",
+      "note": "등락이 잦아 '싸게 사서 튀면 판다'가 그럭저럭 맞는 무대. 대신 매도할 때마다 거래세 0.15% 가 떨어져 나가서, 자주 사고팔수록 수익이 세금으로 새어나간다. 그래서 손잡이를 아무것도 바꾸지 않고 공통 기본값 그대로 쓴다 — 워크포워드에서 6개 변형의 순위가 통째로 뒤집혔기 때문에(8-5절), 지금 무엇을 골라도 근거가 없다.",
+      "verifiedAt": null
+    },
+
+    "US": {
+      "label": "미국 (나스닥·NYSE)",
+      "note": "국내 규칙이 여기서 PF 0.88 / -13.1% 로 무너졌다(8-4절). 진단은 '너무 좁게 자르고 너무 일찍 판다' 였다 — 일방적으로 오르는 장에서 ATR×2 손절은 흔들릴 때마다 잘려나가고(휩소), 다시 사는 사이에 상승분을 놓친다. 그래서 손절폭을 넓혀 버티고, 매도신호로 끊지 않고, 트레일링으로 추세 끝까지 따라간다. 실제로 다시 돌려보니 -13.1% → +2.0%, PF 0.88 → 1.03, MDD -20.3% → -11.5% 로 방향은 맞았다. 다만 5개 기준 중 3개는 여전히 불합격이다(기대값 0.042R · PF 1.03 · 단순보유 -103.8%). 남은 병목은 비용비중 63.4% 와 슬롯참 741회 — 즉 아직도 너무 자주 사고, 수수료가 7bp 라 회전이 그대로 비용이 된다. 실계좌에 올릴 규칙이 아니다.",
+      "verifiedAt": null,
+
+      "exit": {
+        "stopLossAtrMult": 3,
+        "takeProfitAtrMult": 6,
+        "trailingAtrMult": 3,
+        "maxHoldDays": 40,
+        "exitOnSellVerdict": false
+      },
+
+      "costs": {
+        "commissionBps": 7
+      }
+    }
+  }
+}

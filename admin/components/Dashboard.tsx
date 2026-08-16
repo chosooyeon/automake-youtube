@@ -13,28 +13,29 @@ import StockAlertDashboard from "./StockAlertDashboard";
 import QuestBoard from "./QuestBoard";
 
 type Tab =
+  | "stock"
   | "quest"
   | "youtube"
   | "instacard"
   | "blog"
   | "emoticon"
   | "cinema"
-  | "stock"
   | "chat";
 
+// 순서가 곧 우선순위다. 매일 장 마감마다 보는 화면이 맨 앞이라야 클릭이 줄어든다.
 const TABS: { id: Tab; label: string; status: "live" | "planned" }[] = [
+  { id: "stock", label: "📈 주식 매매", status: "live" },
   { id: "quest", label: "✅ 데일리 퀘스트", status: "live" },
   { id: "youtube", label: "🎬 유튜브", status: "live" },
   { id: "instacard", label: "🟪 인스타 카드 피드", status: "live" },
   { id: "blog", label: "📝 블로그 글 (네이버)", status: "live" },
   { id: "emoticon", label: "🎨 이모티콘 (마켓 등록)", status: "live" },
   { id: "cinema", label: "🎭 시나리오 (감독 모드)", status: "live" },
-  { id: "stock", label: "📈 주식 매매 알림", status: "live" },
   { id: "chat", label: "💬 클로드 대화", status: "live" },
 ];
 
 export default function Dashboard() {
-  const [tab, setTab] = useState<Tab>("quest");
+  const [tab, setTab] = useState<Tab>("stock");
 
   return (
     <div className="space-y-6">
@@ -68,6 +69,7 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {tab === "stock" && <StockAlertDashboard />}
       {tab === "quest" && <QuestBoard />}
       {tab === "youtube" && <YoutubeWorkspace />}
       <div className={tab === "instacard" ? "" : "hidden"}>
@@ -78,7 +80,6 @@ export default function Dashboard() {
       </div>
       {tab === "emoticon" && <EmoticonStudio />}
       {tab === "cinema" && <CinemaStudio />}
-      {tab === "stock" && <StockAlertDashboard />}
       {/* 스트리밍 중 탭을 옮겨도 대화가 끊기지 않도록 언마운트하지 않는다 */}
       <div className={tab === "chat" ? "" : "hidden"}>
         <ChatPanel />

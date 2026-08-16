@@ -1,0 +1,287 @@
+{
+  "market": "US",
+  "startedAt": "20260817",
+  "universeNote": "관심종목 35종목 (20260816 기준 스냅샷)",
+  "universe": [
+    {
+      "symbol": "NVDA.O",
+      "code": "NVDA",
+      "name": "엔비디아",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "TSLA.O",
+      "code": "TSLA",
+      "name": "테슬라",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "AAPL.O",
+      "code": "AAPL",
+      "name": "애플",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "MSFT.O",
+      "code": "MSFT",
+      "name": "마이크로소프트",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "GOOGL.O",
+      "code": "GOOGL",
+      "name": "알파벳 Class A",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "AMZN.O",
+      "code": "AMZN",
+      "name": "아마존닷컴",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "META.O",
+      "code": "META",
+      "name": "메타",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "AVGO.O",
+      "code": "AVGO",
+      "name": "브로드컴",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "AMD.O",
+      "code": "AMD",
+      "name": "AMD(어드밴스드 마이크로 디바이시스)",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "NFLX.O",
+      "code": "NFLX",
+      "name": "넷플릭스",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "COST.O",
+      "code": "COST",
+      "name": "코스트코 홀세일",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "JPM",
+      "code": "JPM",
+      "name": "제이피모간체이스",
+      "market": "US",
+      "exchange": "NYSE"
+    },
+    {
+      "symbol": "V",
+      "code": "V",
+      "name": "비자",
+      "market": "US",
+      "exchange": "NYSE"
+    },
+    {
+      "symbol": "MA",
+      "code": "MA",
+      "name": "마스터카드",
+      "market": "US",
+      "exchange": "NYSE"
+    },
+    {
+      "symbol": "UNH",
+      "code": "UNH",
+      "name": "유나이티드헬스 그룹",
+      "market": "US",
+      "exchange": "NYSE"
+    },
+    {
+      "symbol": "LLY",
+      "code": "LLY",
+      "name": "일라이 릴리",
+      "market": "US",
+      "exchange": "NYSE"
+    },
+    {
+      "symbol": "WMT.O",
+      "code": "WMT",
+      "name": "월마트",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "ORCL.K",
+      "code": "ORCL",
+      "name": "오라클",
+      "market": "US",
+      "exchange": "NYSE"
+    },
+    {
+      "symbol": "CRM",
+      "code": "CRM",
+      "name": "세일즈포스",
+      "market": "US",
+      "exchange": "NYSE"
+    },
+    {
+      "symbol": "QCOM.O",
+      "code": "QCOM",
+      "name": "퀄컴",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "MU.O",
+      "code": "MU",
+      "name": "마이크론 테크놀로지",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "PLTR.O",
+      "code": "PLTR",
+      "name": "팔란티어 테크놀로지스",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "XOM",
+      "code": "XOM",
+      "name": "엑슨모빌 홀딩스",
+      "market": "US",
+      "exchange": "NYSE"
+    },
+    {
+      "symbol": "SPY",
+      "code": "SPY",
+      "name": "State Street SPDR S&P 500 ETF Trust",
+      "market": "US",
+      "exchange": "AMEX"
+    },
+    {
+      "symbol": "QQQM.O",
+      "code": "QQQM",
+      "name": "Invesco NASDAQ 100 ETF",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "VOO",
+      "code": "VOO",
+      "name": "뱅가드 S&P500 ETF",
+      "market": "US",
+      "exchange": "AMEX"
+    },
+    {
+      "symbol": "QQQ.O",
+      "code": "QQQ",
+      "name": "인베스코 나스닥100 ETF",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "VTI",
+      "code": "VTI",
+      "name": "뱅가드 미국 전체시장 ETF",
+      "market": "US",
+      "exchange": "AMEX"
+    },
+    {
+      "symbol": "DIA",
+      "code": "DIA",
+      "name": "SPDR 다우존스 ETF",
+      "market": "US",
+      "exchange": "AMEX"
+    },
+    {
+      "symbol": "SCHD.K",
+      "code": "SCHD",
+      "name": "슈왑 미국 배당 ETF",
+      "market": "US",
+      "exchange": "AMEX"
+    },
+    {
+      "symbol": "JEPQ.O",
+      "code": "JEPQ",
+      "name": "JP모간 나스닥 커버드콜 ETF",
+      "market": "US",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "JEPI.K",
+      "code": "JEPI",
+      "name": "JP모간 S&P 커버드콜 ETF",
+      "market": "US",
+      "exchange": "AMEX"
+    },
+    {
+      "symbol": "GLDM.K",
+      "code": "GLDM",
+      "name": "SPDR 골드 미니셰어 ETF",
+      "market": "US",
+      "exchange": "AMEX"
+    },
+    {
+      "symbol": "IAU",
+      "code": "IAU",
+      "name": "아이셰어즈 골드 ETF",
+      "market": "US",
+      "exchange": "AMEX"
+    },
+    {
+      "symbol": "TLT.O",
+      "code": "TLT",
+      "name": "아이셰어즈 20년+ 미국채 ETF",
+      "market": "US",
+      "exchange": "NASDAQ"
+    }
+  ],
+  "config": {
+    "capital": 3000000,
+    "entry": {
+      "minNetScore": 4,
+      "requireUptrend": true,
+      "maxOpenPositions": 5,
+      "cooldownDays": 5
+    },
+    "exit": {
+      "stopLossAtrMult": 3,
+      "takeProfitAtrMult": 6,
+      "trailingAtrMult": 3,
+      "maxHoldDays": 40,
+      "exitOnSellVerdict": false
+    },
+    "risk": {
+      "riskPerTradePct": 1,
+      "maxPositionPct": 20,
+      "dailyLossLimitPct": 3
+    },
+    "costs": {
+      "commissionBps": 7,
+      "slippageBps": 10,
+      "sellTaxBps": {
+        "KR": 15,
+        "US": 0
+      }
+    },
+    "warmupBars": 60,
+    "market": "US",
+    "marketLabel": "미국 (나스닥·NYSE)",
+    "marketNote": "국내 규칙이 여기서 PF 0.88 / -13.1% 로 무너졌다(8-4절). 진단은 '너무 좁게 자르고 너무 일찍 판다' 였다 — 일방적으로 오르는 장에서 ATR×2 손절은 흔들릴 때마다 잘려나가고(휩소), 다시 사는 사이에 상승분을 놓친다. 그래서 손절폭을 넓혀 버티고, 매도신호로 끊지 않고, 트레일링으로 추세 끝까지 따라간다. 실제로 다시 돌려보니 -13.1% → +2.0%, PF 0.88 → 1.03, MDD -20.3% → -11.5% 로 방향은 맞았다. 다만 5개 기준 중 3개는 여전히 불합격이다(기대값 0.042R · PF 1.03 · 단순보유 -103.8%). 남은 병목은 비용비중 63.4% 와 슬롯참 741회 — 즉 아직도 너무 자주 사고, 수수료가 7bp 라 회전이 그대로 비용이 된다. 실계좌에 올릴 규칙이 아니다.",
+    "verifiedAt": null
+  },
+  "note": "페이퍼 트레이딩 계약서. 진행 중에는 종목도 규칙도 바꾸지 않는다 — 바꾸는 순간 검증이 아니라 또 한 번의 튜닝이 된다. 바꾸려면 --init 으로 새로 시작한다."
+}

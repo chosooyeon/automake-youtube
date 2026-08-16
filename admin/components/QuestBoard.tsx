@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToast } from "./Toast";
 import IdeaBoard from "./IdeaBoard";
+import MissionBoard from "./MissionBoard";
 import {
   HeatLegend,
   MonthHeatmap,
@@ -51,10 +52,11 @@ import {
   type TrackId,
 } from "@/lib/quest";
 
-type View = "today" | "month" | "year" | "log" | "manage" | "ideas";
+type View = "today" | "main" | "month" | "year" | "log" | "manage" | "ideas";
 
 const VIEWS: { id: View; label: string }[] = [
   { id: "today", label: "오늘" },
+  { id: "main", label: "🗺️ 메인 퀘스트" },
   { id: "month", label: "월간" },
   { id: "year", label: "연간" },
   { id: "log", label: "기록 표" },
@@ -196,6 +198,7 @@ export default function QuestBoard() {
       {view === "manage" && (
         <ManageView tasks={tasks} today={today} onChange={setTasks} onReloadLog={setLog} />
       )}
+      {view === "main" && <MissionBoard />}
       {view === "ideas" && <IdeaBoard />}
     </div>
   );

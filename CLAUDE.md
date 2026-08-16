@@ -30,7 +30,7 @@
 | 단계 순서·의존성 | `config/pipeline.json` |
 | 봇이 어떻게 호출되나 | `admin/lib/runBot.ts` (headless `claude -p`), `scripts/run-bot.sh` |
 | 모든 경로 상수·스테이지 ID | `admin/lib/paths.ts` ← **경로 추측 대신 여기 확인** |
-| 대시보드 탭 구성 | `admin/components/Dashboard.tsx` (탭 셸). 유튜브 탭은 `YoutubeWorkspace.tsx` 안에 주제큐·롱폼·숏폼 서브탭 |
+| 대시보드 탭 구성 | `admin/components/Dashboard.tsx` (탭 셸). **탭 배열 순서가 곧 화면 순서이고 첫 항목이 기본 탭** — 지금은 주식이 맨 앞. 유튜브 탭은 `YoutubeWorkspace.tsx` 안에 주제큐·롱폼·숏폼 서브탭 |
 | 클로드 대화 탭 (일반 채팅) | `admin/app/api/chat/route.ts` (`claude -p --output-format stream-json` 스트리밍) + `admin/components/ChatPanel.tsx` + `Markdown.tsx`. 프로젝트 CLAUDE.md 오염을 피하려 빈 cwd `admin/data/chat/` 에서 실행 |
 | 색상·테마(라이트/다크) | `admin/app/globals.css` 의 `:root`/`.dark` 변수 ← **여기만 고치면 전 화면 반영**. 컴포넌트엔 `bg-panel`·`text-subtext` 같은 시맨틱 토큰만 쓰고 `gray-700` 류 하드코딩 금지 |
 | 인스타 카드 생성 | `admin/app/api/instagram/generate/route.ts` + `admin/lib/instagram/*` |
@@ -39,7 +39,21 @@
 | 이모티콘 | `admin/lib/emoticon*.ts` |
 | 주식 매매신호·알림 | `admin/lib/stock/*` (naver=데이터·indicators=지표·signals=판정·scan=알림). 관심종목·알림이력은 `config/stock-*.json` (커밋됨), 봇 토큰만 `admin/data/stock/telegram.json` (git 제외) |
 | 주식 알림 상시 가동 | `.github/workflows/stock-alert.yml` → `scripts/stock-scan-ci.ts` (tsx, admin 서버 불필요). 맥 켜둔 채 돌릴 땐 `scripts/stock-watch.mjs` |
+| 주식 자동매매 (백테스트) | `admin/lib/stock/backtest.ts`(시뮬레이션·성적표) + `tradingConfig.ts`(정책 로더) + `scripts/backtest.ts`(CLI). 정책은 `config/stock-trading.json` (커밋됨) ← **수익률은 여기서 계산되어 나오는 결과값**. 설정 의미·합격 기준·키 발급 절차는 `docs/STOCK-TRADING.md` |
+| 시장별 매매 규칙 (국내 ≠ 미국) | `config/stock-trading.json` 이 **공통값 + `markets.{KR,US}` 덮어쓰기 2층**이고 `loadTradingConfig(market)` 이 합쳐서 준다 ← **백테스트·스윕·워크포워드는 반드시 market 을 넘긴다** (안 넘기면 공통값으로 돌아 미국을 국내 규칙으로 굴린다 — 그게 -13.1% 였다). 화면은 `admin/app/api/stock/method/route.ts` → `components/MethodBoard.tsx` (주식 탭 [📐 방법론]). `markets.*.verifiedAt` 이 null 이면 화면이 "검증 전 가설"로 표시하며, **워크포워드 통과일만 적는다** |
+| 백테스트 파라미터 스윕 | `scripts/backtest-sweep.ts`(변형 목록이 여기 하드코딩 — 손잡이를 바꾸려면 `VARIANTS` 수정) → `admin/data/stock/backtest/sweep-{market}.json` (git 제외) → `admin/app/api/stock/backtest/route.ts` → `components/BacktestBoard.tsx` (주식 탭의 [🧪 백테스트] 서브탭). **일봉은 1회만 받아 모든 변형·종목군이 공유**하므로 조합을 늘려도 네트워크 비용은 그대로. 합격 기준은 복제하지 말고 `backtest.ts` 의 `verdictLines()` 를 쓸 것 |
+| 페이퍼 트레이딩 (실시간 가상매매) | `admin/lib/stock/paper.ts` + `scripts/paper-trade.ts` + `components/PaperBoard.tsx` (주식 탭 [📝 페이퍼]). 계약서 `config/paper-{KR,US}.json` (커밋됨 — 시작 시점의 **종목·규칙을 얼린 것**, 진행 중 수정 금지), 결과 `admin/data/stock/paper/{market}.json` (git 제외). **증분이 아니라 시작일부터 매번 재생(replay)한다** — 진입·청산 로직을 backtest.ts 와 한 벌 더 쓰지 않으려는 것. 상태 파일이 없으니 썩지도 않는다 |
+| 워크포워드 검증 (과최적화 판정) | `scripts/walk-forward.ts` — 학습구간에서만 후보를 돌리고 **`pickWinner()` 규칙이 승자를 고른 뒤** 검증구간엔 승자만 1회. 선택 규칙을 코드에 박아둔 이유는 손으로 하면 검증 성적을 보고 되돌아가 고르게 되기 때문 ← **스윕 결과를 실전 설정으로 승격하기 전 반드시 통과**. 결과는 `admin/data/stock/backtest/walkforward-{market}-{universe}.json` (git 제외) |
+| 백테스트 유니버스 (알림과 분리) | `admin/lib/stock/universe.ts` — 네이버 `m.stock.naver.com/api/stocks/marketValue/{KOSPI,KOSDAQ}` 랭킹에서 시총·거래대금 상위 N을 뽑는다. **관심종목(watchlist)에 넣지 않는 이유는 그게 곧 텔레그램 알림 대상이기 때문** — 100종목을 넣으면 알림이 못 쓰게 된다. 풀은 `.cache/stock/` 에 12h 캐시. `--universe marketCap,tradingValue --top 100` 처럼 여러 개를 주면 **합집합을 한 번만 받아** 일봉 수집이 배로 늘지 않는다 ← ⚠ 오늘 기준 스냅샷이라 선택 편향이 있다 |
+| 백테스트 종목군 (자산군별 분리) | `config/stock-groups.json` (커밋됨) — 지수ETF·커버드콜·금채권만 적고 **나머지는 '개별주'로 자동 분류**되므로 종목을 추가해도 이 파일은 안 고쳐도 된다. 결과는 `종목군 × 설정` 2차원이고 API 가 `?group=` 으로 잘라서 준다 ← **지수ETF와 개별주를 한 솥에 넣으면 어느 쪽이 성적을 만들었는지 알 수 없다** |
+| KIS 클라이언트 (조회 전용 · 실계좌 이중잠금) | `admin/lib/stock/kis.ts` — GET 전용 통로 하나뿐이라 **주문 함수가 없다**. `STOCK_MODE` 기본 `dry`, 실계좌는 `STOCK_MODE=live` **와** `KIS_LIVE_TRADING_ENABLED=true` 가 **둘 다** 있어야 열린다 ← 하나만 켜면 안 열림 |
+| 매매 차단 현황 한눈에 | `scripts/trading-status.ts` — API 호출 없이 가드 함수를 실제로 불러보고 KIS·토스가 막혔는지 판정 |
+| KIS 모의계좌 연결 확인 | `scripts/kis-check.ts` — 토큰 발급 + 잔고 조회만 (주문 안 나감). 키는 `.env` 의 `KIS_PAPER_*`, 토큰은 `admin/data/stock/kis-token.json` 에 24h 캐시. `--account`/`--product` 로 .env 안 고치고 계좌번호 시험 가능 |
+| 토스증권 연결 확인 | `scripts/toss-check.ts` — 조회 전용 (`get()` 하나로만 호출해서 주문 경로가 없음). **실계좌다** (토스는 샌드박스 없음). `TOSS_ACCOUNT` 은 계좌번호가 아니라 `/api/v1/accounts` 가 주는 `accountSeq` |
+| 토스 클라이언트 (조회 전용) | `admin/lib/stock/toss.ts` — GET 전용 `get()` 하나뿐이라 **주문 함수가 아예 없다**. `assertTradingAllowed()` 는 `.env` 의 `TOSS_TRADING_ENABLED=true` 없으면 throw ← **기본값 차단**. `positionAt()` 은 그 시점의 수량·평단 (오늘 평단을 과거에 소급하면 분할매수 종목 숫자가 틀어진다) |
+| 토스 페이퍼 리포트 ("그때 팔았으면") | `scripts/toss-paper.ts` — 보유·체결이력은 토스에서 읽고, 매도 판정은 `signals.ts` 를 과거 일봉에 굴려 종이 위에서만 한다. 매수일은 체결이력에서 실제로 가져온다 |
 | 데일리 퀘스트 (일/월/년 달성 관리) | `admin/lib/quest.ts`(순수 집계·클라이언트 공용) + `questStore.ts`(파일 IO) + `components/QuestBoard.tsx`·`QuestCharts.tsx`. 기록은 `config/quest-{tasks,log,season}.json` (커밋됨). 미니 퀘스트·코치 배너·시즌 진행바 포함 |
+| 메인 퀘스트 (12주 수익화 플랜, 일회성) | `admin/lib/mission.ts` + `missionStore.ts` + `components/MissionBoard.tsx` (퀘스트 탭 서브뷰). 목록은 `config/missions.json` (커밋됨) |
 | 아이디어 파킹판 | `admin/lib/idea.ts` + `ideaStore.ts` + `components/IdeaBoard.tsx` (퀘스트 탭의 서브뷰). 목록은 `config/ideas.json` (커밋됨) ← **새 트랙 제안 전에 여기부터 확인** |
 | 차트 색 (트랙 8색·달성률 램프) | `admin/app/globals.css` 의 `--c-series-1..8` / `--c-heat-0..4` ← **순서가 색약 안전장치라 섞지 말 것** |
 | 주제 큐 | `topics/queue/`, `admin/lib/topics.ts` |
@@ -80,6 +94,15 @@ scripts/run-topic.sh --niche psychology      # 주제 5개 추천
 node scripts/build-video.mjs <slug>          # 롱폼 렌더
 node scripts/render-shorts.mjs <slug>        # 숏폼 렌더
 node scripts/stock-watch.mjs                 # 관심종목 스캔 → 텔레그램 알림 (admin 실행 중이어야 함)
+cd admin && npx tsx ../scripts/backtest.ts   # 매매규칙 백테스트 (키 불필요, --market/--from/--to)
+cd admin && npx tsx ../scripts/backtest-sweep.ts  # 설정 6종 한 번에 비교 → 주식탭 [🧪 백테스트]
+cd admin && npx tsx ../scripts/walk-forward.ts    # 과최적화 검증 (--split 20250630 기본)
+cd admin && npx tsx ../scripts/paper-trade.ts --market KR   # 페이퍼 트레이딩 갱신 (--notify 로 텔레그램)
+cd admin && npx tsx ../scripts/walk-forward.ts --universe marketCap,tradingValue --top 100  # 100종목 유니버스로
+cd admin && npx tsx ../scripts/kis-check.ts  # KIS 모의계좌 연결 확인 (조회만, --fresh 로 토큰 재발급)
+cd admin && npx tsx ../scripts/toss-check.ts # 토스증권 연결 확인 (조회만 — 실계좌 주의)
+cd admin && npx tsx ../scripts/toss-paper.ts # 토스 보유종목 "그때 팔았으면" 리포트 (주문 안 나감)
+cd admin && npx tsx ../scripts/trading-status.ts  # 실계좌 주문이 막혀 있는지 확인
 ```
 
 ## 규칙
