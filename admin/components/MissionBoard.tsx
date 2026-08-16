@@ -1,21 +1,25 @@
 "use client";
 
 /**
- * 메인 퀘스트 보드 — 12주 수익화 플랜을 챕터로 나눠 게임처럼 보여준다.
+ * 메인 퀘스트 보드 — 12주짜리 시즌 플랜을 챕터로 나눠 게임처럼 보여준다.
  *
  * 데일리 퀘스트가 "오늘 뭘 하지"라면 여기는 "지금 어디쯤 왔지"다.
+ * **트랙은 한 번에 하나만 보인다** — 수익화와 이직을 동시에 펼쳐놓으면
+ * 어느 쪽도 진행 중이 아닌 것처럼 보이고, 그게 범위를 넓히는 첫걸음이다.
  * 잠금 표시는 순서를 안내할 뿐 체크를 막지 않는다 — 도구가 사람을 막아서면 안 열게 된다.
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToast } from "./Toast";
 import {
-  MISSION_CHAPTERS,
+  DEFAULT_TRACK,
+  MISSION_TRACKS,
   chapterMeta,
   chapterStats,
   missionsOf,
   nextMission,
   totalStat,
+  trackMeta,
   type Mission,
 } from "@/lib/mission";
 import { toDateStr } from "@/lib/quest";
@@ -23,6 +27,7 @@ import { toDateStr } from "@/lib/quest";
 export default function MissionBoard() {
   const { push } = useToast();
   const [missions, setMissions] = useState<Mission[]>([]);
+  const [track, setTrack] = useState<string>(DEFAULT_TRACK);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
   const [today, setToday] = useState("");
@@ -62,9 +67,10 @@ export default function MissionBoard() {
     [call]
   );
 
-  const stats = useMemo(() => chapterStats(missions), [missions]);
-  const total = useMemo(() => totalStat(missions), [missions]);
-  const next = useMemo(() => nextMission(missions), [missions]);
+  const meta = useMemo(() => trackMeta(track), [track]);
+  const stats = useMemo(() => chapterStats(missions, track), [missions, track]);
+  const total = useMemo(() => totalStat(missions, track), [missions, track]);
+  const next = useMemo(() => nextMission(missions, track), [missions, track]);
 
   if (loading || !today) {
     return <div className="text-sm text-subtext py-10 text-center">불러오는 중…</div>;
@@ -72,14 +78,42 @@ export default function MissionBoard() {
 
   return (
     <div className="space-y-4">
+      {/* 트랙 — 한 번에 하나만 본다 */}
+      <div className="flex flex-wrap gap-1.5">
+        {MISSION_TRACKS.map((t) => {
+          const st = totalStat(missions, t.id);
+          const active = t.id === track;
+          return (
+            <button
+              key={t.id}
+              onClick={() => {
+                setTrack(t.id);
+                setOpen(null);
+              }}
+              className={
+                "px-3 py-1.5 rounded-lg border text-xs transition " +
+                (active
+                  ? "border-accent bg-accent/10 text-text font-semibold"
+                  : "border-line bg-panel text-subtext hover:text-text hover:border-subtext/40")
+              }
+            >
+              {t.emoji} {t.label}
+              <span className="ml-1.5 mono tabular-nums opacity-70">
+                {st.done}/{st.total}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* 전체 진행도 */}
       <div className="bg-panel border border-line rounded-xl p-4">
         <div className="flex flex-wrap items-end justify-between gap-2 mb-3">
           <div>
-            <h2 className="text-base font-semibold">🗺️ 메인 퀘스트 — 12주 수익화</h2>
-            <p className="text-xs text-subtext mt-0.5">
-              한 번만 하면 끝나지만, 안 하면 다음이 안 열리는 일들입니다.
-            </p>
+            <h2 className="text-base font-semibold">
+              🗺️ 메인 퀘스트 — {meta.headline}
+            </h2>
+            <p className="text-xs text-subtext mt-0.5">{meta.note}</p>
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-bold mono tabular-nums">{total.done}</span>
@@ -100,7 +134,7 @@ export default function MissionBoard() {
             <div className="text-[11px] text-subtext">지금 할 것 하나</div>
             <div className="text-sm font-semibold mt-0.5">{next.title}</div>
             <div className="text-[11px] text-subtext mt-1">
-              CHAPTER {next.chapter} · {chapterMeta(next.chapter).title}
+              CHAPTER {next.chapter} · {chapterMeta(track, next.chapter).title}
             </div>
           </div>
         ) : (
@@ -113,9 +147,9 @@ export default function MissionBoard() {
       </div>
 
       {/* 챕터 */}
-      {MISSION_CHAPTERS.map((c) => {
+      {meta.chapters.map((c) => {
         const st = stats.find((s) => s.chapter === c.id)!;
-        const items = missionsOf(missions, c.id);
+        const items = missionsOf(missions, track, c.id);
         const dim = !st.unlocked && !st.cleared && st.done === 0;
 
         return (
@@ -180,7 +214,7 @@ export default function MissionBoard() {
                   call({
                     method: "POST",
                     headers: { "content-type": "application/json" },
-                    body: JSON.stringify({ chapter: c.id, title }),
+                    body: JSON.stringify({ track, chapter: c.id, title }),
                   })
                 }
               />

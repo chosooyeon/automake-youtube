@@ -273,6 +273,8 @@ export function formatPaperReport(r: PaperReport): string {
   L.push(line);
   L.push(`페이퍼 트레이딩 · ${r.market}   ${r.startedAt} 시작 → ${r.asOf}`);
   L.push(`거래일 ${r.tradingDays}일 · 종목 ${r.universeSize}개`);
+  // 이 줄을 지우지 말 것. 며칠 지나 숫자만 보면 실제 계좌 잔고로 착각하기 쉽다.
+  L.push(`※ 종이 위 기록입니다 — 주문이 어디로도 나가지 않습니다 (KIS 모의계좌와도 무관)`);
   L.push(line);
 
   if (r.tradingDays === 0) {

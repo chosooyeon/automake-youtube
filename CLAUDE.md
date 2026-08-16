@@ -39,6 +39,7 @@
 | 이모티콘 | `admin/lib/emoticon*.ts` |
 | 주식 매매신호·알림 | `admin/lib/stock/*` (naver=데이터·indicators=지표·signals=판정·scan=알림). 관심종목·알림이력은 `config/stock-*.json` (커밋됨), 봇 토큰만 `admin/data/stock/telegram.json` (git 제외) |
 | 주식 알림 상시 가동 | `.github/workflows/stock-alert.yml` → `scripts/stock-scan-ci.ts` (tsx, admin 서버 불필요). 맥 켜둔 채 돌릴 땐 `scripts/stock-watch.mjs` |
+| 페이퍼 트레이딩 상시 가동 | `.github/workflows/paper-trade.yml` — 한국장 15:50 KST / 미국장 06:35 KST. **어느 크론이 깨웠는지(`github.event.schedule`)로 시장을 가른다** (둘 다 매번 돌리면 텔레그램이 하루 4통). 재생 방식이라 커밋할 상태가 없어 `contents: read` 로 충분. 마지막 스텝이 계약서 변경을 감지하면 실패시킨다 |
 | 주식 자동매매 (백테스트) | `admin/lib/stock/backtest.ts`(시뮬레이션·성적표) + `tradingConfig.ts`(정책 로더) + `scripts/backtest.ts`(CLI). 정책은 `config/stock-trading.json` (커밋됨) ← **수익률은 여기서 계산되어 나오는 결과값**. 설정 의미·합격 기준·키 발급 절차는 `docs/STOCK-TRADING.md` |
 | 시장별 매매 규칙 (국내 ≠ 미국) | `config/stock-trading.json` 이 **공통값 + `markets.{KR,US}` 덮어쓰기 2층**이고 `loadTradingConfig(market)` 이 합쳐서 준다 ← **백테스트·스윕·워크포워드는 반드시 market 을 넘긴다** (안 넘기면 공통값으로 돌아 미국을 국내 규칙으로 굴린다 — 그게 -13.1% 였다). 화면은 `admin/app/api/stock/method/route.ts` → `components/MethodBoard.tsx` (주식 탭 [📐 방법론]). `markets.*.verifiedAt` 이 null 이면 화면이 "검증 전 가설"로 표시하며, **워크포워드 통과일만 적는다** |
 | 백테스트 파라미터 스윕 | `scripts/backtest-sweep.ts`(변형 목록이 여기 하드코딩 — 손잡이를 바꾸려면 `VARIANTS` 수정) → `admin/data/stock/backtest/sweep-{market}.json` (git 제외) → `admin/app/api/stock/backtest/route.ts` → `components/BacktestBoard.tsx` (주식 탭의 [🧪 백테스트] 서브탭). **일봉은 1회만 받아 모든 변형·종목군이 공유**하므로 조합을 늘려도 네트워크 비용은 그대로. 합격 기준은 복제하지 말고 `backtest.ts` 의 `verdictLines()` 를 쓸 것 |
@@ -53,7 +54,7 @@
 | 토스 클라이언트 (조회 전용) | `admin/lib/stock/toss.ts` — GET 전용 `get()` 하나뿐이라 **주문 함수가 아예 없다**. `assertTradingAllowed()` 는 `.env` 의 `TOSS_TRADING_ENABLED=true` 없으면 throw ← **기본값 차단**. `positionAt()` 은 그 시점의 수량·평단 (오늘 평단을 과거에 소급하면 분할매수 종목 숫자가 틀어진다) |
 | 토스 페이퍼 리포트 ("그때 팔았으면") | `scripts/toss-paper.ts` — 보유·체결이력은 토스에서 읽고, 매도 판정은 `signals.ts` 를 과거 일봉에 굴려 종이 위에서만 한다. 매수일은 체결이력에서 실제로 가져온다 |
 | 데일리 퀘스트 (일/월/년 달성 관리) | `admin/lib/quest.ts`(순수 집계·클라이언트 공용) + `questStore.ts`(파일 IO) + `components/QuestBoard.tsx`·`QuestCharts.tsx`. 기록은 `config/quest-{tasks,log,season}.json` (커밋됨). 미니 퀘스트·코치 배너·시즌 진행바 포함 |
-| 메인 퀘스트 (12주 수익화 플랜, 일회성) | `admin/lib/mission.ts` + `missionStore.ts` + `components/MissionBoard.tsx` (퀘스트 탭 서브뷰). 목록은 `config/missions.json` (커밋됨) |
+| 메인 퀘스트 (12주 시즌 플랜, 일회성) | `admin/lib/mission.ts` + `missionStore.ts` + `components/MissionBoard.tsx` (퀘스트 탭 서브뷰). 목록은 `config/missions.json` (커밋됨). **트랙 2개**(`income` 수익화 / `career` 이직 블록 1)이고 **챕터 번호는 트랙 안에서만 유효** — 집계 함수에 반드시 track 을 넘긴다 (안 넘기면 두 시즌이 한 진행바에 섞인다). 화면은 한 번에 한 트랙만 |
 | 아이디어 파킹판 | `admin/lib/idea.ts` + `ideaStore.ts` + `components/IdeaBoard.tsx` (퀘스트 탭의 서브뷰). 목록은 `config/ideas.json` (커밋됨) ← **새 트랙 제안 전에 여기부터 확인** |
 | 차트 색 (트랙 8색·달성률 램프) | `admin/app/globals.css` 의 `--c-series-1..8` / `--c-heat-0..4` ← **순서가 색약 안전장치라 섞지 말 것** |
 | 주제 큐 | `topics/queue/`, `admin/lib/topics.ts` |

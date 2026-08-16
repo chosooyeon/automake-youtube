@@ -30,7 +30,7 @@ import {
   savePaperCharter,
   type PaperCharter,
 } from "../admin/lib/stock/paper";
-import { sendTelegram } from "../admin/lib/stock/telegram";
+import { esc, sendTelegram } from "../admin/lib/stock/telegram";
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -47,6 +47,17 @@ function todayYmd(): string {
     String(d.getMonth() + 1).padStart(2, "0") +
     String(d.getDate()).padStart(2, "0")
   );
+}
+
+/** YYYYMMDD 로부터 오늘까지 며칠 지났나 */
+function daysSinceYmd(ymd: string): number {
+  const t = new Date(
+    Number(ymd.slice(0, 4)),
+    Number(ymd.slice(4, 6)) - 1,
+    Number(ymd.slice(6, 8))
+  ).getTime();
+  if (!Number.isFinite(t)) return 0;
+  return Math.max(0, Math.round((Date.now() - t) / 86_400_000));
 }
 
 async function confirm(question: string): Promise<boolean> {
@@ -134,7 +145,11 @@ async function main(): Promise<void> {
 
   // 워밍업(SMA60·ATR14)에 쓸 과거 봉까지 넉넉히 받는다.
   // 시작일 이후만 받으면 첫 60봉이 지표 계산에 먹혀 석 달을 놓친다.
-  const days = Number(arg("days") || 400);
+  //
+  // 기간은 시작일에서 자동으로 늘어난다 — 400일로 고정해 두면 페이퍼가 1년을 넘긴 순간
+  // 앞부분 기록이 조용히 잘려 나가고, 재생 결과가 어제와 달라진다.
+  const spanNeeded = daysSinceYmd(charter.startedAt) + 150; // 150일 = 워밍업 60봉 + 여유
+  const days = Number(arg("days") || Math.max(400, spanNeeded));
   console.log(`\n일봉 수집 중 (${charter.universe.length}종목 × 최근 ${days}일)...`);
   const data: SymbolData[] = [];
   let done = 0;
@@ -184,10 +199,30 @@ async function main(): Promise<void> {
   console.log(`\n저장: ${file}`);
 
   if (flag("notify")) {
-    // 텔레그램은 4096자 제한이 있어 길면 잘린다
-    const body = text.length > 3800 ? text.slice(0, 3800) + "\n…(생략)" : text;
-    const r = await sendTelegram("<pre>" + body.replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]!) + "</pre>");
-    console.log(r.ok ? "텔레그램 발송 완료" : `텔레그램 발송 실패: ${r.error ?? "unknown"}`);
+    // 매매가 없고 후보도 없는 날은 보내지 않는다 — 매일 "변화 없음" 이 오면
+    // 정작 매매가 일어난 날의 알림도 같이 안 읽게 된다.
+    const quiet =
+      report.todayEntries.length === 0 &&
+      report.todayExits.length === 0 &&
+      candidates.length === 0 &&
+      report.openPositions.length === 0;
+
+    if (quiet && !flag("always-notify")) {
+      console.log("텔레그램 발송 생략 — 매매·보유·후보가 모두 없는 날입니다 (--always-notify 로 강제).");
+    } else {
+      const flagEmoji = market === "KR" ? "🇰🇷" : "🇺🇸";
+      const head =
+        `${flagEmoji} <b>페이퍼 트레이딩 ${market}</b> · ${report.asOf}\n` +
+        `매수 ${report.todayEntries.length} · 매도 ${report.todayExits.length} · ` +
+        `보유 ${report.openPositions.length} · 후보 ${candidates.length}\n`;
+
+      // 텔레그램 본문은 4096자 제한이라 헤더 몫을 빼고 자른다
+      const LIMIT = 3600;
+      const body = text.length > LIMIT ? text.slice(0, LIMIT) + "\n…(생략 — admin 📝 페이퍼 탭에서 전체 확인)" : text;
+      const r = await sendTelegram(head + "<pre>" + esc(body) + "</pre>");
+      console.log(r.ok ? "텔레그램 발송 완료" : `텔레그램 발송 실패: ${r.error ?? "unknown"}`);
+      if (!r.ok) process.exitCode = 1; // CI 가 조용히 성공으로 끝나면 안 된다
+    }
   }
 }
 
