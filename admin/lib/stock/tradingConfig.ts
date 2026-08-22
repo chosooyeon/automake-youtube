@@ -43,6 +43,22 @@ export interface EntryRule {
   requireUptrend: boolean;
   /** 동시에 들고 갈 수 있는 최대 종목 수 */
   maxOpenPositions: number;
+  /**
+   * 같은 업종에 동시에 담을 수 있는 최대 종목 수. null 이면 제한 없음(기본값).
+   *
+   * ⚠ **이건 수익용 손잡이가 아니라 보험이다. 값에 따라 부호가 바뀐다.**
+   *   1 로 조이면 상승장에서 **후보 중 최악**이다 (PF 0.98 · +0.006R · MDD -25.0%,
+   *     제한없음 1.29 · +0.108R · -16.8%). 좋은 자리를 막고 점수 낮은 다른 업종을 대신 산다.
+   *   2 는 상승장에서 거의 안 걸려 손해가 -0.007R 수준이고, **하락 3구간 모두에서**
+   *     단순보유 대비 우위가 제한없음보다 컸다 (-8.8% 장: +4.2%p vs +2.4%p).
+   *
+   * 즉 분산은 **좋은 장에서 조금 내고 나쁜 장에서 돌려받는 비용**이다. 그래서
+   * 공통 기본값은 null(끔)로 두고 **markets.KR 에서만 2로 켠다** — 국내에서만 검증했기 때문.
+   * 값을 바꾸려면 walk-forward.ts 의 ind1/ind2/indoff 후보로 먼저 돌려볼 것.
+   *
+   * 업종을 못 받은 종목(비공식 API 실패)은 제약 대상에서 빠진다.
+   */
+  maxPerIndustry: number | null;
   /** 같은 종목을 청산 후 며칠간 재진입 금지 (신호가 며칠 연속 뜰 때 중복 진입 방지) */
   cooldownDays: number;
 }
@@ -87,6 +103,18 @@ export interface TradingConfig {
   costs: CostRule;
   /** 지표가 안정되기까지 건너뛸 봉 수. SMA60 을 쓰므로 60 미만으로 내리지 말 것 */
   warmupBars: number;
+  /**
+   * 소수점 매수 허용. false 면 정수주만 산다.
+   *
+   * 미국에서 켜는 이유: 원금 $2,100 · 1회 리스크 1%($21) 로는 손절폭이 $21 을 넘는
+   * 종목을 **1주도 못 산다** — 실제로 상위 12종목 중 9종목이 '0주' 로 걸러졌고,
+   * 5종목 분산 전략이 1주짜리 2종목으로 쪼그라들었다. 그 상태의 성적표는 전략이 아니라
+   * 정수주 제약을 측정한 것이다. 한국투자·토스 실계좌가 미국주식 소수점을 지원하므로
+   * 이 가정은 실전보다 유리한 쪽으로 기울지 않는다.
+   *
+   * 국내는 소수점 매매가 일반적이지 않아 false 로 둔다.
+   */
+  fractionalShares: boolean;
 
   /** 어느 시장 규칙으로 풀린 설정인가. null = 공통 기본값만 */
   market: Market | null;
@@ -102,6 +130,15 @@ export interface MarketOverride {
   label?: string;
   note?: string;
   verifiedAt?: string | null;
+  /**
+   * 이 시장의 원금. **통화가 다르므로 반드시 시장마다 따로 잡는다.**
+   * 엔진은 환산을 하지 않아서, 공통 capital 3,000,000 을 미국에 그대로 쓰면
+   * 300만원이 아니라 $3,000,000(약 40억원)으로 매매한다 — 실제로 그 상태로
+   * 미국 페이퍼가 5일간 돌았다. 안 적으면 공통값을 그대로 물려받으니 주의.
+   */
+  capital?: number;
+  /** 소수점 매수 허용 (미국처럼 주가가 높아 정수주로는 규칙이 안 도는 시장) */
+  fractionalShares?: boolean;
   entry?: Partial<EntryRule>;
   exit?: Partial<ExitRule>;
   risk?: Partial<RiskRule>;
@@ -116,6 +153,7 @@ export interface TradingConfigFile {
   risk?: Partial<RiskRule>;
   costs?: Partial<Omit<CostRule, "sellTaxBps">> & { sellTaxBps?: Partial<CostRule["sellTaxBps"]> };
   warmupBars?: number;
+  fractionalShares?: boolean;
   markets?: Partial<Record<Market, MarketOverride>>;
 }
 
@@ -125,6 +163,7 @@ export const DEFAULT_TRADING_CONFIG: TradingConfig = {
     minNetScore: 4,
     requireUptrend: true,
     maxOpenPositions: 5,
+    maxPerIndustry: null,
     cooldownDays: 5,
   },
   exit: {
@@ -145,6 +184,7 @@ export const DEFAULT_TRADING_CONFIG: TradingConfig = {
     sellTaxBps: { KR: 15, US: 0 },
   },
   warmupBars: 60,
+  fractionalShares: false,
   market: null,
   marketLabel: null,
   marketNote: null,
@@ -178,6 +218,7 @@ function mergeCommon(raw: TradingConfigFile): TradingConfig {
       sellTaxBps: { ...d.costs.sellTaxBps, ...(raw.costs?.sellTaxBps ?? {}) },
     },
     warmupBars: raw.warmupBars ?? d.warmupBars,
+    fractionalShares: raw.fractionalShares ?? d.fractionalShares,
     market: null,
     marketLabel: null,
     marketNote: null,
@@ -189,6 +230,8 @@ function mergeCommon(raw: TradingConfigFile): TradingConfig {
 function applyMarket(base: TradingConfig, market: Market, ov: MarketOverride | undefined): TradingConfig {
   return {
     ...base,
+    capital: ov?.capital ?? base.capital,
+    fractionalShares: ov?.fractionalShares ?? base.fractionalShares,
     entry: { ...base.entry, ...(ov?.entry ?? {}) },
     exit: { ...base.exit, ...(ov?.exit ?? {}) },
     risk: { ...base.risk, ...(ov?.risk ?? {}) },

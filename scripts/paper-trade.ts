@@ -20,6 +20,7 @@ import { fetchCandles, type Candle, type Market, type StockRef } from "../admin/
 import { loadWatchlist, STOCK_DATA_DIR } from "../admin/lib/stock/store";
 import { loadTradingConfig } from "../admin/lib/stock/tradingConfig";
 import { fetchUniverse, UNIVERSE_LABEL, type UniverseKind } from "../admin/lib/stock/universe";
+import { fetchIndustries } from "../admin/lib/stock/industry";
 import type { SymbolData } from "../admin/lib/stock/backtest";
 import {
   formatPaperReport,
@@ -150,13 +151,18 @@ async function main(): Promise<void> {
   // 앞부분 기록이 조용히 잘려 나가고, 재생 결과가 어제와 달라진다.
   const spanNeeded = daysSinceYmd(charter.startedAt) + 150; // 150일 = 워밍업 60봉 + 여유
   const days = Number(arg("days") || Math.max(400, spanNeeded));
+  const industryMap =
+    market === "KR"
+      ? await fetchIndustries(charter.universe.map((r) => r.code))
+      : new Map<string, string>();
+
   console.log(`\n일봉 수집 중 (${charter.universe.length}종목 × 최근 ${days}일)...`);
   const data: SymbolData[] = [];
   let done = 0;
   for (const ref of charter.universe) {
     try {
       const candles: Candle[] = await fetchCandles(ref, days);
-      data.push({ ref, candles });
+      data.push({ ref, candles, industry: industryMap.get(ref.code) });
     } catch (e) {
       console.log(`\n  ✗ ${ref.name} ${(e as Error).message} — 제외`);
     }
@@ -201,14 +207,20 @@ async function main(): Promise<void> {
   if (flag("notify")) {
     // 매매가 없고 후보도 없는 날은 보내지 않는다 — 매일 "변화 없음" 이 오면
     // 정작 매매가 일어난 날의 알림도 같이 안 읽게 된다.
-    const quiet =
-      report.todayEntries.length === 0 &&
-      report.todayExits.length === 0 &&
-      candidates.length === 0 &&
-      report.openPositions.length === 0;
+    // --trades-only: 실제 매매가 있는 날만 알린다.
+    // 시장을 둘 다 돌리면 숫자가 두 벌이 되고, 나쁜 쪽을 만지고 싶어진다 —
+    // 그게 계약서를 건드리게 만들어 검증을 죽인다. 트랙을 지우는 대신 안 보이게 해서 막는다.
+    const tradedToday = report.todayEntries.length > 0 || report.todayExits.length > 0;
+    const quiet = flag("trades-only")
+      ? !tradedToday
+      : !tradedToday && candidates.length === 0 && report.openPositions.length === 0;
 
     if (quiet && !flag("always-notify")) {
-      console.log("텔레그램 발송 생략 — 매매·보유·후보가 모두 없는 날입니다 (--always-notify 로 강제).");
+      console.log(
+        flag("trades-only")
+          ? "텔레그램 발송 생략 — 오늘 매매가 없었습니다 (--trades-only 모드)."
+          : "텔레그램 발송 생략 — 매매·보유·후보가 모두 없는 날입니다 (--always-notify 로 강제)."
+      );
     } else {
       const flagEmoji = market === "KR" ? "🇰🇷" : "🇺🇸";
       const head =

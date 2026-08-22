@@ -30,8 +30,15 @@ import { runBacktest } from "./backtest";
 import { analyze } from "./signals";
 import type { TradingConfig } from "./tradingConfig";
 
-/** runBacktest 가 종목을 버리는 기준(`warmupBars + 5`)과 같아야 한다 */
-const MIN_BARS_MARGIN = 6;
+/**
+ * 워밍업 봉을 warmupBars 보다 이만큼 더 준다.
+ *
+ * 딱 warmupBars 만큼만 자르면, 시작 직후에는 슬라이스가 runBacktest 의
+ * `warmupBars + 5` 가드를 못 넘겨 종목이 통째로 버려진다. 실제로 그것 때문에
+ * 페이퍼가 첫 6거래일 동안 조용히 "거래일 0" 만 찍었다.
+ * 여유분을 주고 진입은 tradeFrom 으로 자르면 시작 첫날부터 정상 동작한다.
+ */
+const WARMUP_MARGIN = 30;
 
 /** 시작할 때 얼려두는 계약서. 이 파일이 바뀌면 그 시점부터 다른 실험이다 */
 export interface PaperCharter {
@@ -185,12 +192,16 @@ export function runPaper(charter: PaperCharter, full: SymbolData[]): PaperReport
 
   const sliced: SymbolData[] = full.map((s) => {
     const startIdx = s.candles.findIndex((c) => c.date >= charter.startedAt);
-    if (startIdx < 0) return { ref: s.ref, candles: [] };
-    const from = Math.max(0, startIdx - cfg.warmupBars);
-    return { ref: s.ref, candles: s.candles.slice(from) };
+    if (startIdx < 0) return { ref: s.ref, candles: [], industry: s.industry };
+    const from = Math.max(0, startIdx - cfg.warmupBars - WARMUP_MARGIN);
+    return { ref: s.ref, candles: s.candles.slice(from), industry: s.industry };
   });
 
-  const usable = sliced.filter((s) => s.candles.length > cfg.warmupBars + MIN_BARS_MARGIN);
+  // 시작일 이후 봉이 하나라도 있으면 쓸 수 있다 — 진입 시작은 tradeFrom 이 막아 준다
+  const usable = sliced.filter(
+    (s) =>
+      s.candles.length > cfg.warmupBars + 5 && s.candles.some((c) => c.date >= charter.startedAt)
+  );
 
   // 시작일 이후 봉이 아직 하나도 없는 경우 (장 열리기 전에 돌렸거나, 시작일이 미래).
   // 에러가 아니라 정상 상태다 — "출발선에 섰고 아직 아무 일도 없다"가 맞는 보고다.
@@ -209,12 +220,12 @@ export function runPaper(charter: PaperCharter, full: SymbolData[]): PaperReport
       equityCurve: [],
       equityPct: 0,
       benchmarkReturnPct: 0,
-      skipped: { noCash: 0, slotsFull: 0, badStop: 0, cooldown: 0 },
+      skipped: { noCash: 0, slotsFull: 0, badStop: 0, cooldown: 0, industryFull: 0 },
       warnings: [`시작일(${charter.startedAt}) 이후 거래일이 아직 없습니다.`],
     };
   }
 
-  const result = runBacktest(usable, cfg);
+  const result = runBacktest(usable, cfg, { tradeFrom: charter.startedAt });
 
   const dates = [...new Set(usable.flatMap((s) => s.candles.map((c) => c.date)))]
     .filter((d) => d >= charter.startedAt)
@@ -265,6 +276,10 @@ const money = (v: number, m: Market) =>
 
 const pct = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
 
+/** 소수점 매수면 잔여 자리까지, 정수주면 정수로 — 0.0001주 같은 숫자를 "0주"로 보이게 하지 않는다 */
+const qty = (n: number) =>
+  Number.isInteger(n) ? `${n}주` : `${n.toFixed(4).replace(/0+$/, "").replace(/\.$/, "")}주`;
+
 /** 매일 읽을 한 화면. 텔레그램에도 같은 본문을 쓴다 */
 export function formatPaperReport(r: PaperReport): string {
   const L: string[] = [];
@@ -294,11 +309,11 @@ export function formatPaperReport(r: PaperReport): string {
     L.push("");
     L.push(`[오늘 ${r.asOf}]`);
     for (const t of r.todayEntries) {
-      L.push(`  🟢 매수  ${t.name} ${t.shares}주 @ ${money(t.entryPrice, r.market)}  ${t.entrySignals.join("+") || "-"}`);
+      L.push(`  🟢 매수  ${t.name} ${qty(t.shares)} @ ${money(t.entryPrice, r.market)}  ${t.entrySignals.join("+") || "-"}`);
     }
     for (const t of r.todayExits) {
       L.push(
-        `  🔴 매도  ${t.name} ${t.shares}주 @ ${money(t.exitPrice, r.market)}  ` +
+        `  🔴 매도  ${t.name} ${qty(t.shares)} @ ${money(t.exitPrice, r.market)}  ` +
           `${pct(t.pnlPct)} (${t.r >= 0 ? "+" : ""}${t.r.toFixed(2)}R) · ${t.reason}`
       );
     }
@@ -314,7 +329,7 @@ export function formatPaperReport(r: PaperReport): string {
   } else {
     for (const p of [...r.openPositions].sort((a, b) => b.unrealizedPct - a.unrealizedPct)) {
       L.push(
-        `  ${p.name.padEnd(14)} ${String(p.shares).padStart(4)}주 · ${p.holdBars}봉 · ` +
+        `  ${p.name.padEnd(14)} ${qty(p.shares).padStart(10)} · ${p.holdBars}봉 · ` +
           `평가 ${pct(p.unrealizedPct)} (${money(p.unrealizedPnl, r.market)})`
       );
     }

@@ -76,6 +76,9 @@ jobs:
             echo "::group::$m"
             args="--market $m"
             [ "$NOTIFY" = "1" ] && args="$args --notify"
+            # 미국은 실제 매매가 있는 날만 알린다 — 주의력은 국내 하나에 모은다.
+            # 기록 자체는 계속 쌓인다 (페이퍼 기록은 소급이 안 되므로 끊지 않는다).
+            [ "$m" = "US" ] && args="$args --trades-only"
             # 한 시장이 실패해도 나머지는 돌린다 — 네이버가 한쪽만 막히는 경우가 있다
             npx --yes tsx@4.23.12 ../scripts/paper-trade.ts $args || fail=1
             echo "::endgroup::"

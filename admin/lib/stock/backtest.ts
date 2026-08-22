@@ -27,6 +27,8 @@ import type { TradingConfig } from "./tradingConfig";
 export interface SymbolData {
   ref: StockRef;
   candles: Candle[];
+  /** 업종코드 (국내). 없으면 업종 제약을 받지 않는다 */
+  industry?: string;
 }
 
 export type ExitReason = "stop" | "target" | "trail" | "signal" | "maxhold" | "open_at_end";
@@ -113,7 +115,7 @@ export interface BacktestResult {
   trades: Trade[];
   equityCurve: EquityPoint[];
   /** 신호는 떴는데 진입하지 못한 횟수와 이유 — 조용히 잘라내면 "다 잡았다"고 착각한다 */
-  skipped: { noCash: number; slotsFull: number; badStop: number; cooldown: number };
+  skipped: { noCash: number; slotsFull: number; badStop: number; cooldown: number; industryFull: number };
   warnings: string[];
   config: TradingConfig;
   symbols: string[];
@@ -161,6 +163,16 @@ function daysBetween(a: string, b: string): number {
 export interface RunBacktestOptions {
   /** 진행 상황 보고 (CLI 에서 종목별 진척 표시용) */
   onProgress?: (done: number, total: number, label: string) => void;
+  /**
+   * YYYYMMDD. 이 날짜부터만 **신규 진입**한다 (지표 워밍업은 그 전 봉으로 한다).
+   *
+   * 왜 필요한가: 진입 시작 시점은 원래 `warmupBars` 인덱스에 묶여 있었다. 그래서
+   * "이 날부터 매매" 를 만들려면 딱 그만큼만 잘라 넘겨야 했는데, 그러면 시작 직후에는
+   * 봉이 모자라 위의 `warmupBars + 5` 가드에 걸려 종목이 통째로 버려진다 —
+   * 페이퍼 트레이딩이 첫 6거래일 동안 조용히 '거래일 0' 이 되던 원인이다.
+   * 워밍업 봉을 넉넉히 주고 매매 시작만 날짜로 자르면 두 문제가 같이 풀린다.
+   */
+  tradeFrom?: string;
 }
 
 export function runBacktest(
@@ -172,7 +184,7 @@ export function runBacktest(
 
   // ── 0. 데이터 준비 ────────────────────────────────────────────
   const data = input
-    .map((s) => ({ ref: s.ref, candles: sanitize(s.candles) }))
+    .map((s) => ({ ref: s.ref, candles: sanitize(s.candles), industry: s.industry }))
     .filter((s) => {
       if (s.candles.length <= cfg.warmupBars + 5) {
         warnings.push(`${s.ref.name}: 봉 ${s.candles.length}개로 부족해 제외했습니다.`);
@@ -216,8 +228,11 @@ export function runBacktest(
   const positions = new Map<string, OpenPosition>();
   const trades: Trade[] = [];
   const equityCurve: EquityPoint[] = [];
-  const skipped = { noCash: 0, slotsFull: 0, badStop: 0, cooldown: 0 };
+  const skipped = { noCash: 0, slotsFull: 0, badStop: 0, cooldown: 0, industryFull: 0 };
   const lastExitDate = new Map<string, string>();
+  /** 심볼 → 업종코드. 업종을 못 받은 종목은 아예 안 들어간다 (= 제약 없음) */
+  const industryBySymbol = new Map<string, string>();
+  for (const s0 of data) if (s0.industry) industryBySymbol.set(s0.ref.symbol, s0.industry);
   const lastClose = new Map<string, number>();
 
   const commission = cfg.costs.commissionBps / BPS;
@@ -342,6 +357,8 @@ export function runBacktest(
       for (const s of prepared) {
         const i = s.idxByDate.get(date);
         if (i == null || i < cfg.warmupBars) continue;
+        // 워밍업 봉을 넉넉히 받은 경우, 시작일 전에는 사지 않는다
+        if (opts.tradeFrom && date < opts.tradeFrom) continue;
         if (positions.has(s.ref.symbol)) continue;
 
         const dec = s.decision[i];
@@ -363,9 +380,26 @@ export function runBacktest(
         (a, b) => b.dec.netScore - a.dec.netScore || a.s.ref.symbol.localeCompare(b.s.ref.symbol)
       );
 
+      // 지금 들고 있는 포지션의 업종 분포 — 후보를 하나씩 채택할 때마다 갱신한다
+      const industryCount = new Map<string, number>();
+      if (cfg.entry.maxPerIndustry != null) {
+        for (const sym of positions.keys()) {
+          const ind = industryBySymbol.get(sym);
+          if (ind) industryCount.set(ind, (industryCount.get(ind) ?? 0) + 1);
+        }
+      }
+
       for (const c of candidates) {
         if (positions.size >= cfg.entry.maxOpenPositions) {
           skipped.slotsFull++;
+          continue;
+        }
+
+        // 업종 상한. 업종을 모르는 종목(ind 없음)은 제약 없이 통과시킨다 —
+        // 모른다는 이유로 기회를 지우면 결과가 조용히 왜곡된다
+        const ind = cfg.entry.maxPerIndustry != null ? industryBySymbol.get(c.s.ref.symbol) : undefined;
+        if (ind && (industryCount.get(ind) ?? 0) >= cfg.entry.maxPerIndustry!) {
+          skipped.industryFull++;
           continue;
         }
         const bar = c.s.candles[c.i];
@@ -385,16 +419,25 @@ export function runBacktest(
 
         const equity = markToMarket();
         const riskAmount = equity * (cfg.risk.riskPerTradePct / 100);
-        let shares = Math.floor(riskAmount / riskPerShare);
+
+        // 소수점 매수를 허용하면 자르지 않는다. 정수주 강제는 원금이 작을 때
+        // "규칙은 사라고 했는데 1주를 못 사서 0주" 를 만들어, 전략이 아니라
+        // 원금 부족을 측정하게 된다 (미국 $2,100 에서 상위 12종목 중 9종목이 그랬다).
+        const round = (n: number) => (cfg.fractionalShares ? n : Math.floor(n));
+        // 소수점이라도 먼지 같은 수량은 의미가 없다 — 소수 6자리에서 끊는다
+        const trim = (n: number) => (cfg.fractionalShares ? Math.floor(n * 1e6) / 1e6 : n);
+
+        let shares = trim(round(riskAmount / riskPerShare));
 
         // 변동성이 아주 낮은 종목은 리스크 룰만으로 계좌 전체를 넘길 수 있어 비중 상한을 건다
-        const maxByWeight = Math.floor((equity * (cfg.risk.maxPositionPct / 100)) / entryPrice);
+        const maxByWeight = trim(round((equity * (cfg.risk.maxPositionPct / 100)) / entryPrice));
         shares = Math.min(shares, maxByWeight);
 
         const unitCost = entryPrice * (1 + commission);
-        if (shares * unitCost > cash) shares = Math.floor(cash / unitCost);
+        if (shares * unitCost > cash) shares = trim(round(cash / unitCost));
 
-        if (shares <= 0) {
+        // 정수주면 1주 미만, 소수점이면 사실상 0 인 경우를 같이 거른다
+        if (shares <= 0 || shares * unitCost < 0.01) {
           skipped.noCash++;
           continue;
         }
@@ -421,6 +464,7 @@ export function runBacktest(
           trailed: false,
         };
         positions.set(c.s.ref.symbol, pos);
+        if (ind) industryCount.set(ind, (industryCount.get(ind) ?? 0) + 1);
 
         // 진입 당일 장중에 이미 손절/익절에 닿는 경우 (당일 왕복).
         // 이걸 빼면 "산 날은 절대 안 잘린다"는 낙관적 가정이 들어간다.
@@ -644,11 +688,11 @@ export function formatReport(r: BacktestResult): string {
   L.push(`  수수료+세금     ${money(m.totalFees)}  (손익의 ${m.feeDragPct.toFixed(1)}%)`);
 
   const sk = r.skipped;
-  if (sk.noCash + sk.slotsFull + sk.badStop + sk.cooldown > 0) {
+  if (sk.noCash + sk.slotsFull + sk.badStop + sk.cooldown + sk.industryFull > 0) {
     L.push("");
     L.push("[놓친 신호] — 규칙상 진입하지 않은 것이지 버그가 아닙니다");
     L.push(
-      `  현금부족 ${sk.noCash} · 슬롯참 ${sk.slotsFull} · 재진입대기 ${sk.cooldown} · ATR없음 ${sk.badStop}`
+      `  현금부족 ${sk.noCash} · 슬롯참 ${sk.slotsFull} · 재진입대기 ${sk.cooldown} · 업종상한 ${sk.industryFull} · ATR없음 ${sk.badStop}`
     );
   }
 

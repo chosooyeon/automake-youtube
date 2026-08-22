@@ -111,6 +111,11 @@ const EXIT_LABEL: Record<string, string> = {
   maxhold: "보유기간 초과",
 };
 
+/** 소수점 매수 시장(미국)에서는 0.3524주 같은 수량이 나온다 */
+function qty(n: number): string {
+  return Number.isInteger(n) ? `${n}주` : `${n.toFixed(4).replace(/0+$/, "").replace(/\.$/, "")}주`;
+}
+
 function pct(v: number): string {
   return `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
 }
@@ -237,7 +242,7 @@ export default function PaperBoard({ market: locked = null }: { market?: Market 
                         <span className="text-good font-medium">🟢 매수</span>
                         <span className="font-medium">{t.name}</span>
                         <span className="mono text-subtext">
-                          {t.shares}주 @ {money(t.entryPrice, market)}
+                          {qty(t.shares)} @ {money(t.entryPrice, market)}
                         </span>
                         <span className="text-subtext text-[10px]">{t.entrySignals.join(" + ")}</span>
                       </li>
@@ -247,7 +252,7 @@ export default function PaperBoard({ market: locked = null }: { market?: Market 
                         <span className="text-bad font-medium">🔴 매도</span>
                         <span className="font-medium">{t.name}</span>
                         <span className="mono text-subtext">
-                          {t.shares}주 @ {money(t.exitPrice, market)}
+                          {qty(t.shares)} @ {money(t.exitPrice, market)}
                         </span>
                         <span className={"mono " + (t.pnl >= 0 ? "text-good" : "text-bad")}>
                           {pct(t.pnlPct)}
@@ -272,7 +277,7 @@ export default function PaperBoard({ market: locked = null }: { market?: Market 
                           <li key={p.symbol} className="flex items-baseline gap-2">
                             <span className="font-medium flex-1 truncate">{p.name}</span>
                             <span className="mono text-subtext text-[10px]">
-                              {p.shares}주 · {p.holdBars}봉
+                              {qty(p.shares)} · {p.holdBars}봉
                             </span>
                             <span
                               className={"mono w-16 text-right " + (p.unrealizedPct >= 0 ? "text-good" : "text-bad")}

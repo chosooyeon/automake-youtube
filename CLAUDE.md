@@ -30,7 +30,7 @@
 | 단계 순서·의존성 | `config/pipeline.json` |
 | 봇이 어떻게 호출되나 | `admin/lib/runBot.ts` (headless `claude -p`), `scripts/run-bot.sh` |
 | 모든 경로 상수·스테이지 ID | `admin/lib/paths.ts` ← **경로 추측 대신 여기 확인** |
-| 대시보드 탭 구성 | `admin/components/Dashboard.tsx` (탭 셸). **탭 배열 순서가 곧 화면 순서이고 첫 항목이 기본 탭** — 지금은 주식이 맨 앞. 유튜브 탭은 `YoutubeWorkspace.tsx` 안에 주제큐·롱폼·숏폼 서브탭 |
+| 대시보드 탭 구성 | `admin/components/Dashboard.tsx` (탭 셸). **탭 배열 순서가 곧 화면 순서이고 첫 항목이 기본 탭** — 기본값은 주식이 맨 앞. 단 **탭은 드래그로 순서 변경이 되고 그 순서가 `localStorage["dashboard.tabOrder"]` 에 남으므로 `TABS` 배열은 이제 기본값일 뿐** ← 화면 순서가 코드와 다르면 저장값부터 의심 (탭 바 [순서 초기화]). 탭을 추가·삭제해도 `mergeOrder()` 가 맞춰주니 저장값을 지울 필요 없다. 유튜브 탭은 `YoutubeWorkspace.tsx` 안에 주제큐·롱폼·숏폼 서브탭 |
 | 클로드 대화 탭 (일반 채팅) | `admin/app/api/chat/route.ts` (`claude -p --output-format stream-json` 스트리밍) + `admin/components/ChatPanel.tsx` + `Markdown.tsx`. 프로젝트 CLAUDE.md 오염을 피하려 빈 cwd `admin/data/chat/` 에서 실행 |
 | 색상·테마(라이트/다크) | `admin/app/globals.css` 의 `:root`/`.dark` 변수 ← **여기만 고치면 전 화면 반영**. 컴포넌트엔 `bg-panel`·`text-subtext` 같은 시맨틱 토큰만 쓰고 `gray-700` 류 하드코딩 금지 |
 | 인스타 카드 생성 | `admin/app/api/instagram/generate/route.ts` + `admin/lib/instagram/*` |
@@ -39,11 +39,15 @@
 | 이모티콘 | `admin/lib/emoticon*.ts` |
 | 주식 매매신호·알림 | `admin/lib/stock/*` (naver=데이터·indicators=지표·signals=판정·scan=알림). 관심종목·알림이력은 `config/stock-*.json` (커밋됨), 봇 토큰만 `admin/data/stock/telegram.json` (git 제외) |
 | 주식 알림 상시 가동 | `.github/workflows/stock-alert.yml` → `scripts/stock-scan-ci.ts` (tsx, admin 서버 불필요). 맥 켜둔 채 돌릴 땐 `scripts/stock-watch.mjs` |
-| 페이퍼 트레이딩 상시 가동 | `.github/workflows/paper-trade.yml` — 한국장 15:50 KST / 미국장 06:35 KST. **어느 크론이 깨웠는지(`github.event.schedule`)로 시장을 가른다** (둘 다 매번 돌리면 텔레그램이 하루 4통). 재생 방식이라 커밋할 상태가 없어 `contents: read` 로 충분. 마지막 스텝이 계약서 변경을 감지하면 실패시킨다 |
+| 페이퍼 트레이딩 상시 가동 | `.github/workflows/paper-trade.yml` — 한국장 15:50 KST / 미국장 06:35 KST. **어느 크론이 깨웠는지(`github.event.schedule`)로 시장을 가른다** (둘 다 매번 돌리면 텔레그램이 하루 4통). 재생 방식이라 커밋할 상태가 없어 `contents: read` 로 충분. 마지막 스텝이 계약서 변경을 감지하면 실패시킨다  **미국은 `--trades-only`** 로 실제 매매가 있는 날만 알린다 — 숫자가 두 벌이면 나쁜 쪽을 만지게 되고 그게 계약서를 건드려 검증을 죽인다. 트랙을 지우는 대신 안 보이게 해서 막는다 (기록은 계속 쌓임 — 페이퍼는 소급이 안 되므로 끊지 않는다) |
 | 주식 자동매매 (백테스트) | `admin/lib/stock/backtest.ts`(시뮬레이션·성적표) + `tradingConfig.ts`(정책 로더) + `scripts/backtest.ts`(CLI). 정책은 `config/stock-trading.json` (커밋됨) ← **수익률은 여기서 계산되어 나오는 결과값**. 설정 의미·합격 기준·키 발급 절차는 `docs/STOCK-TRADING.md` |
 | 시장별 매매 규칙 (국내 ≠ 미국) | `config/stock-trading.json` 이 **공통값 + `markets.{KR,US}` 덮어쓰기 2층**이고 `loadTradingConfig(market)` 이 합쳐서 준다 ← **백테스트·스윕·워크포워드는 반드시 market 을 넘긴다** (안 넘기면 공통값으로 돌아 미국을 국내 규칙으로 굴린다 — 그게 -13.1% 였다). 화면은 `admin/app/api/stock/method/route.ts` → `components/MethodBoard.tsx` (주식 탭 [📐 방법론]). `markets.*.verifiedAt` 이 null 이면 화면이 "검증 전 가설"로 표시하며, **워크포워드 통과일만 적는다** |
+| 업종 분산 (사람이 넣은 보험 — 최적화 결과 아님) | `admin/lib/stock/industry.ts` + `entry.maxPerIndustry` (공통 null, `markets.KR` 만 2). ⚠ **워크포워드는 3개 split 중 2개에서 '제한 없음'을 골랐다** (-0.007~-0.009R). 그래도 켜 둔 건 **하락 3구간 모두에서 단순보유 대비 우위가 더 컸기** 때문 — 보험료를 내는 중이지 성적이 좋아서가 아니다. **'성적 안 좋으니 끄자'로 판단하면 안 되고 '하락장 보험이 필요 없다'로 판단해야 한다.** 1 로는 내리지 말 것(상승장 최악). 근거는 `config/stock-trading.json` 의 `_maxPerIndustry` |
+| 하락장 구간 찾기 | `scripts/market-regime.ts` — 유니버스 100종목 **동일가중 지수**를 만들어 낙폭 구간을 뽑는다 (코스피 지수는 삼성전자에 끌려다녀 백테스트 대상과 다른 그림을 준다). 이게 필요한 이유는 **전 구간 백테스트가 상승장 편향이라 '그냥 묻어둬라'만 나오기 때문** — 규칙의 값어치는 하락장에서 갈린다 |
+| 표본 늘리기 (알림과 분리) | `scripts/backtest.ts --universe marketCap --top 100` ← 관심종목은 곧 텔레그램 알림 대상이라 표본 늘리려고 거기에 종목을 넣으면 안 된다. 30종목 3개월=15거래는 통계가 아니고, 100종목 2.7년=377거래라야 판정이 뒤집히지 않는다 |
 | 백테스트 파라미터 스윕 | `scripts/backtest-sweep.ts`(변형 목록이 여기 하드코딩 — 손잡이를 바꾸려면 `VARIANTS` 수정) → `admin/data/stock/backtest/sweep-{market}.json` (git 제외) → `admin/app/api/stock/backtest/route.ts` → `components/BacktestBoard.tsx` (주식 탭의 [🧪 백테스트] 서브탭). **일봉은 1회만 받아 모든 변형·종목군이 공유**하므로 조합을 늘려도 네트워크 비용은 그대로. 합격 기준은 복제하지 말고 `backtest.ts` 의 `verdictLines()` 를 쓸 것 |
 | 페이퍼 트레이딩 (실시간 가상매매) | `admin/lib/stock/paper.ts` + `scripts/paper-trade.ts` + `components/PaperBoard.tsx` (주식 탭 [📝 페이퍼]). 계약서 `config/paper-{KR,US}.json` (커밋됨 — 시작 시점의 **종목·규칙을 얼린 것**, 진행 중 수정 금지), 결과 `admin/data/stock/paper/{market}.json` (git 제외). **증분이 아니라 시작일부터 매번 재생(replay)한다** — 진입·청산 로직을 backtest.ts 와 한 벌 더 쓰지 않으려는 것. 상태 파일이 없으니 썩지도 않는다 |
+| 시장별 원금·소수점 매수 | `config/stock-trading.json` 의 `markets.{KR,US}` 에 `capital` 과 `fractionalShares` ← **엔진은 통화 환산을 안 한다.** 공통 capital 3,000,000 을 미국에 그대로 쓰면 300만원이 아니라 $3,000,000 으로 매매한다 (실제로 그 상태로 5일 돌았다). $2,100 으로 낮추면 이번엔 1회 리스크 $21 로 정수주를 못 사서 상위 12종목 중 9종목이 '0주' 가 된다 → 미국만 `fractionalShares: true`. 국내는 false 유지 |
 | 워크포워드 검증 (과최적화 판정) | `scripts/walk-forward.ts` — 학습구간에서만 후보를 돌리고 **`pickWinner()` 규칙이 승자를 고른 뒤** 검증구간엔 승자만 1회. 선택 규칙을 코드에 박아둔 이유는 손으로 하면 검증 성적을 보고 되돌아가 고르게 되기 때문 ← **스윕 결과를 실전 설정으로 승격하기 전 반드시 통과**. 결과는 `admin/data/stock/backtest/walkforward-{market}-{universe}.json` (git 제외) |
 | 백테스트 유니버스 (알림과 분리) | `admin/lib/stock/universe.ts` — 네이버 `m.stock.naver.com/api/stocks/marketValue/{KOSPI,KOSDAQ}` 랭킹에서 시총·거래대금 상위 N을 뽑는다. **관심종목(watchlist)에 넣지 않는 이유는 그게 곧 텔레그램 알림 대상이기 때문** — 100종목을 넣으면 알림이 못 쓰게 된다. 풀은 `.cache/stock/` 에 12h 캐시. `--universe marketCap,tradingValue --top 100` 처럼 여러 개를 주면 **합집합을 한 번만 받아** 일봉 수집이 배로 늘지 않는다 ← ⚠ 오늘 기준 스냅샷이라 선택 편향이 있다 |
 | 백테스트 종목군 (자산군별 분리) | `config/stock-groups.json` (커밋됨) — 지수ETF·커버드콜·금채권만 적고 **나머지는 '개별주'로 자동 분류**되므로 종목을 추가해도 이 파일은 안 고쳐도 된다. 결과는 `종목군 × 설정` 2차원이고 API 가 `?group=` 으로 잘라서 준다 ← **지수ETF와 개별주를 한 솥에 넣으면 어느 쪽이 성적을 만들었는지 알 수 없다** |
@@ -55,6 +59,7 @@
 | 토스 페이퍼 리포트 ("그때 팔았으면") | `scripts/toss-paper.ts` — 보유·체결이력은 토스에서 읽고, 매도 판정은 `signals.ts` 를 과거 일봉에 굴려 종이 위에서만 한다. 매수일은 체결이력에서 실제로 가져온다 |
 | 데일리 퀘스트 (일/월/년 달성 관리) | `admin/lib/quest.ts`(순수 집계·클라이언트 공용) + `questStore.ts`(파일 IO) + `components/QuestBoard.tsx`·`QuestCharts.tsx`. 기록은 `config/quest-{tasks,log,season}.json` (커밋됨). 미니 퀘스트·코치 배너·시즌 진행바 포함 |
 | 메인 퀘스트 (12주 시즌 플랜, 일회성) | `admin/lib/mission.ts` + `missionStore.ts` + `components/MissionBoard.tsx` (퀘스트 탭 서브뷰). 목록은 `config/missions.json` (커밋됨). **트랙 2개**(`income` 수익화 / `career` 이직 블록 1)이고 **챕터 번호는 트랙 안에서만 유효** — 집계 함수에 반드시 track 을 넘긴다 (안 넘기면 두 시즌이 한 진행바에 섞인다). 화면은 한 번에 한 트랙만 |
+| 프로젝트 설명서 (면접용) | `admin/lib/projectBrief.ts` (내용 원본 — 순수 데이터) + `components/ProjectBrief.tsx` (탭 [🗂️ 프로젝트 설명]). 구조·판단카드·예상질문 3개 뷰. **여기 적힌 숫자와 주장은 면접에서 말할 내용이라 추측 금지** ← 코드를 바꾸면 이 파일도 같이 고친다 |
 | 아이디어 파킹판 | `admin/lib/idea.ts` + `ideaStore.ts` + `components/IdeaBoard.tsx` (퀘스트 탭의 서브뷰). 목록은 `config/ideas.json` (커밋됨) ← **새 트랙 제안 전에 여기부터 확인** |
 | 차트 색 (트랙 8색·달성률 램프) | `admin/app/globals.css` 의 `--c-series-1..8` / `--c-heat-0..4` ← **순서가 색약 안전장치라 섞지 말 것** |
 | 주제 큐 | `topics/queue/`, `admin/lib/topics.ts` |

@@ -25,6 +25,7 @@ import { fetchCandles, type Candle, type Market, type StockRef } from "../admin/
 import { loadWatchlist, STOCK_DATA_DIR } from "../admin/lib/stock/store";
 import { describeRules, loadTradingConfig, type TradingConfig } from "../admin/lib/stock/tradingConfig";
 import { runBacktest, verdictLines, type SymbolData } from "../admin/lib/stock/backtest";
+import { fetchIndustries } from "../admin/lib/stock/industry";
 import { CONFIG_DIR } from "../admin/lib/paths";
 
 function arg(name: string): string | undefined {
@@ -178,6 +179,9 @@ async function main(): Promise<void> {
 
   // 일봉은 한 번만 받아서 모든 변형이 공유한다 — 변형마다 다시 받으면
   // 데이터가 미묘하게 달라져 비교 자체가 무의미해진다.
+  const industryMap =
+    market === "KR" ? await fetchIndustries(refs.map((r) => r.code)) : new Map<string, string>();
+
   console.log(`\n일봉 수집 중 (${refs.length}종목 × 최근 ${days}일) — 변형 전체가 공유합니다...`);
   const data: SymbolData[] = [];
   for (const ref of refs) {
@@ -185,7 +189,7 @@ async function main(): Promise<void> {
       let candles: Candle[] = await fetchCandles(ref, days);
       if (from) candles = candles.filter((c) => c.date >= from);
       if (to) candles = candles.filter((c) => c.date <= to);
-      data.push({ ref, candles });
+      data.push({ ref, candles, industry: industryMap.get(ref.code) });
       process.stdout.write(`\r  ${data.length}/${refs.length} ${ref.name.padEnd(14)}`);
     } catch (e) {
       console.log(`\n  ✗ ${ref.name} ${(e as Error).message} — 제외`);

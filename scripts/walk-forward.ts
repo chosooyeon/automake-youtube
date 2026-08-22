@@ -31,6 +31,7 @@ import {
   type SymbolData,
 } from "../admin/lib/stock/backtest";
 import { fetchUniverse, UNIVERSE_LABEL, type UniverseKind } from "../admin/lib/stock/universe";
+import { fetchIndustries } from "../admin/lib/stock/industry";
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -47,6 +48,9 @@ const CANDIDATES: Array<{ id: string; label: string; apply: (c: TradingConfig) =
   { id: "score6", label: "신호 엄격 (점수 6)", apply: (c) => void (c.entry.minNetScore = 6) },
   { id: "score5", label: "신호 엄격 (점수 5)", apply: (c) => void (c.entry.minNetScore = 5) },
   { id: "score7", label: "신호 엄격 (점수 7)", apply: (c) => void (c.entry.minNetScore = 7) },
+  { id: "ind1", label: "업종당 1종목", apply: (c) => void (c.entry.maxPerIndustry = 1) },
+  { id: "ind2", label: "업종당 2종목", apply: (c) => void (c.entry.maxPerIndustry = 2) },
+  { id: "indoff", label: "업종제한 없음", apply: (c) => void (c.entry.maxPerIndustry = null) },
   { id: "trail", label: "트레일링 스톱", apply: (c) => void (c.exit.trailingAtrMult = 2.5) },
   { id: "nosignal", label: "매도신호 무시", apply: (c) => void (c.exit.exitOnSellVerdict = false) },
   {
@@ -155,13 +159,19 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  // 업종 후보(ind1/ind2)가 목록에 있으므로 국내는 항상 업종을 받아둔다
+  const industryMap =
+    market === "KR"
+      ? await fetchIndustries([...allRefs.values()].map((r) => r.code))
+      : new Map<string, string>();
+
   console.log(`\n일봉 수집 중 (합집합 ${allRefs.size}종목 × 최근 ${days}일)...`);
   const bySymbol = new Map<string, SymbolData>();
   let done = 0;
   for (const ref of allRefs.values()) {
     try {
       const candles: Candle[] = await fetchCandles(ref, days);
-      bySymbol.set(ref.symbol, { ref, candles });
+      bySymbol.set(ref.symbol, { ref, candles, industry: industryMap.get(ref.code) });
     } catch (e) {
       console.log(`\n  ✗ ${ref.name} ${(e as Error).message} — 제외`);
     }
@@ -192,6 +202,7 @@ async function walkForward(
   const train: SymbolData[] = full.map((s) => ({
     ref: s.ref,
     candles: s.candles.filter((c) => c.date <= split),
+    industry: s.industry,
   }));
 
   // 검증: split 이후. 단 지표 워밍업(SMA60·ATR14)에 쓸 과거 봉을 앞에 붙인다.
@@ -200,9 +211,9 @@ async function walkForward(
   // 학습 데이터가 새는 게 아니라, 검증구간 전체를 실제로 쓰는 것이다.
   const validation: SymbolData[] = full.map((s) => {
     const splitIdx = s.candles.findIndex((c) => c.date > split);
-    if (splitIdx < 0) return { ref: s.ref, candles: [] };
+    if (splitIdx < 0) return { ref: s.ref, candles: [], industry: s.industry };
     const from = Math.max(0, splitIdx - base.warmupBars);
-    return { ref: s.ref, candles: s.candles.slice(from) };
+    return { ref: s.ref, candles: s.candles.slice(from), industry: s.industry };
   });
 
   const trainBars = Math.max(...train.map((s) => s.candles.length));
