@@ -43,6 +43,18 @@ const WARMUP_MARGIN = 30;
 /** 시작할 때 얼려두는 계약서. 이 파일이 바뀌면 그 시점부터 다른 실험이다 */
 export interface PaperCharter {
   market: Market;
+  /**
+   * 트랙 ID — 파일 이름이자 이 실험의 식별자 (config/paper-{track}.json).
+   *
+   * 한 시장에서 **규칙 두 벌을 나란히 굴리기** 위해 있다. 계약서는 진행 중 수정 금지라
+   * 규칙을 바꾸려면 기존 기록을 버리고 다시 시작하는 수밖에 없는데, 그러면
+   * "바꾼 게 나은가"를 영원히 못 밝힌다. 트랙을 하나 더 여는 게 답이다.
+   *
+   * 없으면 market 과 같다고 본다 (KR/US 계약서가 이 필드 전에 만들어졌다).
+   */
+  track?: string;
+  /** 화면·알림에 쓸 이름. 없으면 트랙 ID */
+  label?: string;
   /** YYYYMMDD — 이 날 이후의 봉만 매매 대상이 된다 */
   startedAt: string;
   /** 어떻게 고른 종목인지 (기록용) */
@@ -82,6 +94,9 @@ export interface RealizedStats {
 
 export interface PaperReport {
   market: Market;
+  /** 어느 트랙의 기록인지 — 같은 시장에 트랙이 여럿일 수 있다 */
+  track: string;
+  label: string;
   startedAt: string;
   /** 데이터가 있는 마지막 거래일 */
   asOf: string;
@@ -139,13 +154,41 @@ export function previewEntryCandidates(cfg: TradingConfig, data: SymbolData[]): 
   return out.sort((a, b) => b.netScore - a.netScore || a.name.localeCompare(b.name));
 }
 
-export function paperCharterFile(market: Market): string {
-  return path.join(CONFIG_DIR, `paper-${market}.json`);
+/** 계약서의 트랙 ID. 옛 계약서(track 없음)는 market 이 곧 트랙이다 */
+export function trackOf(charter: PaperCharter): string {
+  return charter.track || charter.market;
 }
 
-export function loadPaperCharter(market: Market): PaperCharter | null {
+/** 화면에 쓸 이름 */
+export function labelOf(charter: PaperCharter): string {
+  return charter.label || trackOf(charter);
+}
+
+/** 트랙 ID 는 파일 이름이 되므로 경로 문자를 막는다 */
+export function isValidTrack(track: string): boolean {
+  return /^[A-Za-z0-9_-]{1,24}$/.test(track);
+}
+
+export function paperCharterFile(track: string): string {
+  return path.join(CONFIG_DIR, `paper-${track}.json`);
+}
+
+/** config/ 안에 있는 계약서 트랙 ID 전부 (화면의 트랙 목록) */
+export function listPaperTracks(): string[] {
   try {
-    return JSON.parse(fs.readFileSync(paperCharterFile(market), "utf8")) as PaperCharter;
+    return fs
+      .readdirSync(CONFIG_DIR)
+      .map((f) => /^paper-(.+)\.json$/.exec(f)?.[1])
+      .filter((t): t is string => !!t && isValidTrack(t))
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
+export function loadPaperCharter(track: string): PaperCharter | null {
+  try {
+    return JSON.parse(fs.readFileSync(paperCharterFile(track), "utf8")) as PaperCharter;
   } catch {
     return null;
   }
@@ -153,7 +196,7 @@ export function loadPaperCharter(market: Market): PaperCharter | null {
 
 export function savePaperCharter(charter: PaperCharter): void {
   fs.mkdirSync(CONFIG_DIR, { recursive: true });
-  fs.writeFileSync(paperCharterFile(charter.market), JSON.stringify(charter, null, 2), "utf8");
+  fs.writeFileSync(paperCharterFile(trackOf(charter)), JSON.stringify(charter, null, 2), "utf8");
 }
 
 function pctOf(t: Trade): number {
@@ -208,6 +251,8 @@ export function runPaper(charter: PaperCharter, full: SymbolData[]): PaperReport
   if (usable.length === 0) {
     return {
       market: charter.market,
+      track: trackOf(charter),
+      label: labelOf(charter),
       startedAt: charter.startedAt,
       asOf: charter.startedAt,
       tradingDays: 0,
@@ -252,6 +297,8 @@ export function runPaper(charter: PaperCharter, full: SymbolData[]): PaperReport
 
   return {
     market: charter.market,
+    track: trackOf(charter),
+    label: labelOf(charter),
     startedAt: charter.startedAt,
     asOf,
     tradingDays: dates.length,
@@ -286,7 +333,7 @@ export function formatPaperReport(r: PaperReport): string {
   const line = "─".repeat(52);
 
   L.push(line);
-  L.push(`페이퍼 트레이딩 · ${r.market}   ${r.startedAt} 시작 → ${r.asOf}`);
+  L.push(`페이퍼 트레이딩 · ${r.label}   ${r.startedAt} 시작 → ${r.asOf}`);
   L.push(`거래일 ${r.tradingDays}일 · 종목 ${r.universeSize}개`);
   // 이 줄을 지우지 말 것. 며칠 지나 숫자만 보면 실제 계좌 잔고로 착각하기 쉽다.
   L.push(`※ 종이 위 기록입니다 — 주문이 어디로도 나가지 않습니다 (KIS 모의계좌와도 무관)`);

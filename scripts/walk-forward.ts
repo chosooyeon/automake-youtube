@@ -61,6 +61,16 @@ const CANDIDATES: Array<{ id: string; label: string; apply: (c: TradingConfig) =
       c.exit.trailingAtrMult = 2.5;
     },
   },
+  { id: "hold40", label: "오래 보유 (40일)", apply: (c) => void (c.exit.maxHoldDays = 40) },
+  {
+    id: "letitrun",
+    label: "덜 판다 (종합)",
+    apply: (c) => {
+      c.exit.maxHoldDays = 40;
+      c.exit.trailingAtrMult = 2.5;
+      c.exit.exitOnSellVerdict = false;
+    },
+  },
   {
     id: "score6slots8",
     label: "엄격 + 슬롯 8",

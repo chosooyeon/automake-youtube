@@ -32,7 +32,7 @@ concurrency:
 jobs:
   paper:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35   # 트랙이 늘면 100종목 재생도 그만큼 반복된다
 
     steps:
       - uses: actions/checkout@v4
@@ -41,21 +41,23 @@ jobs:
         with:
           node-version: "20"
 
-      # 어느 시장을 돌릴지 결정한다.
       # 스케줄이 둘인데 워크플로가 하나라서, 어느 크론이 깨웠는지로 갈라야 한다 —
-      # 둘 다 매번 돌리면 텔레그램이 하루 4통이 되고, 장 열리기도 전의 시장까지 계산한다.
-      - name: 시장 결정
+      # 둘 다 매번 돌리면 장이 열리기도 전의 시장까지 계산하고 텔레그램도 배로 온다.
+      #
+      # 돌릴 것은 시장이 아니라 **트랙**이다. 한 시장에 규칙이 다른 트랙이 나란히 있고
+      # (KR = 현재 설정, KR2 = 덜 판다), 둘을 같은 날 같은 종목으로 굴려야 비교가 성립한다.
+      - name: 트랙 결정
         id: pick
         run: |
           case "${{ github.event.schedule }}" in
-            "50 6 * * 1-5")  echo "markets=KR" >> "$GITHUB_OUTPUT" ;;
-            "35 21 * * 1-5") echo "markets=US" >> "$GITHUB_OUTPUT" ;;
+            "50 6 * * 1-5")  echo "tracks=KR KR2" >> "$GITHUB_OUTPUT" ;;
+            "35 21 * * 1-5") echo "tracks=US" >> "$GITHUB_OUTPUT" ;;
             *)
               # 손으로 실행한 경우 — 입력값을 따른다
               case "${{ inputs.market }}" in
-                KR) echo "markets=KR" >> "$GITHUB_OUTPUT" ;;
-                US) echo "markets=US" >> "$GITHUB_OUTPUT" ;;
-                *)  echo "markets=KR US" >> "$GITHUB_OUTPUT" ;;
+                KR) echo "tracks=KR KR2" >> "$GITHUB_OUTPUT" ;;
+                US) echo "tracks=US" >> "$GITHUB_OUTPUT" ;;
+                *)  echo "tracks=KR KR2 US" >> "$GITHUB_OUTPUT" ;;
               esac
               ;;
           esac
@@ -72,14 +74,21 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
-          for m in ${{ steps.pick.outputs.markets }}; do
-            echo "::group::$m"
-            args="--market $m"
+          for t in ${{ steps.pick.outputs.tracks }}; do
+            echo "::group::$t"
+            args="--track $t"
             [ "$NOTIFY" = "1" ] && args="$args --notify"
-            # 미국은 실제 매매가 있는 날만 알린다 — 주의력은 국내 하나에 모은다.
-            # 기록 자체는 계속 쌓인다 (페이퍼 기록은 소급이 안 되므로 끊지 않는다).
-            [ "$m" = "US" ] && args="$args --trades-only"
-            # 한 시장이 실패해도 나머지는 돌린다 — 네이버가 한쪽만 막히는 경우가 있다
+            # 매일 알림은 KR 하나만 받는다. 미국(US)과 비교군(KR2)은 실제 매매가 있는 날만.
+            #
+            # 트랙을 늘린 만큼 알림도 늘리면 하루 세 통이 되고, 그러면 숫자가 여러 벌이라
+            # 나쁜 쪽을 만지고 싶어진다 — 그게 계약서를 건드려 검증을 죽인다.
+            # 비교는 매일 할 일이 아니라 몇 주 뒤에 할 일이므로 화면(📝 페이퍼 탭)에서 본다.
+            # 기록 자체는 계속 쌓인다 (페이퍼는 소급이 안 되므로 끊지 않는다).
+            case "$t" in
+              KR) ;;
+              *) args="$args --trades-only" ;;
+            esac
+            # 한 트랙이 실패해도 나머지는 돌린다 — 네이버가 한쪽만 막히는 경우가 있다
             npx --yes tsx@4.23.12 ../scripts/paper-trade.ts $args || fail=1
             echo "::endgroup::"
           done
@@ -90,9 +99,9 @@ jobs:
       - name: 계약서 무결성 확인
         if: always()
         run: |
-          if ! git diff --quiet -- config/paper-KR.json config/paper-US.json; then
+          if ! git diff --quiet -- config/paper-*.json; then
             echo "::error::페이퍼 계약서가 실행 중에 바뀌었습니다. 규칙이 갈리므로 확인이 필요합니다."
-            git diff -- config/paper-KR.json config/paper-US.json
+            git diff -- config/paper-*.json
             exit 1
           fi
           echo "계약서 변경 없음 ✓"

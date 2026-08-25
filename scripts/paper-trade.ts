@@ -9,6 +9,14 @@
  *   cd admin && npx tsx ../scripts/paper-trade.ts --market KR
  *   cd admin && npx tsx ../scripts/paper-trade.ts --market KR --notify        # 텔레그램으로도
  *
+ * 같은 시장에 규칙 두 벌을 나란히 굴리기 (비교군):
+ *   cd admin && npx tsx ../scripts/paper-trade.ts --market KR --track KR2 --init \
+ *     --like KR --rules letitrun --start 20260817
+ *   cd admin && npx tsx ../scripts/paper-trade.ts --track KR2
+ *
+ * `--like` 는 기존 트랙의 종목을 그대로 복사한다. 종목이 다르면 두 트랙의 성적 차이가
+ * 규칙 때문인지 종목 때문인지 못 가른다. 재생 방식이라 `--start` 로 같은 날부터 굴릴 수 있다.
+ *
  * ⚠ `--init` 은 기존 계약서를 덮어쓴다. 덮어쓰는 순간 그동안의 기록이 무효가 되므로
  * (다른 종목·다른 규칙으로 다시 시작하는 것과 같다) 확인을 한 번 받는다. `--force` 로 건너뛴다.
  */
@@ -24,13 +32,17 @@ import { fetchIndustries } from "../admin/lib/stock/industry";
 import type { SymbolData } from "../admin/lib/stock/backtest";
 import {
   formatPaperReport,
+  isValidTrack,
+  labelOf,
   loadPaperCharter,
   paperCharterFile,
   previewEntryCandidates,
   runPaper,
   savePaperCharter,
+  trackOf,
   type PaperCharter,
 } from "../admin/lib/stock/paper";
+import type { TradingConfig } from "../admin/lib/stock/tradingConfig";
 import { esc, sendTelegram } from "../admin/lib/stock/telegram";
 
 function arg(name: string): string | undefined {
@@ -68,14 +80,49 @@ async function confirm(question: string): Promise<boolean> {
   return answer.trim().toLowerCase() === "y";
 }
 
-async function buildCharter(market: Market): Promise<PaperCharter> {
+/**
+ * 시작 시점에 한 번만 쓰는 규칙 프리셋.
+ *
+ * 정의 원본은 scripts/backtest-sweep.ts 의 VARIANTS 다. 여기 값은 --init 때
+ * loadTradingConfig 결과 위에 한 번 덮어쓰고 그대로 계약서에 얼어붙으므로,
+ * 나중에 원본과 갈라져도 진행 중인 기록에는 영향이 없다 (계약서가 유일한 진실이다).
+ */
+const RULE_PRESETS: Record<string, { label: string; apply: (c: TradingConfig) => void }> = {
+  baseline: { label: "현재 설정", apply: () => {} },
+  letitrun: {
+    label: "덜 판다 (종합)",
+    apply: (c) => {
+      c.exit.maxHoldDays = 40;
+      c.exit.trailingAtrMult = 2.5;
+      c.exit.exitOnSellVerdict = false;
+    },
+  },
+};
+
+async function buildCharter(market: Market, track: string): Promise<PaperCharter> {
   const universeArg = arg("universe") as UniverseKind | undefined;
   const top = Number(arg("top") || 100);
+
+  const like = arg("like");
 
   let universe: StockRef[];
   let universeNote: string;
 
-  if (universeArg) {
+  // --like 로 물려받은 계약서. 종목뿐 아니라 규칙의 출발점도 여기서 가져온다.
+  let inherited: PaperCharter | null = null;
+
+  if (like) {
+    // 같은 종목 위에서 규칙만 다르게 굴리려는 경우. 유니버스가 다르면 두 트랙의 차이가
+    // 규칙 때문인지 종목 때문인지 구분할 수 없다 — 비교군은 종목을 공유해야 한다.
+    const src = loadPaperCharter(like);
+    if (!src) throw new Error("--like " + like + " — 그런 계약서가 없습니다 (" + paperCharterFile(like) + ").");
+    if (src.market !== market) {
+      throw new Error("--like " + like + " 는 " + src.market + " 시장입니다. --market 과 맞추세요.");
+    }
+    inherited = src;
+    universe = src.universe;
+    universeNote = src.universeNote + " — " + trackOf(src) + " 트랙과 동일 종목";
+  } else if (universeArg) {
     if (market !== "KR") {
       // universe.ts 가 쓰는 네이버 랭킹 API 는 국내 전용이다
       throw new Error("--universe 는 국내(KR)에서만 씁니다. 미국은 관심종목을 얼립니다.");
@@ -91,17 +138,45 @@ async function buildCharter(market: Market): Promise<PaperCharter> {
 
   if (universe.length === 0) throw new Error(`${market} 시장에 얼릴 종목이 없습니다.`);
 
+  const presetId = arg("rules") || "baseline";
+  const preset = RULE_PRESETS[presetId];
+  if (!preset) {
+    throw new Error("--rules " + presetId + " — 없는 프리셋입니다. 가능: " + Object.keys(RULE_PRESETS).join(", "));
+  }
+  // 프리셋이 덮어쓸 '바닥'을 고른다.
+  //
+  // --like 가 있으면 그 트랙의 얼어붙은 규칙을 바닥으로 쓴다. 현재 설정을 쓰면 안 된다 —
+  // 원본 계약서는 과거에 얼린 것이라 그 사이 config/stock-trading.json 이 바뀌었을 수 있고,
+  // 실제로 KR(8/16 얼림, minNetScore 4)과 오늘 설정(6)이 그렇게 갈라져 있었다.
+  // 그 상태로 나란히 굴리면 성적 차이가 프리셋 때문인지 그 사이 바뀐 설정 때문인지 못 가른다.
+  const config: TradingConfig = inherited
+    ? JSON.parse(JSON.stringify(inherited.config))
+    : loadTradingConfig(market);
+  preset.apply(config);
+
+  const startedAt = arg("start") || todayYmd();
+  const backdated = startedAt < todayYmd();
+
   return {
     market,
-    startedAt: arg("start") || todayYmd(),
+    track,
+    label: market + " · " + preset.label,
+    startedAt,
     universeNote,
     universe,
     // 시작 시점 규칙을 통째로 복사해 둔다. 나중에 config/stock-trading.json 을 고쳐도
     // 이미 진행 중인 페이퍼 기록은 영향을 받지 않아야 한다.
-    config: loadTradingConfig(market),
+    config,
     note:
       "페이퍼 트레이딩 계약서. 진행 중에는 종목도 규칙도 바꾸지 않는다 — " +
-      "바꾸는 순간 검증이 아니라 또 한 번의 튜닝이 된다. 바꾸려면 --init 으로 새로 시작한다.",
+      "바꾸는 순간 검증이 아니라 또 한 번의 튜닝이 된다. 바꾸려면 --init 으로 새로 시작한다." +
+      // 시작일을 과거로 당기면 그 구간은 규칙을 고를 때 이미 본 데이터다. 성적이 좋아도
+      // 그건 전진검증이 아니라 백테스트의 연장이므로, 계약서에 못 박아 둔다.
+      (backdated
+        ? ` ⚠ 시작일 ${startedAt} 은 계약서를 만든 ${todayYmd()} 보다 과거다. ` +
+          `${startedAt}~${todayYmd()} 구간은 규칙 선택에 쓰인 데이터라 in-sample 이며, ` +
+          `전진검증으로 셀 수 있는 것은 ${todayYmd()} 이후뿐이다.`
+        : ""),
   };
 }
 
@@ -112,19 +187,26 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  // 트랙 = 실험 하나. 기본값이 시장 이름이라 --track 을 안 쓰던 기존 호출은 그대로 동작한다.
+  const track = arg("track") || market;
+  if (!isValidTrack(track)) {
+    console.error("✗ --track 은 영문·숫자·-·_ 만, 24자 이내여야 합니다 (파일 이름이 됩니다).");
+    process.exit(1);
+  }
+
   if (flag("init")) {
-    const existing = loadPaperCharter(market);
+    const existing = loadPaperCharter(track);
     if (existing && !flag("force")) {
-      console.log(`\n⚠ ${market} 계약서가 이미 있습니다 (${existing.startedAt} 시작, ${existing.universe.length}종목).`);
+      console.log(`\n⚠ ${track} 계약서가 이미 있습니다 (${existing.startedAt} 시작, ${existing.universe.length}종목).`);
       console.log("  덮어쓰면 그동안의 페이퍼 기록이 무효가 됩니다 (다른 실험이 되므로).");
       if (!(await confirm("  정말 새로 시작할까요?"))) {
         console.log("  취소했습니다.");
         return;
       }
     }
-    const charter = await buildCharter(market);
+    const charter = await buildCharter(market, track);
     savePaperCharter(charter);
-    console.log(`\n✓ 계약서 생성: ${paperCharterFile(market)}`);
+    console.log(`\n✓ 계약서 생성: ${paperCharterFile(track)}`);
     console.log(`  시작일 ${charter.startedAt} · ${charter.universeNote}`);
     console.log(
       `  규칙   minNetScore ${charter.config.entry.minNetScore} · ` +
@@ -134,13 +216,18 @@ async function main(): Promise<void> {
     console.log(`  ★ 이 파일은 커밋하세요. 진행 중에 바꾸면 검증이 무효가 됩니다.\n`);
   }
 
-  const charter = loadPaperCharter(market);
+  const charter = loadPaperCharter(track);
   if (!charter) {
     console.error(
-      `✗ ${market} 계약서가 없습니다. 먼저 만드세요:\n` +
-        `  npx tsx ../scripts/paper-trade.ts --market ${market} --init` +
+      `✗ ${track} 계약서가 없습니다. 먼저 만드세요:\n` +
+        `  npx tsx ../scripts/paper-trade.ts --market ${market} --track ${track} --init` +
         (market === "KR" ? " --universe marketCap --top 100" : "")
     );
+    process.exit(1);
+  }
+  // 계약서가 시장의 진실이다. --track 만 주고 --market 을 빠뜨려도 US 트랙을 KR 로 굴리지 않는다.
+  if (charter.market !== market && arg("market")) {
+    console.error(`✗ ${track} 트랙은 ${charter.market} 시장인데 --market ${market} 이 들어왔습니다.`);
     process.exit(1);
   }
 
@@ -151,8 +238,9 @@ async function main(): Promise<void> {
   // 앞부분 기록이 조용히 잘려 나가고, 재생 결과가 어제와 달라진다.
   const spanNeeded = daysSinceYmd(charter.startedAt) + 150; // 150일 = 워밍업 60봉 + 여유
   const days = Number(arg("days") || Math.max(400, spanNeeded));
+  const chartMarket = charter.market;
   const industryMap =
-    market === "KR"
+    chartMarket === "KR"
       ? await fetchIndustries(charter.universe.map((r) => r.code))
       : new Map<string, string>();
 
@@ -196,7 +284,7 @@ async function main(): Promise<void> {
 
   const dir = path.join(STOCK_DATA_DIR, "paper");
   fs.mkdirSync(dir, { recursive: true });
-  const file = path.join(dir, `${market}.json`);
+  const file = path.join(dir, `${track}.json`);
   fs.writeFileSync(
     file,
     JSON.stringify({ charter, report, candidates, ranAt: new Date().toISOString() }),
@@ -222,9 +310,9 @@ async function main(): Promise<void> {
           : "텔레그램 발송 생략 — 매매·보유·후보가 모두 없는 날입니다 (--always-notify 로 강제)."
       );
     } else {
-      const flagEmoji = market === "KR" ? "🇰🇷" : "🇺🇸";
+      const flagEmoji = chartMarket === "KR" ? "🇰🇷" : "🇺🇸";
       const head =
-        `${flagEmoji} <b>페이퍼 트레이딩 ${market}</b> · ${report.asOf}\n` +
+        `${flagEmoji} <b>페이퍼 트레이딩 ${labelOf(charter)}</b> · ${report.asOf}\n` +
         `매수 ${report.todayEntries.length} · 매도 ${report.todayExits.length} · ` +
         `보유 ${report.openPositions.length} · 후보 ${candidates.length}\n`;
 

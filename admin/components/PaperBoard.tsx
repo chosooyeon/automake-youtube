@@ -78,9 +78,21 @@ interface Candidate {
   signals: string[];
 }
 
+interface TrackInfo {
+  id: string;
+  label: string;
+  market: Market | null;
+  startedAt: string | null;
+}
+
 interface Payload {
   started: boolean;
+  /** 트랙 ID — 한 시장에 규칙이 다른 트랙이 여럿일 수 있다 (KR / KR2) */
+  track: string;
+  label?: string;
   market: Market;
+  /** config/ 안의 계약서 전부. 트랙 버튼을 그리는 데 쓴다 */
+  tracks?: TrackInfo[];
   initCommand?: string;
   runCommand?: string;
   ranAt?: string | null;
@@ -96,6 +108,7 @@ interface Payload {
         takeProfitAtrMult: number;
         trailingAtrMult: number | null;
         maxHoldDays: number;
+        exitOnSellVerdict: boolean;
       };
     };
   };
@@ -139,42 +152,56 @@ function Cmd({ children }: { children: string }) {
 }
 
 export default function PaperBoard({ market: locked = null }: { market?: Market | null }) {
-  const [ownMarket, setOwnMarket] = useState<Market>("KR");
-  const market = locked ?? ownMarket;
+  // 선택 단위가 시장이 아니라 트랙이다. 트랙 ID 기본값이 시장 이름이라 locked 는 그대로 쓰인다.
+  const [track, setTrack] = useState<string>(locked ?? "KR");
+
+  // locked(시장 고정)가 바뀌면 그 시장의 기본 트랙으로 돌아간다 —
+  // 안 그러면 미국 탭에서 KR2 를 계속 보여준다.
+  useEffect(() => {
+    if (locked) setTrack(locked);
+  }, [locked]);
+
   const [data, setData] = useState<Payload | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    fetch(`/api/stock/paper?market=${market}`, { cache: "no-store" })
+    fetch(`/api/stock/paper?track=${track}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((j) => alive && j.ok && setData(j as Payload))
       .finally(() => alive && setLoading(false));
     return () => {
       alive = false;
     };
-  }, [market]);
+  }, [track]);
 
   const r = data?.report ?? null;
   const c = data?.charter;
+  const market: Market = data?.market ?? (track === "US" ? "US" : "KR");
+
+  // 시장이 고정된 화면에서는 그 시장의 트랙만 고른다
+  const tracks = (data?.tracks ?? []).filter((t) => !locked || t.market === locked);
 
   return (
     <div className="space-y-4">
-      {!locked && (
-        <div className="flex items-center gap-2">
-          {(["KR", "US"] as Market[]).map((m) => (
+      {/* 트랙 = 실험 하나. 같은 시장에 규칙이 다른 트랙이 나란히 있을 수 있다.
+          버튼이 1개뿐이면 고를 게 없으므로 감춘다. */}
+      {tracks.length > 1 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {tracks.map((t) => (
             <button
-              key={m}
-              onClick={() => setOwnMarket(m)}
+              key={t.id}
+              onClick={() => setTrack(t.id)}
+              title={t.startedAt ? `${t.startedAt} 시작` : undefined}
               className={
                 "px-3 py-1.5 text-sm rounded-lg border transition " +
-                (market === m
+                (track === t.id
                   ? "bg-accent/15 border-accent/50 text-text"
                   : "bg-panel border-line text-subtext hover:text-text")
               }
             >
-              {MARKET_FLAG[m]} {MARKET_SHORT[m]}
+              {t.market ? MARKET_FLAG[t.market] : ""} {t.label}
             </button>
           ))}
         </div>
@@ -185,13 +212,13 @@ export default function PaperBoard({ market: locked = null }: { market?: Market 
       {!loading && data && !data.started && (
         <div className="bg-panel border border-line rounded-xl p-8 text-center space-y-3">
           <p className="text-sm text-subtext">
-            {MARKET_SHORT[market]} 페이퍼 트레이딩이 아직 시작되지 않았습니다.
+            {track} 페이퍼 트레이딩이 아직 시작되지 않았습니다.
           </p>
           <div>
             <Cmd>{data.initCommand ?? ""}</Cmd>
           </div>
           <p className="text-[11px] text-subtext">
-            시작하면 그 시점의 종목과 규칙이 <span className="mono">config/paper-{market}.json</span> 에
+            시작하면 그 시점의 종목과 규칙이 <span className="mono">config/paper-{track}.json</span> 에
             얼려집니다.
           </p>
         </div>
@@ -203,7 +230,7 @@ export default function PaperBoard({ market: locked = null }: { market?: Market 
           <div className="bg-panel border border-line rounded-xl p-4">
             <div className="flex items-baseline justify-between gap-3 flex-wrap">
               <h3 className="text-base font-semibold">
-                {MARKET_FLAG[market]} {MARKET_SHORT[market]} 페이퍼 트레이딩
+                {MARKET_FLAG[market]} {data?.label ?? MARKET_SHORT[market]} 페이퍼 트레이딩
               </h3>
               <span className="text-[11px] text-subtext">
                 {fullDate(c.startedAt)} 시작
@@ -215,7 +242,7 @@ export default function PaperBoard({ market: locked = null }: { market?: Market 
               <br />
               규칙 고정: 진입점수 {c.config.entry.minNetScore} · 손절 ATR×{c.config.exit.stopLossAtrMult} · 익절
               ATR×{c.config.exit.takeProfitAtrMult} · 트레일링 {c.config.exit.trailingAtrMult ?? "없음"} · 최대보유{" "}
-              {c.config.exit.maxHoldDays}봉
+              {c.config.exit.maxHoldDays}봉 · 매도신호 {c.config.exit.exitOnSellVerdict ? "따름" : "무시"}
             </p>
             <p className="text-[11px] text-warn mt-2">
               ⚠ 진행 중에는 종목도 규칙도 바꾸지 않습니다 — 바꾸는 순간 검증이 아니라 또 한 번의 튜닝이 됩니다.

@@ -49,7 +49,7 @@ interface Variant {
 }
 
 /**
- * 변형 목록. 순서가 곧 차트의 색 순서(--c-series-1..6)이므로 섞지 말 것.
+ * 변형 목록. 순서가 곧 차트의 색 순서(--c-series-1..8)이므로 섞지 말 것.
  * baseline 이 항상 첫 번째여야 비교 기준이 고정된다.
  */
 const VARIANTS: Variant[] = [
@@ -104,6 +104,30 @@ const VARIANTS: Variant[] = [
     why: "실전 체결이 백테스트보다 나쁠 때도 살아남는지. 여기서 무너지면 엣지가 비용에 잠긴 것",
     apply: (c) => {
       c.costs.slippageBps = 20;
+    },
+  },
+  // ↓ "덜 판다" 계열. 하이닉스 137거래일을 쪼개 보니 장중(시가→종가)은 -37.6%, 갭(종가→다음시가)이
+  //   +209.1% 였다 — 수익이 "보유한 채 자는 밤"에 생겼다는 뜻이다. 그렇다면 병목은 진입이 아니라
+  //   "너무 일찍 파는 것"이고, 미국 규칙을 -13.1% → +2.0% 로 돌려세운 수정도 방향이 같았다(8-9절).
+  //   ⚠ 한 종목의 지나간 7개월에서 나온 가설이다. 여기 성적이 좋아도 워크포워드 전엔 승격 금지.
+  {
+    id: "hold40",
+    label: "오래 보유 (40일)",
+    change: "exit.maxHoldDays 20 → 40",
+    why: "손잡이 하나만 돌린 대조군. 보유기간만 늘려도 갭 수익이 잡히는지 먼저 확인한다",
+    apply: (c) => {
+      c.exit.maxHoldDays = 40;
+    },
+  },
+  {
+    id: "letitrun",
+    label: "덜 판다 (종합)",
+    change: "maxHoldDays 40 · trailingAtrMult 2.5 · exitOnSellVerdict false",
+    why: "조기청산 경로 3개를 한꺼번에 막는다. 청산의 59%를 차지하던 매도신호를 끄고, 익절선 대신 트레일링으로 추세 끝까지 태운다",
+    apply: (c) => {
+      c.exit.maxHoldDays = 40;
+      c.exit.trailingAtrMult = 2.5;
+      c.exit.exitOnSellVerdict = false;
     },
   },
 ];
