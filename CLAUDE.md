@@ -60,6 +60,7 @@
 | 토스 페이퍼 리포트 ("그때 팔았으면") | `scripts/toss-paper.ts` — 보유·체결이력은 토스에서 읽고, 매도 판정은 `signals.ts` 를 과거 일봉에 굴려 종이 위에서만 한다. 매수일은 체결이력에서 실제로 가져온다 |
 | 데일리 퀘스트 (일/월/년 달성 관리) | `admin/lib/quest.ts`(순수 집계·클라이언트 공용) + `questStore.ts`(파일 IO) + `components/QuestBoard.tsx`·`QuestCharts.tsx`. 기록은 `config/quest-{tasks,log,season}.json` (커밋됨). 미니 퀘스트·코치 배너·시즌 진행바 포함 |
 | 메인 퀘스트 (12주 시즌 플랜, 일회성) | `admin/lib/mission.ts` + `missionStore.ts` + `components/MissionBoard.tsx` (퀘스트 탭 서브뷰). 목록은 `config/missions.json` (커밋됨). **트랙 2개**(`income` 수익화 / `career` 이직 블록 1)이고 **챕터 번호는 트랙 안에서만 유효** — 집계 함수에 반드시 track 을 넘긴다 (안 넘기면 두 시즌이 한 진행바에 섞인다). 화면은 한 번에 한 트랙만 |
+| 개인 문서 (이력서·채용공고·경력 메모) | `private/` — **git 제외** (`.gitignore`). 이 저장소는 **공개**라 회사명·경력 판단·연락처가 들어가는 문서는 전부 여기. `RESUME-v2.md`(이력서 본문) · `RESUME-DRAFT.md`(근거·면접 대본) · `JOB-POSTINGS.md`(공고 요구사항 표). **`config/missions.json` 은 커밋되므로 career 트랙 텍스트에 현 직장명·인사 언급을 넣지 않는다** (2026-08-26 한 번 걸러냈음) |
 | 프로젝트 설명서 (면접용) | `admin/lib/projectBrief.ts` (내용 원본 — 순수 데이터) + `components/ProjectBrief.tsx` (탭 [🗂️ 프로젝트 설명]). 구조·판단카드·예상질문 3개 뷰. **여기 적힌 숫자와 주장은 면접에서 말할 내용이라 추측 금지** ← 코드를 바꾸면 이 파일도 같이 고친다 |
 | 아이디어 파킹판 | `admin/lib/idea.ts` + `ideaStore.ts` + `components/IdeaBoard.tsx` (퀘스트 탭의 서브뷰). 목록은 `config/ideas.json` (커밋됨) ← **새 트랙 제안 전에 여기부터 확인** |
 | 차트 색 (트랙 8색·달성률 램프) | `admin/app/globals.css` 의 `--c-series-1..8` / `--c-heat-0..4` ← **순서가 색약 안전장치라 섞지 말 것** |
