@@ -1,0 +1,29 @@
+{
+  "_note": "인스타툰 표현 사전. 규칙: prompt 는 추상적 감정어가 아니라 '사람이 따라 할 수 있는 구체적 동작'으로 쓴다 (X: 눈썹을 찌푸린다 / O: 손톱을 물어뜯는다). AI 도 사람도 추상어는 못 그린다. 캐릭터 주변에 '떠 있는' 기호(말풍선·물결·땀방울)는 여기 넣지 않고 overlay 로 코드가 그린다 — 에셋에 구워버리면 그 기호 없는 버전이 필요할 때 다시 뽑아야 하고, 말풍선 안 한글이 뭉개진다.",
+  "expressions": [
+    { "key": "anxious", "label": "불안", "overlay": "sweat",
+      "prompt": "biting the fingernail of one hand, the other arm wrapped around own waist, eyes glancing sideways and down, shoulders pulled up tight toward the ears" },
+    { "key": "think", "label": "곰곰이", "overlay": "bubble",
+      "prompt": "head tilted slightly up, one index finger tapping own temple, the other hand tucked under the elbow, eyes looking up to the upper right" },
+    { "key": "sulk", "label": "시무룩", "overlay": "wave3",
+      "prompt": "squatting down on the floor hugging both knees to the chest, chin resting on top of the knees, eyes looking down and away" },
+    { "key": "tired", "label": "지침", "overlay": "wave3",
+      "prompt": "sitting on the floor with both legs sprawled straight forward, arms hanging limp at the sides, head drooped forward so the face is half hidden behind the hair" },
+    { "key": "resolve", "label": "결심", "overlay": "lines",
+      "prompt": "standing with both fists clenched up at chest height, feet planted wide apart, chin lifted, eyes open wide staring straight ahead" },
+    { "key": "calm", "label": "담담", "overlay": "",
+      "prompt": "standing straight with arms hanging naturally at the sides, feet together, looking directly at the viewer, small straight mouth" },
+    { "key": "smile", "label": "웃음", "overlay": "",
+      "prompt": "eyes curved into two upward arcs, both hands clasped together in front of the chest, shoulders lifted, one foot slightly raised behind" },
+    { "key": "surprise", "label": "놀람", "overlay": "lines",
+      "prompt": "both hands flat against own cheeks, mouth a small round O, body leaning back with one foot stepping backward" },
+    { "key": "upset", "label": "격양", "overlay": "lines",
+      "prompt": "one arm thrown up pointing forward, the other fist on the hip, torso leaning forward, mouth open wide mid-shout" },
+    { "key": "give_up", "label": "체념", "overlay": "wave3",
+      "prompt": "both arms hanging straight down, palms open and facing forward, head tipped back looking up at the ceiling, mouth a flat line" },
+    { "key": "blank", "label": "멍", "overlay": "spiral",
+      "prompt": "sitting cross-legged on the floor, both hands resting loose on the knees, mouth slightly open, eyes unfocused looking at nothing" },
+    { "key": "burden", "label": "짐진", "overlay": "sweat",
+      "prompt": "walking hunched forward under an invisible weight, both arms crossed over the chest, knees bent, head lowered" }
+  ]
+}

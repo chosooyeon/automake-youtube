@@ -5,7 +5,7 @@ import YoutubeWorkspace from "./YoutubeWorkspace";
 import BlogGenerator from "./BlogGenerator";
 import BlogProgressBar from "./BlogProgressBar";
 import EmoticonStudio from "./EmoticonStudio";
-import InstagramCardGenerator from "./InstagramCardGenerator";
+import InstagramWorkspace from "./InstagramWorkspace";
 import InstagramProgressBar from "./InstagramProgressBar";
 import CinemaStudio from "./CinemaStudio";
 import ChatPanel from "./ChatPanel";
@@ -182,7 +182,7 @@ export default function Dashboard() {
       {tab === "brief" && <ProjectBrief />}
       {tab === "youtube" && <YoutubeWorkspace />}
       <div className={tab === "instacard" ? "" : "hidden"}>
-        <InstagramCardGenerator />
+        <InstagramWorkspace />
       </div>
       <div className={tab === "blog" ? "" : "hidden"}>
         <BlogGenerator />

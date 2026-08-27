@@ -1,0 +1,15 @@
+{
+  "_note": "소품 사전 — 캐릭터와 같은 그림체로 뽑는 오브젝트. 표정 에셋과 같은 원리로 한 번 만들어 두고 여러 편에서 재사용한다. 캐릭터가 아니라 물건이므로 프롬프트에서 '사람 금지' 조항이 들어간다. 배치(위치·크기·투명도)는 렌더러가 하므로 그림에는 배경을 넣지 않는다.",
+  "props": [
+    { "key": "books",      "label": "책 더미",     "prompt": "a leaning stack of about five closed books" },
+    { "key": "pencils",    "label": "연필 무더기", "prompt": "a small scattered pile of pencils and one eraser" },
+    { "key": "clock",      "label": "벽시계",       "prompt": "a simple round wall clock with two thin hands" },
+    { "key": "plant",      "label": "화분",         "prompt": "a small potted plant with three rounded leaves" },
+    { "key": "mug",        "label": "머그컵",       "prompt": "a mug seen from the side with two small curls of steam above it" },
+    { "key": "clouds",     "label": "구름",         "prompt": "three small rounded clouds of slightly different sizes, floating apart" },
+    { "key": "window",     "label": "창문",         "prompt": "a simple square window with a curtain tied at each side" },
+    { "key": "chair",      "label": "의자",         "prompt": "a simple wooden chair seen from the side" },
+    { "key": "paperplane", "label": "종이비행기",   "prompt": "a small paper airplane with a short dashed trail curving behind it" },
+    { "key": "moon",       "label": "초승달",       "prompt": "a crescent moon with two tiny four-pointed stars beside it" }
+  ]
+}
