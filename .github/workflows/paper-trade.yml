@@ -41,6 +41,19 @@ jobs:
         with:
           node-version: "20"
 
+      # KR 트랙은 매일 --notify 로 보내는데, 토큰이 없으면 100종목 재생을 다 끝낸 뒤 발송에서 실패한다.
+      # 2026-08-21 ~ 09-07 한국장 실행이 전부 이것으로 죽었다 (미국장은 매매 없는 날 발송을 안 해 성공으로 보였다).
+      - name: 텔레그램 시크릿 확인
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "::error::GitHub Secrets 에 TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID 가 없습니다. 저장소 Settings → Secrets and variables → Actions 에 추가하세요 (값은 admin/data/stock/telegram.json)."
+            exit 1
+          fi
+          echo "시크릿 있음 ✓"
+
       # 스케줄이 둘인데 워크플로가 하나라서, 어느 크론이 깨웠는지로 갈라야 한다 —
       # 둘 다 매번 돌리면 장이 열리기도 전의 시장까지 계산하고 텔레그램도 배로 온다.
       #

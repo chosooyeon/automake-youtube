@@ -1,0 +1,102 @@
+{
+  "207940": {
+    "lastVerdict": "SELL",
+    "lastFingerprint": "SELL|sma60_break|20260908",
+    "lastSentAt": "2026-09-08T09:05:50.997Z"
+  },
+  "267250": {
+    "lastVerdict": "SELL",
+    "lastFingerprint": "SELL|bb_upper_break|20260908",
+    "lastSentAt": "2026-09-08T09:05:52.975Z"
+  },
+  "373220": {
+    "lastVerdict": "SELL",
+    "lastFingerprint": "SELL|sma60_break|20260908",
+    "lastSentAt": "2026-09-08T09:05:50.495Z"
+  },
+  "066570": {
+    "lastVerdict": "SELL",
+    "lastFingerprint": "SELL|bb_upper_break|20260813",
+    "lastSentAt": "2026-08-13T12:06:10.511Z"
+  },
+  "TSLA.O": {
+    "lastVerdict": "STRONG_SELL",
+    "lastFingerprint": "STRONG_SELL|downtrend_filter,sma60_break|20260904",
+    "lastSentAt": "2026-09-08T09:05:49.463Z"
+  },
+  "068270": {
+    "lastVerdict": "BUY",
+    "lastFingerprint": "BUY|sma60_support|20260908",
+    "lastSentAt": "2026-09-08T09:05:51.485Z"
+  },
+  "051910": {
+    "lastVerdict": "STRONG_SELL",
+    "lastFingerprint": "STRONG_SELL|downtrend_filter,sma60_break|20260908",
+    "lastSentAt": "2026-09-08T09:05:51.976Z"
+  },
+  "018260": {
+    "lastVerdict": "SELL",
+    "lastFingerprint": "SELL|dead_cross|20260908",
+    "lastSentAt": "2026-09-08T09:05:52.470Z"
+  },
+  "AMZN.O": {
+    "lastVerdict": "STRONG_BUY",
+    "lastFingerprint": "STRONG_BUY|sma60_support,uptrend_filter|20260904",
+    "lastSentAt": "2026-09-08T09:05:53.468Z"
+  },
+  "NFLX.O": {
+    "lastVerdict": "SELL",
+    "lastFingerprint": "SELL|macd_bear_cross|20260904",
+    "lastSentAt": "2026-09-08T09:05:53.937Z"
+  },
+  "ORCL.K": {
+    "lastVerdict": "SELL",
+    "lastFingerprint": "SELL|bb_upper_break|20260904",
+    "lastSentAt": "2026-09-08T09:05:54.416Z"
+  },
+  "MU.O": {
+    "lastVerdict": "STRONG_BUY",
+    "lastFingerprint": "STRONG_BUY|sma60_support,uptrend_filter|20260904",
+    "lastSentAt": "2026-09-08T09:05:54.987Z"
+  },
+  "SPY": {
+    "lastVerdict": "STRONG_BUY",
+    "lastFingerprint": "STRONG_BUY|sma60_support,uptrend_filter|20260904",
+    "lastSentAt": "2026-09-08T09:05:55.472Z"
+  },
+  "QQQM.O": {
+    "lastVerdict": "BUY",
+    "lastFingerprint": "BUY|sma60_support|20260904",
+    "lastSentAt": "2026-09-08T09:05:55.984Z"
+  },
+  "VOO": {
+    "lastVerdict": "STRONG_BUY",
+    "lastFingerprint": "STRONG_BUY|sma60_support,uptrend_filter|20260904",
+    "lastSentAt": "2026-09-08T09:05:56.512Z"
+  },
+  "QQQ.O": {
+    "lastVerdict": "BUY",
+    "lastFingerprint": "BUY|sma60_support|20260904",
+    "lastSentAt": "2026-09-08T09:05:57.017Z"
+  },
+  "VTI": {
+    "lastVerdict": "BUY",
+    "lastFingerprint": "BUY|sma60_support|20260904",
+    "lastSentAt": "2026-09-08T09:05:57.559Z"
+  },
+  "DIA": {
+    "lastVerdict": "BUY",
+    "lastFingerprint": "BUY|sma60_support|20260904",
+    "lastSentAt": "2026-09-08T09:05:58.038Z"
+  },
+  "JEPQ.O": {
+    "lastVerdict": "BUY",
+    "lastFingerprint": "BUY|sma60_support|20260904",
+    "lastSentAt": "2026-09-08T09:05:58.609Z"
+  },
+  "JEPI.K": {
+    "lastVerdict": "BUY",
+    "lastFingerprint": "BUY|sma60_support|20260904",
+    "lastSentAt": "2026-09-08T09:05:59.092Z"
+  }
+}
