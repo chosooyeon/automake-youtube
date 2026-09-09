@@ -213,7 +213,7 @@ export default function BlogGenerator() {
               <div>
                 <div className="text-sm font-medium">🧬 내 스타일 적용 (뚜둔97)</div>
                 <div className="text-[11px] text-subtext mt-0.5">
-                  본인 글 4편에서 추출한 시그니처(짧은 줄, "암튼/우당탕탕", 괄호 메타발언)로 작성.
+                  본인 글 4편에서 추출한 시그니처(짧은 줄, &ldquo;암튼/우당탕탕&rdquo;, 괄호 메타발언)로 작성.
                   OFF 면 일반 채널 톤으로 작성. <span className="mono">admin/data/blog_style.md</span> 수정 시 즉시 반영.
                 </div>
               </div>

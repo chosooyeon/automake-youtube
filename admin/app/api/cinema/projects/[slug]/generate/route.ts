@@ -17,7 +17,7 @@ import {
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-type Step = "logline" | "synopsis" | "characters" | "scenes" | "scene_prompt" | "ost";
+type Step = "brief" | "logline" | "synopsis" | "characters" | "scenes" | "scene_prompt" | "ost";
 
 interface GenerateBody {
   step: Step;
@@ -48,6 +48,25 @@ function commonHeader(p: CinemaProject): string {
 function buildPrompt(step: Step, p: CinemaProject, body: GenerateBody): string {
   const header = commonHeader(p);
   const hint = body.hint?.trim() ? `\n[감독의 추가 요청] ${body.hint.trim()}\n` : "";
+
+  if (step === "brief") {
+    return [
+      "너는 영화 프로듀서다. 감독이 기획 메모·영상 레퍼런스를 정리 없이 한 덩어리로 던졌다.",
+      "그 덤프는 아래 [감독 컨셉 메모] 에 들어 있다. 분위기 묘사, 레퍼런스 영화/영상 제목, 대략의 아이디어가 섞여 있을 수 있다.",
+      "거기서 프로젝트 메타를 추출해라. 명시돼 있지 않은 항목은 메모의 분위기에 어울리게 지어낸다.",
+      "",
+      header,
+      hint,
+      "",
+      "출력 형식 — JSON 한 덩어리만:",
+      `{
+  "title": "작품 제목 (한국어, 2~14자, 파일명 아님)",
+  "genre": "장르 (드라마/SF/누아르 등 자유 텍스트)",
+  "tone": "톤 한두 줄",
+  "length_type": "shorts | short_film | series_pilot 중 하나. 메모에 길이 언급이 없으면 '${p.length_type}' 유지"
+}`,
+    ].join("\n");
+  }
 
   if (step === "logline") {
     return [
@@ -231,7 +250,7 @@ function pickModel(step: Step): string {
   if (step === "logline" || step === "synopsis" || step === "scenes") {
     return "claude-opus-4-7";
   }
-  if (step === "characters" || step === "ost") {
+  if (step === "brief" || step === "characters" || step === "ost") {
     return "claude-sonnet-4-6";
   }
   return "claude-haiku-4-5-20251001"; // scene_prompt
@@ -312,6 +331,18 @@ export async function POST(req: Request, ctx: { params: { slug: string } }) {
   const parsed = result.parsed as Record<string, unknown>;
 
   // step별로 프로젝트에 머지하고 저장
+  if (body.step === "brief") {
+    const r = parsed as { title?: string; genre?: string; tone?: string; length_type?: string };
+    if (typeof r.title === "string" && r.title.trim()) project.title = r.title.trim();
+    if (typeof r.genre === "string" && r.genre.trim()) project.genre = r.genre.trim();
+    if (typeof r.tone === "string" && r.tone.trim()) project.tone = r.tone.trim();
+    if (r.length_type === "shorts" || r.length_type === "short_film" || r.length_type === "series_pilot") {
+      project.length_type = r.length_type;
+    }
+    writeProject(project);
+    return NextResponse.json({ ok: true, project });
+  }
+
   if (body.step === "logline") {
     const r = parsed as unknown as LoglineResp;
     const candidates = Array.isArray(r.candidates) ? r.candidates : [];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useToast } from "./Toast";
 
 type LengthType = "shorts" | "short_film" | "series_pilot";
@@ -68,7 +68,14 @@ const LENGTH_LABELS: Record<LengthType, string> = {
   series_pilot: "📺 시리즈 파일럿",
 };
 
-type Step = "logline" | "synopsis" | "characters" | "scenes" | "scene_prompt" | "ost";
+type Step = "brief" | "logline" | "synopsis" | "characters" | "scenes" | "scene_prompt" | "ost";
+
+interface AutoLogItem {
+  key: string;
+  label: string;
+  status: "wait" | "run" | "done" | "skip" | "fail";
+  detail?: string;
+}
 
 export default function CinemaStudio() {
   const { push } = useToast();
@@ -171,6 +178,142 @@ export default function CinemaStudio() {
     }
   }
 
+  /* ---------- 풀오토 제작 엔진 ----------
+   * 각 단계는 기존 generate API 를 그대로 순서대로 호출하고, 서버가 단계마다 저장하므로
+   * 중간에 실패/중단해도 '빈 칸 자동 완성' 으로 이어서 돌릴 수 있다. */
+  const [autoLog, setAutoLog] = useState<AutoLogItem[] | null>(null);
+  const [autoRunning, setAutoRunning] = useState(false);
+  const autoAbort = useRef(false);
+
+  async function fetchProject(slug: string): Promise<CinemaProject> {
+    const r = await fetch(`/api/cinema/projects/${slug}`, { cache: "no-store" });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || "load_failed");
+    return j.project as CinemaProject;
+  }
+
+  async function callGen(slug: string, step: Step, scene_id?: string): Promise<CinemaProject> {
+    const r = await fetch(`/api/cinema/projects/${slug}/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ step, scene_id }),
+    });
+    const j = await r.json();
+    if (!j.ok) throw new Error((j.error || "generate_failed") + (j.detail ? `\n${String(j.detail).slice(0, 300)}` : ""));
+    return j.project as CinemaProject;
+  }
+
+  async function runAuto(slug: string, opts: { includeBrief: boolean }) {
+    autoAbort.current = false;
+    setAutoRunning(true);
+    const log: AutoLogItem[] = [];
+    const sync = () => setAutoLog([...log]);
+    const start = (key: string, label: string) => {
+      log.push({ key, label, status: "run" });
+      sync();
+    };
+    const finish = (status: AutoLogItem["status"], detail?: string) => {
+      log[log.length - 1] = { ...log[log.length - 1], status, detail };
+      sync();
+    };
+
+    try {
+      let p = await fetchProject(slug);
+      setCurrentSlug(slug);
+      setProject(p);
+
+      const plan: Array<{ step: Step; label: string; skip: (p: CinemaProject) => boolean }> = [
+        ...(opts.includeBrief
+          ? [{ step: "brief" as Step, label: "메타 정리 (제목·장르·톤)", skip: (q: CinemaProject) => !q.concept.trim() }]
+          : []),
+        { step: "logline", label: "로그라인", skip: (q) => !!q.logline.trim() },
+        { step: "synopsis", label: "시놉시스", skip: (q) => !!q.synopsis.trim() },
+        { step: "characters", label: "캐릭터 시트", skip: (q) => q.characters.length > 0 },
+        { step: "scenes", label: "씬 브레이크다운", skip: (q) => q.scenes.length > 0 },
+      ];
+
+      for (const st of plan) {
+        if (autoAbort.current) throw new Error("aborted");
+        start(st.step, st.label);
+        if (st.skip(p)) {
+          finish("skip", "이미 있음");
+          continue;
+        }
+        p = await callGen(slug, st.step);
+        setProject(p);
+        finish("done");
+      }
+
+      // 씬별 영상화 프롬프트 (씬이 확정된 뒤에야 id 를 알 수 있어 plan 밖에서 돈다)
+      for (const s of p.scenes) {
+        if (autoAbort.current) throw new Error("aborted");
+        start(`scene_prompt:${s.id}`, `씬 ${s.number} 영상 프롬프트 — ${s.heading || "(헤딩 없음)"}`);
+        if (s.video_prompt.trim()) {
+          finish("skip", "이미 있음");
+          continue;
+        }
+        p = await callGen(slug, "scene_prompt", s.id);
+        setProject(p);
+        finish("done");
+      }
+
+      if (autoAbort.current) throw new Error("aborted");
+      start("ost", "OST / BGM 추천");
+      if (p.ost.length > 0) {
+        finish("skip", "이미 있음");
+      } else {
+        p = await callGen(slug, "ost");
+        setProject(p);
+        finish("done");
+      }
+
+      refreshList();
+      push({ kind: "success", title: "🎬 풀오토 제작 완료", message: "각 카드에서 다듬은 뒤 씬별 프롬프트를 복사해 쓰세요." });
+    } catch (e) {
+      const msg = (e as Error).message;
+      if (msg === "aborted") {
+        // 중단은 단계 사이에서만 일어나므로 마지막 항목을 덮지 말고 새 줄로 남긴다
+        log.push({ key: "aborted", label: "여기서 멈춤", status: "fail", detail: "중단됨" });
+        sync();
+        push({ kind: "warn", title: "자동 제작 중단", message: "여기까지는 저장됐어요. '빈 칸 자동 완성' 으로 이어서 돌릴 수 있습니다." });
+      } else {
+        if (log.length > 0 && log[log.length - 1].status === "run") finish("fail", msg);
+        push({ kind: "error", title: "자동 제작 실패", message: msg + "\n실패 지점까지는 저장됐어요. '빈 칸 자동 완성' 으로 재시도하세요." });
+      }
+      refreshList();
+    } finally {
+      setAutoRunning(false);
+    }
+  }
+
+  async function startAutoFromDump(dump: string, lengthType: LengthType) {
+    // 첫 줄을 임시 제목으로 쓰고, 진짜 제목은 brief 단계가 덮어쓴다
+    const firstLine = dump.split("\n").map((l) => l.trim()).find(Boolean) || "무제";
+    const r = await fetch("/api/cinema/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: firstLine.slice(0, 30), length_type: lengthType, genre: "", tone: "", concept: dump.trim() }),
+    });
+    const j = await r.json();
+    if (!j.ok) {
+      push({ kind: "error", title: "프로젝트 생성 실패", message: j.error });
+      return;
+    }
+    refreshList();
+    await runAuto(j.project.slug, { includeBrief: true });
+  }
+
+  const missingCount = project
+    ? [
+        !project.logline.trim(),
+        !project.synopsis.trim(),
+        project.characters.length === 0,
+        project.scenes.length === 0,
+        project.ost.length === 0,
+        ...project.scenes.map((s) => !s.video_prompt.trim()),
+      ].filter(Boolean).length
+    : 0;
+
   return (
     <div className="space-y-6">
       <div className="bg-panel border border-line rounded-2xl p-6">
@@ -179,7 +322,7 @@ export default function CinemaStudio() {
             <div className="text-xs text-subtext uppercase tracking-widest mb-1">시나리오 · 감독 모드</div>
             <h2 className="text-xl font-bold">🎬 시나리오 스튜디오</h2>
             <p className="text-sm text-subtext mt-2">
-              로그라인 → 시놉시스 → 캐릭터 → 씬 브레이크다운 → 씬별 영상/이미지 프롬프트 → OST.
+              기획이나 레퍼런스를 아래에 부어 넣으면 로그라인 → 시놉시스 → 캐릭터 → 씬 → 씬별 영상/이미지 프롬프트 → OST 까지 한 번에 만들어 둡니다.
               <br />이미지/영상은 외부 툴(Sora·Veo·Midjourney 등)로 직접 만들고, 여기서는 시나리오와 프롬프트만 다듬습니다.
             </p>
           </div>
@@ -191,6 +334,19 @@ export default function CinemaStudio() {
           </button>
         </div>
       </div>
+
+      <AutoProduceCard busy={autoRunning} onRun={startAutoFromDump} />
+
+      {autoLog && (
+        <AutoProgressPanel
+          log={autoLog}
+          running={autoRunning}
+          onAbort={() => {
+            autoAbort.current = true;
+          }}
+          onClose={() => setAutoLog(null)}
+        />
+      )}
 
       {/* 프로젝트 셀렉터 */}
       <div className="bg-panel border border-line rounded-xl p-4 flex items-center gap-3 flex-wrap">
@@ -213,6 +369,15 @@ export default function CinemaStudio() {
             </option>
           ))}
         </select>
+        {project && missingCount > 0 && (
+          <button
+            onClick={() => runAuto(project.slug, { includeBrief: false })}
+            disabled={autoRunning}
+            className="text-xs border border-accent text-accent rounded px-2 py-1 hover:bg-accent/10 disabled:opacity-50"
+          >
+            {autoRunning ? "⏳ 자동 제작 중..." : `⚡ 빈 칸 자동 완성 (${missingCount})`}
+          </button>
+        )}
         {project && (
           <button
             onClick={deleteProject}
@@ -281,6 +446,98 @@ export default function CinemaStudio() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+/* ------------------------------- 풀오토 제작 ------------------------------- */
+function AutoProduceCard({ busy, onRun }: { busy: boolean; onRun: (dump: string, lengthType: LengthType) => void }) {
+  const { push } = useToast();
+  const [dump, setDump] = useState("");
+  const [lengthType, setLengthType] = useState<LengthType>("short_film");
+
+  function submit() {
+    if (dump.trim().length < 10) {
+      push({ kind: "warn", title: "기획을 조금만 더 적어주세요", message: "한두 문장이라도 좋아요. 레퍼런스 제목만 던져도 됩니다." });
+      return;
+    }
+    onRun(dump, lengthType);
+    setDump("");
+  }
+
+  return (
+    <div className="bg-panel border border-accent/40 rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-2 gap-3 flex-wrap">
+        <h3 className="text-base font-semibold">⚡ 통짜 제작 — 기획을 부어 넣으면 끝까지 만듭니다</h3>
+        <select value={lengthType} onChange={(e) => setLengthType(e.target.value as LengthType)} className="bg-bg border border-line rounded-md px-3 py-1.5 text-sm">
+          {(Object.keys(LENGTH_LABELS) as LengthType[]).map((k) => (
+            <option key={k} value={k}>
+              {LENGTH_LABELS[k]}
+            </option>
+          ))}
+        </select>
+      </div>
+      <textarea
+        value={dump}
+        onChange={(e) => setDump(e.target.value)}
+        rows={4}
+        className={inputCls + " leading-relaxed"}
+        placeholder={
+          "정리 안 해도 됩니다. 생각나는 대로:\n" +
+          "· 하고 싶은 이야기 / 분위기 키워드\n" +
+          "· 레퍼런스 영상·영화 (제목이나 링크, '그 영화의 이 장면 느낌' 같은 메모)\n" +
+          "· 꼭 넣고 싶은 장면이나 대사"
+        }
+      />
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <span className="text-xs text-subtext">제목·장르·톤도 메모에서 알아서 뽑습니다. 결과는 단계별로 저장되니 중간에 끊겨도 이어서 돌릴 수 있어요.</span>
+        <button
+          onClick={submit}
+          disabled={busy}
+          className="bg-accent text-bg font-semibold rounded-md px-4 py-2 text-sm hover:bg-accent2 disabled:opacity-50 disabled:cursor-wait shrink-0"
+        >
+          {busy ? "⏳ 제작 중..." : "🎬 풀오토 제작"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AutoProgressPanel({
+  log,
+  running,
+  onAbort,
+  onClose,
+}: {
+  log: AutoLogItem[];
+  running: boolean;
+  onAbort: () => void;
+  onClose: () => void;
+}) {
+  const ICON: Record<AutoLogItem["status"], string> = { wait: "·", run: "⏳", done: "✅", skip: "⏭️", fail: "❌" };
+  return (
+    <div className="bg-panel border border-line rounded-xl p-4">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-semibold">🎬 자동 제작 진행</h3>
+        {running ? (
+          <button onClick={onAbort} className="text-xs border border-bad/40 text-bad rounded px-2 py-1 hover:bg-bad/10">
+            ⏹️ 다음 단계에서 멈추기
+          </button>
+        ) : (
+          <button onClick={onClose} className="text-xs border border-line rounded px-2 py-1 hover:bg-panel2">
+            닫기
+          </button>
+        )}
+      </div>
+      <ul className="space-y-1">
+        {log.map((item, i) => (
+          <li key={item.key + i} className="text-sm flex items-start gap-2">
+            <span className="shrink-0">{ICON[item.status]}</span>
+            <span className={item.status === "run" ? "font-medium" : item.status === "fail" ? "text-bad" : ""}>{item.label}</span>
+            {item.detail && <span className="text-xs text-subtext mt-0.5">— {item.detail}</span>}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

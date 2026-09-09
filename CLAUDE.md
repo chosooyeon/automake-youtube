@@ -18,7 +18,7 @@
 | 유튜브 숏폼 | 봇 S1~S4 (부모 롱폼 필요) | `projects/{slug}/S3-edit/short.mp4` |
 | 인스타 카드뉴스 | admin API가 직접 처리 | `projects/{slug}/instagram-cards/cards/*.png` |
 | 블로그 글 | admin API → `claude` 프로세스 | 응답으로 반환 (파일 저장 안 함) |
-| 이모티콘 / 시나리오(cinema) | admin API + Gemini 이미지 | `admin/data/emoticons/`, `cinema/{slug}/project.json` |
+| 이모티콘 / 시나리오(cinema) | admin API + Gemini 이미지 (cinema 는 기획 덤프 → 풀오토 체인) | `admin/data/emoticons/`, `cinema/{slug}/project.json` |
 | 주식 매매 알림 | admin API가 직접 처리 (콘텐츠 트랙 아님) | 텔레그램 메시지, `admin/data/stock/` |
 | 데일리 퀘스트 | admin 탭에서 체크 (콘텐츠 트랙 아님 — 실행 관리) | `config/quest-{tasks,log}.json` |
 
@@ -33,12 +33,14 @@
 | 대시보드 탭 구성 | `admin/components/Dashboard.tsx` (탭 셸). **탭 배열 순서가 곧 화면 순서이고 첫 항목이 기본 탭** — 기본값은 주식이 맨 앞. 단 **탭은 드래그로 순서 변경이 되고 그 순서가 `localStorage["dashboard.tabOrder"]` 에 남으므로 `TABS` 배열은 이제 기본값일 뿐** ← 화면 순서가 코드와 다르면 저장값부터 의심 (탭 바 [순서 초기화]). 탭을 추가·삭제해도 `mergeOrder()` 가 맞춰주니 저장값을 지울 필요 없다. 유튜브 탭은 `YoutubeWorkspace.tsx` 안에 주제큐·롱폼·숏폼 서브탭 |
 | 클로드 대화 탭 (일반 채팅) | `admin/app/api/chat/route.ts` (`claude -p --output-format stream-json` 스트리밍) + `admin/components/ChatPanel.tsx` + `Markdown.tsx`. 프로젝트 CLAUDE.md 오염을 피하려 빈 cwd `admin/data/chat/` 에서 실행 |
 | 색상·테마(라이트/다크) | `admin/app/globals.css` 의 `:root`/`.dark` 변수 ← **여기만 고치면 전 화면 반영**. 컴포넌트엔 `bg-panel`·`text-subtext` 같은 시맨틱 토큰만 쓰고 `gray-700` 류 하드코딩 금지 |
+| 글꼴·기본 글자 크기 | `admin/app/globals.css` 상단 `@font-face`(Pretendard, `admin/public/fonts/` ← 원본은 `shared/fonts/`) + `html { font-size: 17px }`. 컴포넌트가 `text-xs/sm` 투성이라 **개별 클래스 말고 html 기본값으로 전체를 키운다**. KoPub 는 CDN 배포가 없어 수동 다운로드만 가능 — 원하면 `public/fonts/` 에 넣고 `@font-face` 만 바꾸면 된다 |
 | 인스타툰 (내 캐릭터 컷툰) | `admin/lib/toon/{store,expressions}.ts` + `admin/app/api/toon/*` + `components/ToonBoard.tsx` (인스타 탭 → `InstagramWorkspace.tsx` 의 [✏️ 인스타툰] 서브탭). 표현 사전은 `config/toon-expressions.json` (커밋됨), 캐릭터 이미지는 `admin/data/toon/` (git 제외 — **원본은 따로 보관**). ⚠ **컷마다 이미지를 생성하지 않는다.** Gemini 이미지 API 는 무료 티어 한도가 **0** 이라 매 컷 생성이 유료인데, 인스타툰은 같은 캐릭터가 표정만 바뀌므로 **표정 에셋을 한 번 만들어 재사용하면 비용 0원이고 컷 사이 그림체도 안 흔들린다** ← 에셋 생성은 Gemini **앱**(무료)에서 하고 업로드만 한다. 에셋은 **인물/소품 2종**(`kind`)이고 사전도 두 벌 — `toon-expressions.json`(표정·동작) / `toon-props.json`(물건). 그림체 고정 문구는 `expressions.ts` 의 `STYLE_LOCK` 과 `props.ts` 의 `PROP_STYLE_LOCK` 인데 **소품 쪽엔 "사람 금지" 조항이 따로 있다** (없으면 물건 옆에 캐릭터를 같이 그려 소품으로 못 쓴다). 렌더는 `scripts/toon-card.mjs` + 대본 `admin/data/toon/episodes/{slug}.json` (git 제외 — 개인 글) |
 | 인스타 카드 생성 | `admin/app/api/instagram/generate/route.ts` + `admin/lib/instagram/*` |
 | 뉴스 RSS 스크랩 | `admin/lib/news/{feeds,rss}.ts` (캐시 `.cache/news/`, TTL 30분) |
 | 블로그 생성 | `admin/app/api/blog/generate/route.ts` + `admin/data/blog_style.md` |
 | 이모티콘 | `admin/lib/emoticon*.ts` |
-| 주식 매매신호·알림 | `admin/lib/stock/*` (naver=데이터·indicators=지표·signals=판정·scan=알림). 관심종목·알림이력은 `config/stock-*.json` (커밋됨), 봇 토큰만 `admin/data/stock/telegram.json` (git 제외) |
+| 시나리오 스튜디오 (cinema) | `admin/lib/cinema.ts` + `admin/app/api/cinema/projects/[slug]/generate/route.ts` (step 당 headless `claude -p` 1회: `brief`→`logline`→`synopsis`→`characters`→`scenes`→`scene_prompt`→`ost`) + `components/CinemaStudio.tsx`. **풀오토는 클라이언트가 체인 호출** — 단계마다 서버 저장이라 끊겨도 [⚡ 빈 칸 자동 완성]으로 재개. 영상 파일은 안 만든다 (Sora/Veo 용 프롬프트까지만) |
+| 주식 매매신호·알림 | `admin/lib/stock/*` (naver=데이터·indicators=지표·signals=판정·scan=알림). 관심종목은 `config/stock-watchlist.json` (커밋됨), 봇 토큰만 `admin/data/stock/telegram.json` (git 제외). 알림 이력 `config/stock-alert-state.json` 은 **CI 에선 Actions 캐시에 살고** 저장소의 사본은 캐시가 빌 때의 씨앗일 뿐 — 로컬 스캔이 건드려 git status 에 떠도 커밋 안 해도 된다. ⚠ CI 는 `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` 가 GitHub Secrets 에 있어야 돈다 (2026-08-13~09-07 34회 연속 실패 원인) |
 | 주식 알림 상시 가동 | `.github/workflows/stock-alert.yml` → `scripts/stock-scan-ci.ts` (tsx, admin 서버 불필요). 맥 켜둔 채 돌릴 땐 `scripts/stock-watch.mjs` |
 | 페이퍼 트레이딩 상시 가동 | `.github/workflows/paper-trade.yml` — 한국장 15:50 KST(`KR KR2`) / 미국장 06:35 KST(`US`). **어느 크론이 깨웠는지(`github.event.schedule`)로 트랙을 가른다** (둘 다 매번 돌리면 장 열리기도 전의 시장까지 계산한다). 재생 방식이라 커밋할 상태가 없어 `contents: read` 로 충분. 마지막 스텝이 `config/paper-*.json` 변경을 감지하면 실패시킨다.  **매일 알림은 `KR` 하나뿐이고 나머지 트랙은 `--trades-only`** — 숫자가 여러 벌이면 나쁜 쪽을 만지게 되고 그게 계약서를 건드려 검증을 죽인다. 트랙을 지우는 대신 안 보이게 해서 막는다 (기록은 계속 쌓임 — 페이퍼는 소급이 안 되므로 끊지 않는다). **비교는 매일 할 일이 아니라 몇 주 뒤에 [📝 페이퍼] 탭에서 할 일** |
 | 주식 자동매매 (백테스트) | `admin/lib/stock/backtest.ts`(시뮬레이션·성적표) + `tradingConfig.ts`(정책 로더) + `scripts/backtest.ts`(CLI). 정책은 `config/stock-trading.json` (커밋됨) ← **수익률은 여기서 계산되어 나오는 결과값**. 설정 의미·합격 기준·키 발급 절차는 `docs/STOCK-TRADING.md` |

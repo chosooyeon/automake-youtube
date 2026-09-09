@@ -87,9 +87,25 @@
   --c-heat-ink-4: 17 24 39;
 }
 
+/* 글꼴 — Pretendard 자체 호스팅 (shared/fonts 원본, public/fonts 복사본).
+   KoPub 돋움 계열의 깔끔한 고딕. 파일 없으면 시스템 고딕으로 떨어진다. */
+@font-face { font-family: "Pretendard"; font-weight: 400; font-display: swap; src: url("/fonts/Pretendard-Regular.ttf") format("truetype"); }
+@font-face { font-family: "Pretendard"; font-weight: 600; font-display: swap; src: url("/fonts/Pretendard-SemiBold.ttf") format("truetype"); }
+@font-face { font-family: "Pretendard"; font-weight: 700; font-display: swap; src: url("/fonts/Pretendard-Bold.ttf") format("truetype"); }
+
+html {
+  /* 기본 16px → 17px : text-xs/text-sm 가 잔뜩이라 전체를 한 단계 키운다 */
+  font-size: 17px;
+}
+
 html, body {
   background: rgb(var(--c-bg));
   color: rgb(var(--c-text));
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  line-height: 1.6;
+  word-break: keep-all;
+  -webkit-font-smoothing: antialiased;
 }
 
 * { box-sizing: border-box; }
