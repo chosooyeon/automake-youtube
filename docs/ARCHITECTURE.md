@@ -97,6 +97,11 @@ project.json 을 저장하므로 실패·중단 지점부터 [⚡ 빈 칸 자동
 실제 영상·이미지 생성은 안 한다 — 산출물은 Sora/Veo/Midjourney 에 붙여 넣을 프롬프트까지.
 
 ### 주식 매매 알림 (콘텐츠 트랙 아님 — admin API가 처리)
+
+> **독립 배포판**: 이 절 이하의 주식 모듈은 `~/Documents/quant` (별도 git 저장소, 아버지용) 로도 배포된다.
+> 원본은 여기이고 그쪽 `scripts/sync-from-automake.sh` 가 `lib/stock`·`app/api/stock`·주식 컴포넌트·CLI 를 복사하며
+> `admin/` 접두어를 벗긴다 (그쪽은 Next 앱이 루트, 데이터는 `data/stock/`, 포트 3200). 설정 JSON 은 동기화 대상이 아니다.
+
 ```
 관심종목(admin/data/stock/watchlist.json)
   → naver.ts   네이버 금융에서 일봉 200일 + 실시간 시세
@@ -111,7 +116,7 @@ project.json 을 저장하므로 실패·중단 지점부터 [⚡ 빈 칸 자동
 - **파일이 세 군데인 이유**: 맥이 꺼져 있어도 알림이 가도록 GitHub Actions 가 스캔한다.
   관심종목 `config/stock-watchlist.json` 은 커밋. 봇 토큰(`admin/data/stock/telegram.json`)은
   git 제외 + CI 에선 Secrets(`TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`)로 주입 — **이게 없으면
-  CI 가 2초 만에 죽는다** (2026-08-13~09-07 34회 연속 실패가 전부 이것. 페이퍼 KR 트랙도 같은 이유).
+  CI 가 2초 만에 죽는다** (2026-08-13 부터 09-16 현재까지 전 실행 실패가 전부 이것 — 시크릿을 아직 안 넣었다. 페이퍼 KR 트랙도 같은 이유).
   알림 이력 `config/stock-alert-state.json` 은 **CI 에선 Actions 캐시**(`actions/cache`, 실행마다
   새 키 + restore-keys 로 최신 복원)에 살고, 저장소 사본은 캐시가 빌 때의 씨앗이다. 봇 커밋으로
   되돌리지 않는 이유: 맥에서 push 할 때마다 rebase 가 필요하고 로컬 스캔이 같은 파일을 건드려 충돌난다.
@@ -312,10 +317,29 @@ config/ideas.json  → lib/ideaStore.ts (파일 IO) → lib/idea.ts (타입·집
   넘치면 화면이 경고색으로 바뀐다. 이 상한을 늘리는 방향의 수정은 도구의 목적을 무너뜨린다.
 - 카테고리 색도 `--c-series-*`. 항상 이모지+이름을 같이 달아 색만으로 구분하지 않는다.
 
+### 공부 노트 (탭 [📚 공부 노트] — 콘텐츠 트랙 아님)
+```
+config/study/*.json        → lib/studyStore.ts (readdir + 정규화) → lib/study.ts (타입·라이트너·검색)
+config/study-progress.json → components/StudyBoard.tsx
+```
+- **과목 1개 = JSON 파일 1개** (`cloud`·`python`·`codingtest`). 파일을 추가하면 코드 수정 없이 과목이 늘어난다.
+  `order` 로 정렬. 챕터는 `blocks[]`(본문) + `cards[]`(플래시카드).
+- 블록 6종: `table`(용어표 — 첫 열이 용어, 나머지가 정의/기억법) · `code`(줄 배열 허용) · `note`(콜아웃) ·
+  `flow`(좌→우 단계) · `compare`(나란히 카드) · `tree`(계층). 셀 텍스트는 `Markdown.tsx` 의 `renderInline`
+  (`\`코드\``·`**굵게**`)을 그대로 쓴다. `text`/`code`/셀은 문자열 배열로 써도 되고 store 가 `\n` 으로 합친다.
+- 복습은 **라이트너 5칸**: 맞히면 다음 칸(1→3→7→14→30일 뒤), 틀리면 1칸. 큐는 '기한 지난 것 → 안 본 것'
+  순이고 **셔플하지 않는다** (책 순서로 봐야 앞 장 개념이 뒤 장 답에 이어진다). 진입 시 큐를 고정해
+  방금 틀린 카드가 바로 뒤에 또 나오지 않게 한다. 키보드: Space 뒤집기, 1 다시, 2 알았다, Esc.
+- **일부러 없는 것**: 달성률·연속일수·코치 배너. 이 화면은 성적표가 아니라 책이다 — 안 본 날이 쌓여도
+  혼내지 않아야 다시 연다 (퀘스트 탭에서 배운 것). 상자 분포 막대 하나만 보여준다.
+- 외우기 도구: [🙈 가리기] = 표의 2열 이후를 `blur` 로 가리고 hover 로 보임 (빨간 셀로판지).
+  [📖 전체 펼치기] = 챕터 전부를 한 페이지에. 검색은 표 셀·비교 카드·카드 Q/A 를 훑는다.
+- 마지막으로 보던 과목·챕터는 `localStorage["study.last"]` (책갈피).
+
 ## 5. admin 상세
 
 - 진입: `app/page.tsx` → `components/Dashboard.tsx` (탭 셸)
-- 탭: **주식(`StockAlertDashboard`, 기본 탭)** · 데일리 퀘스트(`QuestBoard`) ·
+- 탭: **주식(`StockAlertDashboard`, 기본 탭)** · 데일리 퀘스트(`QuestBoard`) · 공부 노트(`StudyBoard`) ·
   유튜브(`YoutubeWorkspace` 안에 롱폼/주제큐/숏폼) · 블로그(`BlogGenerator`) · 이모티콘(`EmoticonStudio`) ·
   인스타(`InstagramCardGenerator`) · 시나리오(`CinemaStudio`) · 클로드 대화(`ChatPanel`)
   → `Dashboard.tsx` 의 `TABS` 배열 **순서가 곧 화면 순서이고 첫 항목이 기본 탭**이다.
@@ -343,6 +367,7 @@ config/ideas.json  → lib/ideaStore.ts (파일 IO) → lib/idea.ts (타입·집
 | cinema | `/cinema/projects`, `/cinema/projects/[slug]{,/generate}` | 시나리오 |
 | quest | `/quest`(GET 전체), `/quest/tasks`(POST·PATCH·DELETE), `/quest/check`(POST 토글·mini), `/quest/season`(PATCH) | 데일리 퀘스트 |
 | ideas | `/ideas` (GET·POST·PATCH·DELETE) | 아이디어 파킹판 |
+| study | `/study` (GET 과목+복습상태 · DELETE `?prefix=` 초기화), `/study/review` (POST 채점) | 공부 노트 |
 | missions | `/missions` (GET·POST·PATCH·DELETE) | 메인 퀘스트 (12주 플랜) |
 | stock | `/stock/{search,watchlist,scan,telegram}` | 관심종목 검색·CRUD, 신호 스캔(`?notify=1`), 텔레그램 연결 |
 | system | `/system/{api-status,channels,keywords,kpi,niche}` | 상태·설정 |

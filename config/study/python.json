@@ -1,0 +1,991 @@
+{
+  "id": "python",
+  "title": "파이썬",
+  "emoji": "🐍",
+  "order": 2,
+  "intro": "코테·면접에서 손이 멈추는 지점만 모았다. 각 장은 **비교표 → 메서드표 → 함정** 순서. 7장(표준 라이브러리)은 라이브코테 과목과 짝.",
+  "chapters": [
+    {
+      "id": "types",
+      "title": "자료형 · 연산자 · 문자열",
+      "summary": "파이썬은 **모든 것이 객체**이고 변수는 객체를 가리키는 **이름표**다. 이 한 문장에서 `is`/`==`, 가변/불변, 얕은 복사가 전부 나온다.",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "기본 타입 한눈에",
+          "columns": ["타입", "예", "가변?", "특징·주의"],
+          "rows": [
+            ["`int`", "`42`, `10**100`", "불변", "**크기 제한 없음** (오버플로 없음). `//` 바닥 나눗셈, `%` 결과 부호는 **나누는 수** 따라감: `-7 % 3 == 2`"],
+            ["`float`", "`3.14`, `1e-9`, `float('inf')`", "불변", "`0.1 + 0.2 != 0.3` → 비교는 `math.isclose`. 정수 비교엔 안 씀"],
+            ["`bool`", "`True`, `False`", "불변", "`int` 의 서브클래스: `True + True == 2`, `sum([True, False])` 가능"],
+            ["`str`", "`'a'`, `\"b\"`, `'''여러 줄'''`", "**불변**", "수정은 새 문자열 생성 → 루프 안 `+=` 는 O(n²), **`''.join(list)`**"],
+            ["`None`", "`None`", "불변 (싱글턴)", "비교는 **`is None`**. '값 없음' 과 `0`·`''`·`[]` 는 다르다"],
+            ["`bytes`", "`b'abc'`", "불변", "`str.encode()` ↔ `bytes.decode()`"],
+            ["`complex`", "`1+2j`", "불변", "거의 안 씀"]
+          ]
+        },
+        {
+          "type": "table",
+          "title": "거짓(falsy) 으로 취급되는 값 — 이것만 외우면 나머지는 참",
+          "columns": ["값", "타입"],
+          "rows": [
+            ["`False`, `None`", "—"],
+            ["`0`, `0.0`, `0j`", "숫자 0"],
+            ["`''`, `[]`, `()`, `{}`, `set()`, `range(0)`", "**빈 컨테이너**"],
+            ["`__bool__` 이 False 거나 `__len__` 이 0 인 객체", "사용자 정의"]
+          ],
+          "note": "함정: `if x:` 는 `x == 0` 도 걸러낸다. '값이 있나' 를 묻고 싶으면 **`if x is not None:`**. `if lst:` 는 '비어있지 않나' 로 관용적 OK."
+        },
+        {
+          "type": "table",
+          "title": "연산자 — 파이썬에만 있는 것",
+          "columns": ["연산자", "뜻", "예"],
+          "rows": [
+            ["`//`", "바닥 나눗셈 (음수는 −∞ 방향)", "`7 // 2 == 3`, `-7 // 2 == -4`"],
+            ["`**`", "거듭제곱 (우결합)", "`2 ** 3 ** 2 == 512`"],
+            ["`divmod(a, b)`", "몫과 나머지 한 번에", "`divmod(7, 2) == (3, 1)`"],
+            ["`:=` (바다코끼리)", "식 안에서 대입", "`if (n := len(a)) > 10:`"],
+            ["`is` / `is not`", "**같은 객체**인가 (id 비교)", "`None`·`True`·`False` 에만 쓴다"],
+            ["`==`", "**값**이 같은가 (`__eq__`)", "리스트·문자열 비교"],
+            ["`in`", "포함 여부", "list O(n), **set/dict O(1)**, str 부분문자열"],
+            ["`a < b < c`", "비교 연쇄", "`0 <= i < n` 가능"],
+            ["`and` / `or`", "**값을 반환** (불이 아님)", "`x = a or 기본값` — 단, `a` 가 0 이면 기본값이 됨"],
+            ["`@`", "행렬곱", "numpy"],
+            ["`~x`", "비트 NOT = `-x-1`", "`~0 == -1`"],
+            ["`x << n`, `x >> n`, `&`, `|`, `^`", "비트 연산", "비트마스크 DP·집합"]
+          ],
+          "note": "**`is` 로 정수를 비교하지 마라.** 작은 정수(-5~256)는 캐시돼 `is` 가 우연히 True 지만 `1000 is 1000` 은 상황 따라 다르다."
+        },
+        {
+          "type": "table",
+          "title": "문자열 메서드 — 코테에서 쓰는 것만",
+          "columns": ["메서드", "동작", "예"],
+          "rows": [
+            ["`s.split(sep=None)`", "공백(연속 공백 하나로)·구분자로 나눔", "`'a  b'.split() == ['a','b']`, `'a,,b'.split(',') == ['a','','b']`"],
+            ["`sep.join(iter)`", "문자열 리스트 합침 (**원소가 str 이어야**)", "`' '.join(map(str, nums))`"],
+            ["`s.strip()` / `lstrip` / `rstrip`", "양끝 공백(또는 지정 문자 집합) 제거", "`'xxhixx'.strip('x') == 'hi'`"],
+            ["`s.replace(a, b)`", "전부 치환 (새 문자열)", "`'aaa'.replace('a','b',1)` → 1번만"],
+            ["`s.find(x)` / `s.index(x)`", "위치. 없으면 **-1** / **ValueError**", "`in` 으로 먼저 확인"],
+            ["`s.count(x)`", "부분문자열 개수 (겹치지 않게)", "`'aaa'.count('aa') == 1`"],
+            ["`s.upper() lower() title() swapcase()`", "대소문자", "비교 정규화엔 `casefold()`"],
+            ["`s.isdigit() isalpha() isalnum() isspace()`", "판별", "`'½'.isdigit()` 은 True — 숫자 파싱은 `try int()`"],
+            ["`s.startswith(t)` / `endswith`", "접두·접미 (튜플로 여러 개)", "`s.endswith(('.jpg', '.png'))`"],
+            ["`s.zfill(n)` / `rjust ljust center`", "채워서 정렬", "`'7'.zfill(3) == '007'`"],
+            ["`s[::-1]`", "뒤집기", "팰린드롬 `s == s[::-1]`"],
+            ["`ord(c)` / `chr(n)`", "문자 ↔ 코드", "`ord('a') == 97`, 알파벳 인덱스 `ord(c) - ord('a')`"],
+            ["`s.partition(sep)`", "(앞, sep, 뒤) 3튜플", "첫 구분자만 자를 때"]
+          ]
+        },
+        {
+          "type": "code",
+          "title": "f-string 포맷 스펙 — 표로 외울 것",
+          "lang": "python",
+          "code": [
+            "x = 3.14159; n = 42; s = 'hi'",
+            "f'{x:.2f}'      # '3.14'      소수 2자리",
+            "f'{n:5d}'       # '   42'     폭 5 우측정렬",
+            "f'{n:<5}|'      # '42   |'    좌측정렬  (^ 가운데)",
+            "f'{n:05d}'      # '00042'     0 채움",
+            "f'{n:,}'        # '42' / f'{1234567:,}' → '1,234,567'",
+            "f'{0.256:.1%}'  # '25.6%'",
+            "f'{n:b}  {n:o}  {n:x}  {n:#x}'  # '101010  52  2a  0x2a'",
+            "f'{s!r}'        # \"'hi'\"      repr 로",
+            "f'{x=}'         # 'x=3.14159' 디버그용 (변수명=값)",
+            "f'{n:>{w}}'     # 폭을 변수로",
+            "f'{{literal}}'  # '{literal}' 중괄호 이스케이프"
+          ],
+          "note": "형식: `{값:[채움][정렬][부호][#][0][폭][,][.정밀도][타입]}`. 정렬 기호 `<` `>` `^`, 타입 `d f s b o x e %`."
+        },
+        {
+          "type": "note",
+          "title": "왜 문자열 `+=` 가 느린가",
+          "text": "문자열은 불변이라 `s += c` 는 매번 **새 문자열을 만들어 전체 복사**한다. n 번이면 O(n²). 리스트에 모아 `''.join()` 하면 O(n). CPython 이 최적화하는 경우가 있지만 믿지 말 것 — 면접에서 이유를 말할 수 있어야 한다."
+        }
+      ],
+      "cards": [
+        { "id": "c1", "q": "`-7 // 2` 와 `-7 % 2` 는?", "a": "`-4` 와 `1`. `//` 는 −∞ 방향 바닥, `%` 부호는 나누는 수를 따른다. (C·JS 는 `-3`, `-1`)" },
+        { "id": "c2", "q": "`is` 와 `==` 의 차이, 언제 `is` 를 쓰나?", "a": "`is` = 같은 객체(id), `==` = 같은 값(`__eq__`). `is` 는 **`None`·`True`·`False`** 비교에만." },
+        { "id": "c3", "q": "falsy 값을 전부 나열하면?", "a": "`False`, `None`, `0`(모든 0), 빈 컨테이너(`''`, `[]`, `()`, `{}`, `set()`, `range(0)`)." },
+        { "id": "c4", "q": "`x = a or 10` 의 함정은?", "a": "`a` 가 `0`·`''`·`[]` 여도 10 이 된다. '없을 때만' 이면 `a if a is not None else 10`." },
+        { "id": "c5", "q": "루프에서 문자열을 이어 붙일 때 올바른 방법과 이유?", "a": "리스트에 모아 `''.join(parts)`. 문자열은 불변이라 `+=` 는 매번 전체 복사 → O(n²)." },
+        { "id": "c6", "q": "`'a,,b'.split(',')` 와 `'a  b'.split()` 결과?", "a": "`['a', '', 'b']` 와 `['a', 'b']`. 인자 없는 split 은 연속 공백을 하나로 보고 빈 문자열을 안 만든다." },
+        { "id": "c7", "q": "f-string 으로 1234567 을 `1,234,567`, 0.256 을 `25.6%`, 42 를 `00042` 로?", "a": "`f'{n:,}'` · `f'{x:.1%}'` · `f'{n:05d}'`." },
+        { "id": "c8", "q": "`0.1 + 0.2 == 0.3` 은? 올바른 비교는?", "a": "`False`. 이진 부동소수점 오차. `math.isclose(a, b)` 또는 정수·`Decimal`·`Fraction` 로." },
+        { "id": "c9", "q": "`s.find` 와 `s.index` 의 차이?", "a": "없을 때 `find` 는 `-1`, `index` 는 `ValueError`. 리스트엔 `find` 가 없다 (`index` 만)." },
+        { "id": "c10", "q": "`True + True` 는?", "a": "`2`. `bool` 은 `int` 의 서브클래스. 그래서 `sum(cond for ...)` 로 개수를 센다." }
+      ]
+    },
+    {
+      "id": "collections",
+      "title": "컬렉션 — list · tuple · set · dict",
+      "summary": "선택 기준은 딱 3가지: **순서가 필요한가 · 중복을 허용하나 · 무엇으로 찾나(인덱스/키/존재)**. 그 다음이 메서드와 복잡도.",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "4종 비교",
+          "columns": ["", "list", "tuple", "set", "dict"],
+          "rows": [
+            ["리터럴", "`[1, 2]`", "`(1, 2)`, `1,` (콤마가 핵심)", "`{1, 2}` (빈 것은 `set()`)", "`{'a': 1}`"],
+            ["순서", "O (삽입 순)", "O", "✕", "O (3.7+ 삽입 순 보장)"],
+            ["중복", "O", "O", "✕", "키 ✕"],
+            ["가변", "O", "**✕**", "O", "O"],
+            ["`x in`", "O(n)", "O(n)", "**O(1)**", "**O(1)** (키)"],
+            ["인덱싱", "`a[i]`, 슬라이스", "`t[i]`", "✕", "`d[key]`"],
+            ["해시 가능 (dict 키·set 원소 됨)", "✕", "O (원소가 다 불변이면)", "✕ (`frozenset` 은 O)", "✕"],
+            ["언제", "순서 있는 목록·스택", "고정 레코드, 딕셔너리 키, 함수 다중 반환", "중복 제거·존재 확인·집합 연산", "키→값 매핑·카운트·그래프 인접"]
+          ],
+          "note": "**`(1)` 은 튜플이 아니라 정수 1.** 원소 1개 튜플은 `(1,)`. 함수 `return a, b` 는 튜플."
+        },
+        {
+          "type": "table",
+          "title": "list 메서드 + 시간복잡도",
+          "columns": ["메서드", "동작", "복잡도", "주의"],
+          "rows": [
+            ["`a.append(x)`", "끝에 추가", "O(1)", ""],
+            ["`a.pop()`", "끝 제거·반환", "O(1)", "스택"],
+            ["`a.pop(0)` / `a.insert(0, x)`", "앞 제거 / 앞 삽입", "**O(n)**", "큐는 `deque` 로"],
+            ["`a.insert(i, x)`", "i 위치 삽입", "O(n)", ""],
+            ["`a.remove(x)`", "첫 x 제거 (없으면 ValueError)", "O(n)", ""],
+            ["`a.index(x)`", "첫 위치 (없으면 ValueError)", "O(n)", "list 엔 `find` 없음"],
+            ["`a.count(x)`", "개수", "O(n)", ""],
+            ["`a.extend(it)` / `a += it`", "이어붙임 (제자리)", "O(k)", "`a + b` 는 새 리스트"],
+            ["`a.sort(key=, reverse=)`", "**제자리** 정렬, `None` 반환", "O(n log n)", "`sorted(a)` 는 새 리스트 반환"],
+            ["`a.reverse()` / `a[::-1]`", "제자리 뒤집기 / 새 리스트", "O(n)", ""],
+            ["`a.copy()` / `a[:]` / `list(a)`", "얕은 복사", "O(n)", "중첩 리스트는 안쪽 공유"],
+            ["`len(a)`, `a[i]`, `a[i] = x`", "", "O(1)", ""],
+            ["`x in a`", "선형 탐색", "O(n)", "반복 확인이면 set 으로"],
+            ["`min/max/sum(a)`", "", "O(n)", ""],
+            ["`del a[i]`, `a.clear()`", "", "O(n) / O(1)", ""]
+          ]
+        },
+        {
+          "type": "table",
+          "title": "슬라이싱 `a[start:stop:step]`",
+          "columns": ["식", "결과 (a = [0,1,2,3,4,5])", "뜻"],
+          "rows": [
+            ["`a[2:4]`", "`[2, 3]`", "stop 은 **미포함**"],
+            ["`a[:3]` / `a[3:]`", "`[0,1,2]` / `[3,4,5]`", "앞 3개 / 3번째부터"],
+            ["`a[-2:]` / `a[:-2]`", "`[4,5]` / `[0,1,2,3]`", "뒤 2개 / 뒤 2개 뺀 것"],
+            ["`a[::2]` / `a[1::2]`", "`[0,2,4]` / `[1,3,5]`", "짝수·홀수 인덱스"],
+            ["`a[::-1]`", "`[5,4,3,2,1,0]`", "뒤집기"],
+            ["`a[10:]`", "`[]`", "범위 밖 슬라이스는 **에러 없음** (인덱싱은 IndexError)"],
+            ["`a[1:3] = [9]`", "`[0,9,3,4,5]`", "슬라이스 대입 — 길이 달라도 됨"],
+            ["`a[i:i+k]`", "길이 k 창", "슬라이딩 윈도우 (복사 O(k) 주의)"]
+          ]
+        },
+        {
+          "type": "table",
+          "title": "dict 메서드",
+          "columns": ["메서드", "동작", "주의"],
+          "rows": [
+            ["`d[k]`", "조회, 없으면 **KeyError**", ""],
+            ["`d.get(k, default=None)`", "없으면 기본값", "카운트 `d[k] = d.get(k, 0) + 1`"],
+            ["`d.setdefault(k, [])`", "없으면 넣고, 그 값을 반환", "`d.setdefault(k, []).append(v)` — 그래프 인접"],
+            ["`d.pop(k, default)`", "제거·반환", "default 없고 키 없으면 KeyError"],
+            ["`d.keys() / values() / items()`", "뷰 객체 (dict 바뀌면 같이)", "`for k, v in d.items()`"],
+            ["`k in d`", "키 존재 O(1)", "값 검색은 `v in d.values()` O(n)"],
+            ["`d.update(other)` / `d | other` / `{**a, **b}`", "병합 (뒤가 이김)", "3.9+ `|`"],
+            ["`dict(zip(keys, vals))`", "두 리스트로 만들기", ""],
+            ["`{k: v for ...}`", "컴프리헨션", "뒤집기 `{v: k for k, v in d.items()}`"],
+            ["`sorted(d, key=d.get)` / `sorted(d.items(), key=lambda x: -x[1])`", "값 기준 정렬", ""],
+            ["`max(d, key=d.get)`", "값이 가장 큰 키", ""],
+            ["`del d[k]`, `d.clear()`, `d.popitem()`", "삭제 / 전부 / **마지막** 항목", "LIFO"]
+          ],
+          "note": "순회 중 dict 크기 바꾸면 RuntimeError → `for k in list(d):` 로 복사본 순회."
+        },
+        {
+          "type": "table",
+          "title": "set 연산",
+          "columns": ["연산", "메서드형", "뜻"],
+          "rows": [
+            ["`a | b`", "`a.union(b)`", "합집합"],
+            ["`a & b`", "`a.intersection(b)`", "교집합"],
+            ["`a - b`", "`a.difference(b)`", "차집합"],
+            ["`a ^ b`", "`a.symmetric_difference(b)`", "대칭차 (한쪽에만)"],
+            ["`a <= b` / `a < b`", "`a.issubset(b)`", "부분집합 / 진부분집합"],
+            ["`a.isdisjoint(b)`", "", "겹치는 게 없나"],
+            ["`s.add(x)` / `s.discard(x)` / `s.remove(x)`", "", "추가 / 없어도 OK / 없으면 KeyError"],
+            ["`s.pop()`", "", "임의 원소 제거"],
+            ["`frozenset(it)`", "", "불변 set — dict 키·set 의 원소로"]
+          ],
+          "note": "메서드형은 **아무 iterable** 을 받지만 연산자형은 set 끼리만. `set(list)` 로 중복 제거하면 순서가 깨진다 → 순서 유지 중복 제거는 `list(dict.fromkeys(a))`."
+        },
+        {
+          "type": "code",
+          "title": "언패킹·스왑·별표",
+          "lang": "python",
+          "code": [
+            "a, b = b, a                 # 스왑 (임시변수 없이)",
+            "first, *rest = [1, 2, 3]    # first=1, rest=[2, 3]",
+            "*init, last = [1, 2, 3]     # init=[1, 2], last=3",
+            "head, *_, tail = range(10)  # 중간은 버림",
+            "x, y = point                # 튜플·리스트·문자열 모두 언패킹",
+            "for i, (k, v) in enumerate(d.items()): ...",
+            "print(*[1, 2, 3])           # 1 2 3  (리스트를 인자로 펼침)",
+            "merged = [*a, *b]           # 리스트 합치기",
+            "merged = {**d1, **d2}       # dict 합치기"
+          ]
+        }
+      ],
+      "cards": [
+        { "id": "c1", "q": "list · tuple · set · dict 중 dict 의 키로 쓸 수 있는 것은?", "a": "**tuple** 만 (원소가 전부 불변일 때). 해시 가능해야 하는데 list·set·dict 는 가변이라 불가. set 은 `frozenset` 으로." },
+        { "id": "c2", "q": "`a.pop(0)` 이 느린 이유와 대안?", "a": "앞 원소를 빼면 나머지를 전부 한 칸씩 옮겨 O(n). 큐는 **`collections.deque`** 의 `popleft()` O(1)." },
+        { "id": "c3", "q": "`a.sort()` 와 `sorted(a)` 의 차이?", "a": "`sort()` 는 제자리 정렬, **`None` 반환**(`b = a.sort()` 는 None). `sorted()` 는 새 리스트 반환, 아무 iterable 가능." },
+        { "id": "c4", "q": "리스트에서 순서를 유지하며 중복을 제거하려면?", "a": "`list(dict.fromkeys(a))`. `set(a)` 는 순서가 깨진다." },
+        { "id": "c5", "q": "`d.get(k, 0)` 과 `d.setdefault(k, [])` 의 차이?", "a": "`get` 은 없으면 기본값을 **돌려주기만**(저장 안 함). `setdefault` 는 없으면 **넣고** 그 값을 돌려줌 → `.append` 체이닝 가능." },
+        { "id": "c6", "q": "`a[10:20]` (길이 6 리스트) 과 `a[10]` 은 각각?", "a": "슬라이스는 **`[]`**(에러 없음), 인덱싱은 **IndexError**." },
+        { "id": "c7", "q": "`(1)` 과 `(1,)` 의 타입?", "a": "`int` 와 `tuple`. 튜플을 만드는 건 괄호가 아니라 **콤마**." },
+        { "id": "c8", "q": "`x in a` 의 복잡도 — list 와 set?", "a": "list O(n), set·dict O(1) 평균. 반복해서 존재 확인하면 set 으로 바꿔라." },
+        { "id": "c9", "q": "dict 를 값 기준 내림차순으로 정렬한 (키, 값) 리스트?", "a": "`sorted(d.items(), key=lambda kv: kv[1], reverse=True)`." },
+        { "id": "c10", "q": "`first, *rest = [1, 2, 3]` 결과?", "a": "`first = 1`, `rest = [2, 3]` (별표는 항상 **리스트**)." }
+      ]
+    },
+    {
+      "id": "control",
+      "title": "제어 흐름 · 컴프리헨션 · 이터레이션",
+      "summary": "파이썬다운 루프는 **인덱스 대신 원소를 순회**한다. `enumerate`·`zip`·컴프리헨션·제너레이터가 그 도구.",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "루프 도구",
+          "columns": ["도구", "쓰임", "예"],
+          "rows": [
+            ["`range(start, stop, step)`", "정수 시퀀스 (stop 미포함)", "`range(10, 0, -1)` = 10…1, `range(n-1, -1, -1)` 역순 인덱스"],
+            ["`enumerate(it, start=0)`", "(인덱스, 원소)", "`for i, x in enumerate(a, 1)`"],
+            ["`zip(a, b)`", "병렬 순회, **짧은 쪽에서 멈춤**", "`zip(a, a[1:])` 인접 쌍. `strict=True`(3.10+) 길이 검사"],
+            ["`zip(*matrix)`", "전치(행↔열)", "`list(zip(*m))`"],
+            ["`reversed(a)`", "역순 이터레이터 (복사 없음)", "`for x in reversed(a)`"],
+            ["`sorted(it, key=)`", "정렬된 새 리스트", ""],
+            ["`for … else`", "**break 없이 끝나면** else 실행", "'찾았나' 플래그 대체"],
+            ["`while … else`", "조건이 거짓이 되어 끝나면", "드묾"],
+            ["`break` / `continue`", "가장 안쪽 루프만", "이중 루프 탈출은 함수로 빼서 `return`"],
+            ["`pass` / `...`", "빈 블록", ""],
+            ["`match` (3.10+)", "구조적 패턴 매칭", "`case [x, y]:`, `case {'k': v}:`, `case _:`"]
+          ]
+        },
+        {
+          "type": "code",
+          "title": "컴프리헨션 4종 + 조건",
+          "lang": "python",
+          "code": [
+            "[x*x for x in range(5)]                 # 리스트  [0,1,4,9,16]",
+            "{x % 3 for x in range(10)}              # 집합    {0,1,2}",
+            "{k: len(k) for k in ['a','bb']}         # 딕셔너리 {'a':1,'bb':2}",
+            "(x*x for x in range(5))                 # 제너레이터 (게으름, 메모리 O(1))",
+            "",
+            "[x for x in a if x > 0]                 # 필터 (뒤)",
+            "['pos' if x > 0 else 'neg' for x in a]  # 삼항 (앞)",
+            "[(i, j) for i in range(3) for j in range(i)]   # 이중: 바깥 for 가 먼저",
+            "[[0] * m for _ in range(n)]             # 2차원 배열 — 이렇게 만들 것",
+            "[[0] * m] * n                           # ✕ 같은 행 n개 참조 (함정)",
+            "",
+            "sum(x for x in a if x % 2)              # 괄호 생략 가능 (유일 인자일 때)",
+            "any(x > 3 for x in a); all(x > 0 for x in a)",
+            "next((x for x in a if x > 3), None)     # 첫 매칭 or 기본값"
+          ],
+          "note": "**바깥 for 부터 쓴다** — 중첩 루프를 그대로 한 줄로 옮긴 것. 두 단계 넘으면 함수로."
+        },
+        {
+          "type": "compare",
+          "title": "iterable · iterator · generator",
+          "items": [
+            { "name": "iterable (반복 가능)", "points": ["`__iter__()` 가 있어 `for` 에 넣을 수 있음", "list·str·dict·range·file", "**여러 번** 순회 가능"] },
+            { "name": "iterator (반복자)", "points": ["`__next__()` 로 하나씩, 끝나면 `StopIteration`", "`iter(lst)`, `map()`, `zip()`, `enumerate()`, 파일 객체", "**한 번** 소진되면 끝 — `list(m)` 두 번 하면 두 번째는 빈 리스트"] },
+            { "name": "generator (생성기)", "points": ["`yield` 로 만든 iterator", "값을 **필요할 때** 만듦 (게으른 계산) → 메모리 O(1)", "`(x for …)` 표현식도 제너레이터", "무한 시퀀스 가능"] }
+          ],
+          "note": "함정: `m = map(int, input().split())` 한 뒤 `len(m)` 안 됨, 두 번 순회 안 됨. 여러 번 쓰면 `list()` 로."
+        },
+        {
+          "type": "code",
+          "title": "제너레이터 — yield",
+          "lang": "python",
+          "code": [
+            "def countdown(n):",
+            "    while n > 0:",
+            "        yield n        # 여기서 멈췄다가 next() 에 이어감",
+            "        n -= 1",
+            "",
+            "g = countdown(3)",
+            "next(g)               # 3",
+            "list(g)               # [2, 1]  (이미 3은 소비됨)",
+            "",
+            "def flatten(nested):",
+            "    for x in nested:",
+            "        if isinstance(x, list):",
+            "            yield from flatten(x)   # 하위 제너레이터에 위임",
+            "        else:",
+            "            yield x",
+            "",
+            "# 파일을 한 줄씩 — 전체를 메모리에 안 올림",
+            "def lines(path):",
+            "    with open(path) as f:",
+            "        for line in f:",
+            "            yield line.rstrip('\\n')"
+          ]
+        },
+        {
+          "type": "table",
+          "title": "itertools — 조합·순열·누적",
+          "columns": ["함수", "결과", "예"],
+          "rows": [
+            ["`permutations(it, r)`", "순열 (순서 O, r개)", "`permutations('abc', 2)` → ab ac ba bc ca cb"],
+            ["`combinations(it, r)`", "조합 (순서 ✕)", "`combinations([1,2,3], 2)` → 12 13 23"],
+            ["`combinations_with_replacement`", "중복 조합", "11 12 13 22 23 33"],
+            ["`product(a, b)` / `product(it, repeat=n)`", "데카르트 곱 / 중복 순열", "`product('01', repeat=3)` → 000 001 …"],
+            ["`accumulate(it, func=add)`", "누적합 (prefix sum)", "`list(accumulate([1,2,3]))` → [1,3,6]"],
+            ["`chain(a, b)` / `chain.from_iterable(ll)`", "이어붙여 순회", "2차원 → 1차원"],
+            ["`groupby(sorted_it, key)`", "**연속된** 같은 키끼리 묶음 (정렬 먼저!)", "런렝스 인코딩"],
+            ["`pairwise(it)` (3.10+)", "인접 쌍", "`zip(a, a[1:])` 와 같음"],
+            ["`islice(it, start, stop)`", "이터레이터 슬라이스", "제너레이터에서 앞 n개"],
+            ["`count(start, step)` / `cycle(it)` / `repeat(x, n)`", "무한 카운터 / 반복 순환 / 반복", ""]
+          ]
+        }
+      ],
+      "cards": [
+        { "id": "c1", "q": "`[[0] * m] * n` 이 위험한 이유와 올바른 2차원 배열 생성?", "a": "바깥 `* n` 이 **같은 행 객체를 n번 참조** → `a[0][0] = 1` 하면 모든 행이 바뀜. `[[0] * m for _ in range(n)]`." },
+        { "id": "c2", "q": "`for … else` 의 else 는 언제 실행되나?", "a": "루프가 **break 없이** 정상 종료했을 때. '못 찾았다' 처리에 씀." },
+        { "id": "c3", "q": "`zip(a, b)` 에서 길이가 다르면?", "a": "**짧은 쪽**에서 멈춘다. 3.10+ `strict=True` 면 ValueError. 긴 쪽 기준은 `itertools.zip_longest`." },
+        { "id": "c4", "q": "iterator 와 iterable 의 차이 한 줄?", "a": "iterable 은 `for` 에 넣을 수 있는 것(여러 번), iterator 는 `next()` 로 소비되는 것(한 번). `map`·`zip`·`filter` 는 iterator라 두 번 못 돈다." },
+        { "id": "c5", "q": "제너레이터를 쓰는 이유 두 가지?", "a": "① 메모리 — 전체 리스트를 만들지 않고 하나씩 ② 게으른 계산 — 무한 시퀀스·앞부분만 필요할 때 조기 종료." },
+        { "id": "c6", "q": "순열·조합·중복순열을 itertools 로?", "a": "`permutations(it, r)` · `combinations(it, r)` · `product(it, repeat=r)`." },
+        { "id": "c7", "q": "`itertools.groupby` 를 쓰기 전에 반드시 할 일?", "a": "**같은 키로 정렬**. groupby 는 연속된 같은 키만 묶는다 (SQL GROUP BY 와 다름)." },
+        { "id": "c8", "q": "행렬 전치를 한 줄로?", "a": "`list(zip(*m))` (튜플 행). 리스트 행이면 `[list(r) for r in zip(*m)]`." },
+        { "id": "c9", "q": "컴프리헨션에서 필터 `if` 와 삼항 `if/else` 의 위치?", "a": "필터는 **뒤** `[x for x in a if c]`, 삼항은 **앞** `[a if c else b for x in a]`." },
+        { "id": "c10", "q": "`next((x for x in a if x > 3), None)` 의 뜻?", "a": "조건을 만족하는 **첫 원소**, 없으면 `None`. 전체를 안 훑고 첫 매칭에서 멈춘다." }
+      ]
+    },
+    {
+      "id": "functions",
+      "title": "함수 — 인자 · 스코프 · 클로저 · 데코레이터",
+      "summary": "인자 5종의 순서를 외우고, LEGB 로 이름을 찾고, 클로저에서 데코레이터가 나온다. 면접 단골: **가변 기본값 함정**과 **데코레이터 직접 구현**.",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "인자 5종 — 정의 순서가 고정이다",
+          "columns": ["종류", "문법", "뜻", "예"],
+          "rows": [
+            ["1. 위치 전용", "`def f(a, /, …)`", "`/` 앞은 키워드로 못 줌", "`f(1)` ○, `f(a=1)` ✕"],
+            ["2. 위치 또는 키워드", "`def f(a, b=2)`", "보통의 인자. 기본값은 뒤에", "`f(1, b=3)`"],
+            ["3. 가변 위치", "`*args`", "남는 위치 인자를 **튜플**로", "`f(1, 2, 3)` → `args == (2, 3)`"],
+            ["4. 키워드 전용", "`*` 또는 `*args` **뒤**", "반드시 이름으로", "`def f(a, *, flag=False)`"],
+            ["5. 가변 키워드", "`**kwargs`", "남는 키워드 인자를 **dict** 로", "`f(x=1)` → `{'x': 1}`"]
+          ],
+          "note": "순서: **위치전용 / 일반 *args 키워드전용 **kwargs**. 호출 쪽 `*`·`**` 는 **펼치기**(unpack): `f(*lst, **d)`."
+        },
+        {
+          "type": "code",
+          "title": "가변 기본값 함정 — 면접 1순위",
+          "lang": "python",
+          "code": [
+            "def add(x, bucket=[]):      # ✕ 기본값은 정의 시점에 딱 1번 만들어짐",
+            "    bucket.append(x)",
+            "    return bucket",
+            "add(1)   # [1]",
+            "add(2)   # [1, 2]  ← 같은 리스트가 살아 있다",
+            "",
+            "def add(x, bucket=None):    # ○ 관용구",
+            "    if bucket is None:",
+            "        bucket = []",
+            "    bucket.append(x)",
+            "    return bucket"
+          ],
+          "note": "기본값 식은 **함수 정의 시 한 번** 평가된다. `list`·`dict`·`set` 기본값은 전부 이 함정. 반대로 캐시로 악용(?)하는 트릭도 있지만 쓰지 말 것."
+        },
+        {
+          "type": "flow",
+          "title": "이름 찾기 순서 LEGB",
+          "steps": [
+            { "label": "Local", "sub": "함수 안" },
+            { "label": "Enclosing", "sub": "감싸는 함수 (클로저)" },
+            { "label": "Global", "sub": "모듈 최상위" },
+            { "label": "Built-in", "sub": "`len`, `print` …" }
+          ],
+          "note": "**대입하면 그 스코프의 지역변수가 된다.** 함수 안에서 `count += 1` 하면 `count` 가 지역으로 잡혀 UnboundLocalError. 바깥 걸 바꾸려면 `global count` / `nonlocal count`. 리스트 `.append()` 는 대입이 아니라 OK."
+        },
+        {
+          "type": "code",
+          "title": "클로저 → 데코레이터",
+          "lang": "python",
+          "code": [
+            "def make_counter():",
+            "    n = 0",
+            "    def inc():",
+            "        nonlocal n        # 바깥 변수를 '갱신' 하려면 필요",
+            "        n += 1",
+            "        return n",
+            "    return inc            # inc 는 n 을 '기억' 한다 = 클로저",
+            "",
+            "import functools, time",
+            "def timer(func):                       # 함수를 받아",
+            "    @functools.wraps(func)             # 이름·독스트링 보존",
+            "    def wrapper(*args, **kwargs):      # 아무 인자나 받고",
+            "        t = time.perf_counter()",
+            "        result = func(*args, **kwargs) # 원래 함수 실행",
+            "        print(f'{func.__name__}: {time.perf_counter() - t:.4f}s')",
+            "        return result",
+            "    return wrapper                     # 바꿔치기한 함수를 반환",
+            "",
+            "@timer                 # == slow = timer(slow)",
+            "def slow(): ...",
+            "",
+            "def repeat(n):         # 인자 있는 데코레이터 = 데코레이터를 반환하는 함수",
+            "    def deco(func):",
+            "        def wrapper(*a, **k):",
+            "            for _ in range(n): func(*a, **k)",
+            "        return wrapper",
+            "    return deco",
+            "@repeat(3)",
+            "def hi(): print('hi')"
+          ],
+          "note": "데코레이터 = **함수를 받아 함수를 돌려주는 함수**. `@x` 는 `f = x(f)` 의 설탕. 인자가 있으면 한 겹 더."
+        },
+        {
+          "type": "table",
+          "title": "functools · 고차함수",
+          "columns": ["도구", "동작", "예"],
+          "rows": [
+            ["`lambda a, b: a + b`", "이름 없는 한 줄 함수 (식만)", "`sorted(a, key=lambda x: (-x[1], x[0]))`"],
+            ["`map(f, it)`", "각 원소에 f (iterator)", "`list(map(int, input().split()))`"],
+            ["`filter(f, it)`", "f 가 참인 것만", "`filter(None, a)` = falsy 제거"],
+            ["`functools.reduce(f, it, init)`", "누적 (왼쪽부터)", "`reduce(lambda a, b: a * b, nums, 1)`"],
+            ["`@functools.lru_cache(maxsize=None)` / `@cache`", "**메모이제이션** — 인자가 해시 가능해야", "재귀 DP 한 줄 해결"],
+            ["`functools.partial(f, x)`", "인자 일부 고정", "`int2 = partial(int, base=2)`"],
+            ["`functools.wraps(func)`", "데코레이터 안에서 메타데이터 보존", ""],
+            ["`functools.cmp_to_key(cmp)`", "구식 비교함수를 key 로", "'두 문자열 이어붙여 큰 순' 정렬"],
+            ["`operator.itemgetter(1)` / `attrgetter('x')`", "key 함수 대용", "lambda 보다 빠름"],
+            ["`key=` 의 튜플 트릭", "다중 기준 정렬", "`key=lambda x: (x[0], -x[1])` — 1순위 오름, 2순위 내림"]
+          ]
+        },
+        {
+          "type": "table",
+          "title": "인자 전달 — '값'도 '참조'도 아니다",
+          "columns": ["상황", "함수 안에서", "밖에 영향?"],
+          "rows": [
+            ["불변 객체 (int·str·tuple)", "`x = x + 1` → 새 객체에 이름을 다시 붙임", "✕"],
+            ["가변 객체, **변형**", "`lst.append(1)` — 같은 객체를 수정", "**O**"],
+            ["가변 객체, **재대입**", "`lst = [1]` — 지역 이름표만 바뀜", "✕"]
+          ],
+          "note": "파이썬은 **객체 참조를 값으로 전달**(call by object reference). 이름표를 넘기는 것 — 이름표를 다른 데 붙이면(재대입) 밖은 모르고, 이름표가 가리키는 물건을 고치면(변형) 밖도 안다."
+        }
+      ],
+      "cards": [
+        { "id": "c1", "q": "`def f(x, acc=[])` 가 왜 위험한가? 관용적 해결은?", "a": "기본값은 **정의 시 1번만** 만들어져 호출 간에 공유된다. `acc=None` 으로 두고 함수 안에서 `if acc is None: acc = []`." },
+        { "id": "c2", "q": "인자 정의 순서 5종?", "a": "위치 전용(`/`) → 일반 → `*args` → 키워드 전용(`*` 뒤) → `**kwargs`." },
+        { "id": "c3", "q": "함수 안에서 `count += 1` 했더니 UnboundLocalError. 왜?", "a": "대입이 있으면 `count` 가 **지역변수로 결정**되는데 읽을 때 아직 값이 없어서. 바깥 것을 쓰려면 `global`/`nonlocal`." },
+        { "id": "c4", "q": "클로저란?", "a": "바깥 함수의 변수를 **기억한 채** 반환된 내부 함수. 바깥 함수가 끝나도 그 변수(자유 변수)가 살아 있다. 갱신하려면 `nonlocal`." },
+        { "id": "c5", "q": "데코레이터를 한 문장으로? `@deco` 는 무엇의 설탕?", "a": "함수를 받아 (보통 감싼) 함수를 돌려주는 함수. `@deco def f` == `f = deco(f)`." },
+        { "id": "c6", "q": "`functools.wraps` 는 왜 붙이나?", "a": "wrapper 가 원래 함수의 `__name__`·`__doc__` 을 덮어쓰지 않도록 복사해 준다. 없으면 디버깅·문서화가 깨진다." },
+        { "id": "c7", "q": "재귀 DP 를 가장 빨리 메모이제이션하는 방법?", "a": "`@functools.lru_cache(maxsize=None)` (3.9+ `@functools.cache`). 인자는 해시 가능해야 하므로 리스트 대신 튜플." },
+        { "id": "c8", "q": "`sorted(a, key=lambda x: (-x[1], x[0]))` 의 뜻?", "a": "두 번째 원소 **내림차순**, 같으면 첫 원소 **오름차순**. 부호를 뒤집어 튜플로 다중 기준." },
+        { "id": "c9", "q": "함수 안에서 `lst.append(1)` 과 `lst = [1]` — 각각 바깥 리스트에 영향?", "a": "`append` 는 같은 객체를 변형하므로 **영향 O**. `lst = [1]` 은 지역 이름표만 바꾸므로 **✕**." },
+        { "id": "c10", "q": "`lambda` 안에 `if` 문이나 `return` 을 쓸 수 있나?", "a": "안 된다. lambda 는 **식(expression) 하나**. 삼항식 `a if c else b` 는 식이라 가능." }
+      ]
+    },
+    {
+      "id": "classes",
+      "title": "클래스 · 매직 메서드 · 데이터클래스",
+      "summary": "클래스는 **상태(속성) + 행동(메서드)** 묶음. 파이썬 특유의 것은 **매직 메서드**(연산자·내장함수 연결)와 **덕 타이핑**.",
+      "blocks": [
+        {
+          "type": "code",
+          "title": "기본 형태 — 한 번에 다 들어간 예",
+          "lang": "python",
+          "code": [
+            "class Account:",
+            "    interest = 0.02                 # 클래스 변수 (모든 인스턴스 공유)",
+            "    __count = 0                     # 이름 맹글링 → _Account__count",
+            "",
+            "    def __init__(self, owner, balance=0):",
+            "        self.owner = owner          # 인스턴스 변수",
+            "        self._balance = balance     # _ 하나 = '건드리지 마' 관례 (강제 아님)",
+            "        Account.__count += 1",
+            "",
+            "    def __repr__(self):             # 개발자용, 컨테이너 안에서 보임",
+            "        return f'Account({self.owner!r}, {self._balance})'",
+            "",
+            "    def __str__(self):              # print() 용 — 없으면 __repr__ 사용",
+            "        return f'{self.owner}: {self._balance:,}원'",
+            "",
+            "    @property                       # 메서드를 속성처럼: acct.balance",
+            "    def balance(self):",
+            "        return self._balance",
+            "",
+            "    @balance.setter",
+            "    def balance(self, v):",
+            "        if v < 0: raise ValueError('음수 불가')",
+            "        self._balance = v",
+            "",
+            "    @classmethod                    # cls 를 받음 — 대체 생성자",
+            "    def from_str(cls, s):",
+            "        owner, bal = s.split(':')",
+            "        return cls(owner, int(bal))",
+            "",
+            "    @staticmethod                   # self·cls 없음 — 그냥 네임스페이스",
+            "    def is_valid(v):",
+            "        return v >= 0",
+            "",
+            "    def __eq__(self, other):        # == 정의하면 __hash__ 가 None 이 됨!",
+            "        return isinstance(other, Account) and self.owner == other.owner",
+            "    def __hash__(self):",
+            "        return hash(self.owner)",
+            "    def __lt__(self, other):        # 이거 하나면 sorted() 됨",
+            "        return self._balance < other._balance"
+          ]
+        },
+        {
+          "type": "table",
+          "title": "메서드 3종",
+          "columns": ["종류", "첫 인자", "접근", "언제"],
+          "rows": [
+            ["인스턴스 메서드", "`self`", "인스턴스 상태", "기본"],
+            ["`@classmethod`", "`cls`", "클래스 상태, 인스턴스 생성", "**대체 생성자** (`from_json`), 서브클래스에서도 올바른 클래스 생성"],
+            ["`@staticmethod`", "없음", "둘 다 안 씀", "관련 있어서 클래스에 둔 유틸 함수"]
+          ]
+        },
+        {
+          "type": "table",
+          "title": "매직 메서드 — 무엇을 정의하면 무엇이 되나",
+          "columns": ["메서드", "연결되는 것", "메모"],
+          "rows": [
+            ["`__init__`", "생성 후 초기화", "`__new__` 는 생성 자체 (거의 안 씀)"],
+            ["`__repr__` / `__str__`", "`repr()`·디버거 / `print()`·`str()`", "**`__repr__` 은 항상 정의** — str 없으면 대신 쓰임"],
+            ["`__eq__` / `__hash__`", "`==` / dict 키·set", "eq 를 정의하면 hash 도 같이 (아니면 unhashable)"],
+            ["`__lt__ __le__ __gt__ __ge__`", "`<` 등, `sorted`, `min`", "`@functools.total_ordering` 으로 하나만 쓰고 나머지 생성"],
+            ["`__len__`", "`len()`, `bool()` (0 이면 False)", ""],
+            ["`__bool__`", "`if obj:`", "`__len__` 보다 우선"],
+            ["`__getitem__` / `__setitem__` / `__delitem__`", "`obj[k]`", "정수면 `for` 도 됨 (IndexError 까지)"],
+            ["`__contains__`", "`in`", "없으면 `__iter__` 로 선형 탐색"],
+            ["`__iter__` / `__next__`", "`for`", "제너레이터로 `__iter__` 만 쓰면 편함"],
+            ["`__call__`", "`obj()`", "함수처럼 — 데코레이터 클래스"],
+            ["`__enter__` / `__exit__`", "`with`", "자원 정리"],
+            ["`__add__ __sub__ __mul__ …`", "`+ - *`", "`__radd__` 는 `1 + obj` (왼쪽이 모를 때)"],
+            ["`__getattr__`", "없는 속성 접근 시", "`__getattribute__` 는 모든 접근 — 위험"],
+            ["`__slots__`", "`__dict__` 제거 → 메모리 절감·속성 추가 금지", "`__slots__ = ('x', 'y')`"]
+          ]
+        },
+        {
+          "type": "code",
+          "title": "dataclass — 보일러플레이트 제거",
+          "lang": "python",
+          "code": [
+            "from dataclasses import dataclass, field",
+            "",
+            "@dataclass(order=True, frozen=False)   # __init__ __repr__ __eq__ 자동, order=True 면 비교도",
+            "class Task:",
+            "    priority: int",
+            "    name: str = ''",
+            "    tags: list[str] = field(default_factory=list)  # 가변 기본값은 반드시 factory",
+            "",
+            "t = Task(1, 'write')",
+            "t == Task(1, 'write')     # True (필드 값 비교)",
+            "sorted([Task(2), Task(1)]) # priority 순 (필드 순서 튜플 비교)",
+            "",
+            "# frozen=True → 불변 + 해시 가능 (dict 키 OK)",
+            "# 힙에 넣을 때: heapq.heappush(h, (task.priority, task)) 처럼 튜플로 감싸거나 order=True",
+            "",
+            "from typing import NamedTuple",
+            "class Point(NamedTuple):      # 불변·튜플 언패킹·가벼움",
+            "    x: int",
+            "    y: int"
+          ]
+        },
+        {
+          "type": "table",
+          "title": "상속·다형성 용어",
+          "columns": ["용어", "정의", "파이썬에서"],
+          "rows": [
+            ["상속", "부모 속성·메서드를 물려받음", "`class Dog(Animal)`"],
+            ["`super().__init__()`", "부모 초기화 호출", "다중 상속에선 MRO 순서대로 다음 클래스"],
+            ["MRO (메서드 결정 순서)", "이름을 찾는 클래스 순서", "`Cls.__mro__`, C3 선형화. 다이아몬드 상속 해결"],
+            ["오버라이딩", "같은 이름 메서드를 자식이 재정의", "오버로딩(같은 이름 다른 인자)은 **없음** — 기본값·`*args` 로"],
+            ["덕 타이핑", "타입이 아니라 **메서드가 있으면** 됨", "`len()` 은 `__len__` 만 있으면 됨. `isinstance` 남발 ✕"],
+            ["추상 클래스 (ABC)", "구현 강제", "`from abc import ABC, abstractmethod`"],
+            ["`Protocol` (3.8+)", "구조적 타이핑 — 상속 없이 '이 메서드 있으면 그 타입'", "타입 힌트용 덕 타이핑"],
+            ["`isinstance(x, (A, B))` / `issubclass`", "타입 검사 (상속 고려)", "`type(x) is A` 는 상속 무시"],
+            ["컴포지션 > 상속", "'is-a' 아니면 가지게(has-a) 하라", "`self.engine = Engine()`"],
+            ["믹스인 (Mixin)", "기능 조각을 다중 상속으로 섞음", "`class JsonMixin: def to_json(self): …`"]
+          ]
+        },
+        {
+          "type": "code",
+          "title": "컨텍스트 매니저 — with 를 직접 만들기",
+          "lang": "python",
+          "code": [
+            "class Timer:",
+            "    def __enter__(self):",
+            "        self.t = time.perf_counter()",
+            "        return self                    # as 로 받는 값",
+            "    def __exit__(self, exc_type, exc, tb):",
+            "        print(time.perf_counter() - self.t)",
+            "        return False                   # True 를 돌려주면 예외를 삼킨다",
+            "",
+            "from contextlib import contextmanager",
+            "@contextmanager",
+            "def timer():",
+            "    t = time.perf_counter()",
+            "    try:",
+            "        yield                          # 여기서 with 본문 실행",
+            "    finally:",
+            "        print(time.perf_counter() - t)",
+            "",
+            "with timer():",
+            "    work()"
+          ]
+        }
+      ],
+      "cards": [
+        { "id": "c1", "q": "`__repr__` 과 `__str__` 의 역할과 하나만 정의한다면?", "a": "`__repr__` 은 개발자용(디버거·컨테이너 안), `__str__` 은 사용자용(`print`). **`__repr__`** 만 정의 — str 이 없으면 repr 을 대신 쓴다." },
+        { "id": "c2", "q": "`__eq__` 를 정의했더니 set 에 못 넣는다. 왜?", "a": "`__eq__` 를 정의하면 `__hash__` 가 자동으로 `None` 이 된다(같다면 해시도 같아야 하므로). `__hash__` 도 함께 정의." },
+        { "id": "c3", "q": "`@classmethod` 와 `@staticmethod` 의 차이와 쓰임?", "a": "classmethod 는 `cls` 를 받아 **대체 생성자**(`from_str`)·클래스 상태 접근. staticmethod 는 아무것도 안 받는 유틸 함수 — 그냥 클래스 안에 두고 싶을 때." },
+        { "id": "c4", "q": "dataclass 에서 `tags: list = []` 가 안 되는 이유와 해법?", "a": "가변 기본값 공유 함정과 같아서 ValueError 를 낸다. `field(default_factory=list)`." },
+        { "id": "c5", "q": "덕 타이핑이란?", "a": "'오리처럼 걷고 꽥꽥거리면 오리' — 타입이 아니라 **필요한 메서드가 있는지**로 판단. `len(x)` 는 `__len__` 만 있으면 된다. `isinstance` 남발 대신 `try`." },
+        { "id": "c6", "q": "MRO 란? 확인 방법?", "a": "메서드·속성 이름을 찾을 클래스 순서(C3 선형화). `Cls.__mro__` 또는 `Cls.mro()`. 다이아몬드 상속에서 `super()` 가 부모가 아니라 **MRO 의 다음 클래스**를 부르는 이유." },
+        { "id": "c7", "q": "파이썬에 메서드 오버로딩이 있나?", "a": "없다. 같은 이름을 다시 정의하면 마지막 것만 남는다. 기본값 인자·`*args`·`functools.singledispatch` 로 대신." },
+        { "id": "c8", "q": "`with` 가 호출하는 두 메서드와 `__exit__` 의 반환값 의미?", "a": "`__enter__`(들어갈 때, as 값 반환) / `__exit__(exc_type, exc, tb)`(나갈 때, 예외 있어도 호출). `__exit__` 가 **True 를 반환하면 예외를 삼킨다**." },
+        { "id": "c9", "q": "`__slots__` 를 쓰는 이유?", "a": "인스턴스마다 `__dict__` 를 안 만들어 **메모리 절감·속성 접근 약간 빠름**. 대신 선언 안 한 속성은 추가 불가. 객체 수백만 개일 때." },
+        { "id": "c10", "q": "객체를 `sorted()` 에 넣으려면 최소 무엇을 정의?", "a": "`__lt__` 하나. 나머지 비교는 `@functools.total_ordering` 이 만들어 준다. dataclass 는 `order=True`." }
+      ]
+    },
+    {
+      "id": "errors",
+      "title": "예외 · 파일 · 모듈",
+      "summary": "파이썬 스타일은 **EAFP** — '허락보다 용서가 쉽다'. 먼저 하고 예외로 처리한다. `try` 4블록의 실행 조건과 예외 계층을 외운다.",
+      "blocks": [
+        {
+          "type": "flow",
+          "title": "try 4블록 — 언제 실행되나",
+          "steps": [
+            { "label": "try", "sub": "시도" },
+            { "label": "except", "sub": "예외 났을 때 (여러 개, 좁은 것부터)" },
+            { "label": "else", "sub": "예외 **안 났을 때만**" },
+            { "label": "finally", "sub": "**무조건** (return 해도)" }
+          ],
+          "note": "`else` 에 두는 이유: 성공했을 때의 코드를 `try` 안에 넣으면 그 코드의 예외까지 `except` 가 잡아버린다."
+        },
+        {
+          "type": "code",
+          "title": "예외 다루기 관용구",
+          "lang": "python",
+          "code": [
+            "try:",
+            "    v = int(s)",
+            "except ValueError as e:              # 좁은 예외부터. 'except:' 맨몸은 금지 (KeyboardInterrupt 까지 잡음)",
+            "    print('숫자 아님', e)",
+            "except (TypeError, KeyError):        # 여러 개는 튜플",
+            "    raise                            # 그대로 다시 던짐 (스택 보존)",
+            "else:",
+            "    print('ok', v)",
+            "finally:",
+            "    cleanup()",
+            "",
+            "class InsufficientFunds(Exception):   # 커스텀 예외 — Exception 상속",
+            "    def __init__(self, need):",
+            "        super().__init__(f'{need}원 부족')",
+            "        self.need = need",
+            "",
+            "raise InsufficientFunds(500)",
+            "raise ValueError('bad') from e       # 원인 연결 (chaining)",
+            "",
+            "# EAFP vs LBYL",
+            "try:                 v = d[k]        # EAFP: 먼저 하고 용서 (파이썬다움)",
+            "except KeyError:     v = 0",
+            "if k in d: v = d[k]                  # LBYL: 미리 확인 (경쟁 조건 가능)"
+          ]
+        },
+        {
+          "type": "tree",
+          "title": "예외 계층 — 자주 만나는 것만",
+          "root": {
+            "label": "BaseException",
+            "children": [
+              { "label": "SystemExit · KeyboardInterrupt · GeneratorExit", "sub": "`except Exception` 으로 안 잡힘 (그래서 Exception 을 상속)" },
+              {
+                "label": "Exception",
+                "children": [
+                  { "label": "ArithmeticError", "children": [{ "label": "ZeroDivisionError · OverflowError" }] },
+                  { "label": "LookupError", "children": [{ "label": "IndexError (시퀀스) · KeyError (dict)" }] },
+                  { "label": "ValueError", "sub": "타입은 맞는데 값이 이상 — `int('x')`" },
+                  { "label": "TypeError", "sub": "타입이 틀림 — `'a' + 1`, `len(5)`" },
+                  { "label": "AttributeError", "sub": "없는 속성 — `None.x`" },
+                  { "label": "NameError", "children": [{ "label": "UnboundLocalError", "sub": "대입 전 참조" }] },
+                  { "label": "OSError", "children": [{ "label": "FileNotFoundError · PermissionError · TimeoutError" }] },
+                  { "label": "RuntimeError", "children": [{ "label": "RecursionError", "sub": "재귀 한도 (기본 1000)" }] },
+                  { "label": "StopIteration", "sub": "이터레이터 끝" },
+                  { "label": "AssertionError", "sub": "`assert` 실패 (`-O` 로 실행하면 사라짐 → 검증엔 쓰지 말 것)" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "table",
+          "title": "파일 · 경로",
+          "columns": ["도구", "동작", "메모"],
+          "rows": [
+            ["`with open(p, 'r', encoding='utf-8') as f:`", "열고 자동 닫기", "**encoding 명시** (윈도우 cp949 사고)"],
+            ["모드 `r w a x` + `b` + `+`", "읽기 / 덮어쓰기 / 이어쓰기 / 새 파일만 / 바이너리 / 읽쓰기", "`w` 는 기존 내용 삭제"],
+            ["`f.read()` / `f.readline()` / `f.readlines()`", "전체 / 한 줄 / 줄 리스트", "큰 파일은 `for line in f:`"],
+            ["`f.write(s)` / `print(s, file=f)`", "쓰기 (개행 직접)", ""],
+            ["`json.load(f)` / `json.dump(obj, f, ensure_ascii=False, indent=2)`", "파일 ↔ 객체", "`loads`/`dumps` 는 문자열. 튜플→리스트, 키→문자열로 바뀜"],
+            ["`pathlib.Path`", "객체지향 경로", "`Path('a') / 'b.txt'`, `.exists() .read_text() .write_text() .glob('*.py') .stem .suffix .parent .mkdir(parents=True, exist_ok=True)`"],
+            ["`csv.reader(f)` / `csv.DictReader(f)`", "CSV", "`newline=''` 로 열기"],
+            ["`sys.stdin.readline()`", "빠른 입력 (코테)", "7장"]
+          ]
+        },
+        {
+          "type": "table",
+          "title": "모듈 · 패키지 · 실행",
+          "columns": ["용어", "정의", "메모"],
+          "rows": [
+            ["모듈", "`.py` 파일 하나", "`import m` 은 **한 번만** 실행되고 캐시(`sys.modules`)"],
+            ["패키지", "`__init__.py` 가 있는 디렉터리", "3.3+ 없어도 되지만(namespace) 두는 게 안전"],
+            ["`if __name__ == '__main__':`", "직접 실행할 때만 (import 시엔 `__name__` 이 모듈명)", "스크립트 + 라이브러리 겸용"],
+            ["`from m import *`", "네임스페이스 오염", "쓰지 말 것. `__all__` 로 제한"],
+            ["상대 임포트 `from . import x`", "패키지 안에서", "스크립트로 직접 실행하면 깨짐 → `python -m pkg.mod`"],
+            ["순환 임포트", "A 가 B, B 가 A", "함수 안에서 import 하거나 구조 분리"],
+            ["가상환경 `venv`", "프로젝트별 패키지 격리", "`python -m venv .venv && source .venv/bin/activate`"],
+            ["`requirements.txt` / `pyproject.toml`", "의존성 목록", "`pip freeze > requirements.txt`"],
+            ["GIL", "한 번에 한 스레드만 바이트코드 실행", "CPU 병렬은 `multiprocessing`, I/O 는 `threading`/`asyncio`"],
+            ["타입 힌트", "`def f(a: int) -> str`", "실행에 영향 없음, `mypy` 로 검사. `list[int]`, `Optional[X]` = `X | None`"]
+          ]
+        }
+      ],
+      "cards": [
+        { "id": "c1", "q": "`try` 의 `else` 는 언제 실행되고 왜 따로 두나?", "a": "예외가 **안 났을 때만**. 성공 코드까지 try 안에 넣으면 그 코드의 예외를 except 가 잘못 잡기 때문." },
+        { "id": "c2", "q": "`except:` (맨몸) 이 나쁜 이유?", "a": "`BaseException` 까지 잡아 **Ctrl+C(KeyboardInterrupt)·SystemExit** 도 삼킨다. 최소 `except Exception`, 되도록 구체적 예외." },
+        { "id": "c3", "q": "EAFP 와 LBYL 은?", "a": "EAFP = 먼저 하고 예외로 용서(`try: d[k]`), 파이썬다움. LBYL = 미리 확인(`if k in d`). EAFP 는 확인과 실행 사이 경쟁 조건이 없다." },
+        { "id": "c4", "q": "IndexError 와 KeyError 의 공통 부모? ValueError 와 TypeError 의 차이?", "a": "`LookupError`. ValueError 는 타입은 맞는데 값이 이상(`int('x')`), TypeError 는 타입 자체가 틀림(`'a' + 1`)." },
+        { "id": "c5", "q": "`raise` 단독과 `raise X from e` 의 뜻?", "a": "`raise` 단독 = 잡은 예외를 **스택 그대로** 다시 던짐. `from e` = 새 예외에 원인을 연결(트레이스백에 'direct cause' 표시)." },
+        { "id": "c6", "q": "`assert` 를 입력 검증에 쓰면 안 되는 이유?", "a": "`python -O` 최적화 모드에서 **assert 가 제거**된다. 검증은 `if … raise ValueError`." },
+        { "id": "c7", "q": "`json.dumps` 하면 튜플과 정수 키는 어떻게 되나? 한글은?", "a": "튜플 → 리스트, 키 → 문자열. 한글은 `\\uXXXX` 로 이스케이프되므로 `ensure_ascii=False`." },
+        { "id": "c8", "q": "`if __name__ == '__main__':` 의 뜻?", "a": "이 파일을 **직접 실행**했을 때만 참(import 되면 `__name__` 은 모듈명). 스크립트 진입점과 라이브러리 겸용." },
+        { "id": "c9", "q": "GIL 때문에 파이썬에서 CPU 병렬을 하려면?", "a": "`multiprocessing`(프로세스 분리). 스레드는 I/O 대기에만 효과. 비동기 I/O 는 `asyncio`." },
+        { "id": "c10", "q": "파일 모드 `w` 와 `a` 와 `x` 의 차이?", "a": "`w` 덮어쓰기(기존 삭제), `a` 끝에 이어쓰기, `x` 새로 만들기(있으면 FileExistsError)." }
+      ]
+    },
+    {
+      "id": "stdlib",
+      "title": "코테 필수 표준 라이브러리",
+      "summary": "import 한 줄로 자료구조가 생기는 것들. **deque·heapq·Counter·defaultdict·bisect** 다섯 개는 손이 자동으로 나가야 한다.",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "collections",
+          "columns": ["클래스", "무엇", "핵심 메서드", "언제"],
+          "rows": [
+            ["`deque`", "양끝 O(1) 큐", "`append popleft appendleft pop rotate(k) maxlen=`", "**BFS 큐**, 슬라이딩 윈도우, 최근 k개"],
+            ["`Counter`", "개수 세는 dict", "`most_common(n)`, `+ - & |`, `elements()`, `total()`", "빈도·애너그램·다수결"],
+            ["`defaultdict(list)`", "없는 키에 기본값 자동", "`dd[k].append(v)`", "**그래프 인접 리스트**, 그룹핑. 함수(`int`, `list`, `set`, `lambda: 0`)를 넘김"],
+            ["`OrderedDict`", "순서 dict (+ `move_to_end`, `popitem(last=False)`)", "", "**LRU 캐시** 구현"],
+            ["`namedtuple('P', 'x y')`", "이름 있는 튜플", "`P(1, 2).x`", "가벼운 레코드"],
+            ["`ChainMap`", "dict 여러 개를 하나처럼", "", "설정 우선순위"]
+          ]
+        },
+        {
+          "type": "code",
+          "title": "heapq — 최소 힙 (최대 힙은 부호 뒤집기)",
+          "lang": "python",
+          "code": [
+            "import heapq",
+            "h = []",
+            "heapq.heappush(h, 3); heapq.heappush(h, 1)   # O(log n)",
+            "heapq.heappop(h)              # 1  (가장 작은 것)  O(log n)",
+            "h[0]                          # 들여다보기 O(1)",
+            "heapq.heapify(lst)            # 리스트를 제자리에서 힙으로 O(n)",
+            "",
+            "heapq.heappush(h, -x); -heapq.heappop(h)     # 최대 힙",
+            "heapq.heappush(h, (dist, node))              # 튜플은 첫 원소로 비교 → 다익스트라",
+            "heapq.heappush(h, (prio, counter, obj))      # obj 비교 불가하면 카운터로 타이브레이크",
+            "",
+            "heapq.nlargest(3, a); heapq.nsmallest(3, a, key=len)   # 상위 k개",
+            "heapq.heappushpop(h, x)       # push 후 pop (더 빠름)",
+            "heapq.heapreplace(h, x)       # pop 후 push"
+          ],
+          "note": "**힙은 정렬된 리스트가 아니다** — `h[0]` 만 최소를 보장. 'k번째로 큰 것' 은 크기 k 최소 힙을 유지."
+        },
+        {
+          "type": "code",
+          "title": "bisect — 정렬된 리스트에서 이진탐색",
+          "lang": "python",
+          "code": [
+            "from bisect import bisect_left, bisect_right, insort",
+            "a = [1, 2, 4, 4, 7]",
+            "bisect_left(a, 4)    # 2  → 4가 들어갈 가장 왼쪽 = 'x 이상인 첫 위치' (lower_bound)",
+            "bisect_right(a, 4)   # 4  → 'x 초과인 첫 위치' (upper_bound)",
+            "bisect_right(a, 4) - bisect_left(a, 4)   # 2 = 4의 개수",
+            "bisect_left(a, 3)    # 2  → 없어도 자리 알려줌",
+            "insort(a, 5)         # 정렬 유지 삽입 (삽입 자체는 O(n))",
+            "",
+            "# 'x 이하 원소 개수' = bisect_right(a, x)",
+            "# 'x 미만 원소 개수' = bisect_left(a, x)",
+            "# LIS O(n log n): tails 배열에 bisect_left 로 교체"
+          ]
+        },
+        {
+          "type": "table",
+          "title": "math · 숫자",
+          "columns": ["함수", "동작", "메모"],
+          "rows": [
+            ["`math.gcd(a, b)` / `math.lcm`", "최대공약수 / 최소공배수 (3.9+)", "`gcd(*list)` 여러 개"],
+            ["`math.isqrt(n)`", "정수 제곱근 (내림)", "`int(n**0.5)` 는 부동소수점 오차"],
+            ["`math.comb(n, k)` / `math.perm`", "조합 수 / 순열 수", "3.8+"],
+            ["`math.factorial(n)`", "팩토리얼", ""],
+            ["`math.ceil` / `floor` / `trunc`", "올림 / 내림 / 0 방향", "`-(-a // b)` = 정수 올림 나눗셈"],
+            ["`math.inf` / `float('inf')`", "무한대", "최솟값 초기값. 정수 문제면 `10**18` 도 OK"],
+            ["`math.log(x, base)` / `log2` / `log10`", "로그", ""],
+            ["`math.hypot(x, y)` / `math.dist(p, q)`", "유클리드 거리", ""],
+            ["`pow(a, b, m)`", "**모듈러 거듭제곱** O(log b)", "`pow(a, -1, m)` = 모듈러 역원 (3.8+)"],
+            ["`abs` `round(x, n)` `divmod` `sum(it, start)`", "내장", "`round(2.5) == 2` **은행가 반올림**!"],
+            ["`int(s, base)` / `bin(n)` `oct` `hex`", "진법 변환", "`bin(5) == '0b101'`, `int('101', 2) == 5`"],
+            ["`bin(n).count('1')` / `n.bit_count()`", "1 비트 개수", "3.10+"],
+            ["`random.randint(a, b)` / `choice` / `shuffle` / `sample(pop, k)`", "난수", "`seed()` 재현"]
+          ]
+        },
+        {
+          "type": "code",
+          "title": "입출력 — 코테 첫 줄",
+          "lang": "python",
+          "code": [
+            "import sys",
+            "input = sys.stdin.readline          # input() 보다 훨씬 빠름 (개행 포함됨 → strip)",
+            "n = int(input())",
+            "a = list(map(int, input().split()))",
+            "grid = [list(input().rstrip()) for _ in range(n)]",
+            "data = sys.stdin.read().split()      # 전부 한 번에 — 가장 빠름",
+            "",
+            "sys.setrecursionlimit(10**6)         # DFS 재귀 깊이 (기본 1000). 그래도 깊으면 스택으로",
+            "",
+            "out = []",
+            "out.append(str(ans))",
+            "sys.stdout.write('\\n'.join(out) + '\\n')   # print 수만 번 대신 한 번에",
+            "print(*row)                          # 공백 구분 출력",
+            "print(a, b, sep='', end='')"
+          ]
+        },
+        {
+          "type": "table",
+          "title": "string · 기타",
+          "columns": ["도구", "동작"],
+          "rows": [
+            ["`string.ascii_lowercase` / `ascii_uppercase` / `digits`", "`'abc…z'` — 알파벳 순회에"],
+            ["`str.maketrans('abc', 'xyz')` + `s.translate(t)`", "문자 일괄 치환 (빠름)"],
+            ["`re.findall(r'\\d+', s)` / `re.sub` / `re.split`", "정규식. `r''` 원시 문자열"],
+            ["`copy.deepcopy(x)`", "중첩 구조 완전 복사"],
+            ["`time.perf_counter()`", "벤치마크"],
+            ["`datetime.date(2026, 9, 16).weekday()`", "0=월. `timedelta(days=1)` 로 날짜 연산"],
+            ["`typing`: `Optional`, `Callable`, `TypedDict`", "힌트"],
+            ["`enum.Enum` / `enum.auto()`", "상수 집합"],
+            ["`array.array('i')`", "메모리 작은 정수 배열 (거의 안 씀)"]
+          ]
+        }
+      ],
+      "cards": [
+        { "id": "c1", "q": "BFS 큐로 list 대신 deque 를 쓰는 이유?", "a": "`list.pop(0)` 은 O(n), `deque.popleft()` 는 O(1). 정점 10만 개면 차이가 초 단위." },
+        { "id": "c2", "q": "heapq 로 최대 힙을 만드는 법?", "a": "값을 **음수로** 넣고 꺼낼 때 다시 부호 반전. 튜플이면 `(-prio, item)`." },
+        { "id": "c3", "q": "`bisect_left` 와 `bisect_right` 의 차이, x 의 개수는?", "a": "left = x **이상**인 첫 위치(lower_bound), right = x **초과**인 첫 위치(upper_bound). 개수 = right − left." },
+        { "id": "c4", "q": "`Counter` 에서 가장 흔한 2개와 두 Counter 의 교집합?", "a": "`c.most_common(2)` · `c1 & c2`(최소 개수). 합은 `c1 + c2`." },
+        { "id": "c5", "q": "`defaultdict(list)` 로 그래프 인접 리스트를 만드는 코드?", "a": "`g = defaultdict(list); g[u].append(v)` — 없는 키를 자동으로 `[]` 로. `defaultdict(int)` 는 카운트." },
+        { "id": "c6", "q": "`round(2.5)` 와 `round(3.5)` 는?", "a": "`2` 와 `4`. 은행가 반올림(짝수로). 일반 반올림은 `int(x + 0.5)` 또는 `decimal`." },
+        { "id": "c7", "q": "`int(n ** 0.5)` 대신 써야 할 것?", "a": "`math.isqrt(n)`. 큰 수에서 부동소수점 오차로 1 틀릴 수 있다." },
+        { "id": "c8", "q": "정수 올림 나눗셈을 부동소수점 없이?", "a": "`-(-a // b)` 또는 `(a + b - 1) // b`." },
+        { "id": "c9", "q": "코테에서 입력이 10만 줄일 때 첫 줄에 쓸 것?", "a": "`input = sys.stdin.readline` (또는 `sys.stdin.read().split()`). 출력도 모아서 `'\\n'.join` 한 번." },
+        { "id": "c10", "q": "`pow(a, b, m)` 을 쓰는 이유?", "a": "모듈러 거듭제곱을 O(log b) 로, 중간 값이 커지지 않게. `pow(a, -1, m)` 은 모듈러 역원." },
+        { "id": "c11", "q": "LRU 캐시를 직접 구현할 때 쓰는 자료구조?", "a": "`OrderedDict` — 접근 시 `move_to_end(k)`, 넘치면 `popitem(last=False)`. 둘 다 O(1)." },
+        { "id": "c12", "q": "재귀 DFS 가 RecursionError 를 낼 때?", "a": "`sys.setrecursionlimit(10**6)` — 그래도 깊으면(수십만) 명시적 스택으로 바꾼다." }
+      ]
+    },
+    {
+      "id": "pitfalls",
+      "title": "함정 모음 — 면접에서 '왜?' 를 묻는 것들",
+      "summary": "앞 장에서 흩어져 나온 함정을 한 표에. **이유**를 말할 수 있어야 하는 것만 골랐다.",
+      "blocks": [
+        {
+          "type": "compare",
+          "title": "얕은 복사 vs 깊은 복사",
+          "items": [
+            { "name": "대입 `b = a`", "points": ["복사 아님 — **같은 객체에 이름 하나 더**", "`b.append(1)` 하면 a 도 바뀜"] },
+            { "name": "얕은 복사 `a[:]`, `a.copy()`, `list(a)`, `dict(d)`", "points": ["바깥 껍데기만 새로", "안쪽 객체(중첩 리스트)는 **공유**", "1차원이면 충분"] },
+            { "name": "깊은 복사 `copy.deepcopy(a)`", "points": ["재귀적으로 전부 새로", "2차원 배열·중첩 dict 에 필요", "느림"] }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "함정 표 — 증상 → 원인 → 처방",
+          "columns": ["증상", "원인", "처방"],
+          "rows": [
+            ["2차원 배열 한 칸 바꿨는데 열 전체가 바뀜", "`[[0]*m]*n` — 같은 행 참조", "`[[0]*m for _ in range(n)]`"],
+            ["함수 호출할수록 리스트가 누적", "가변 기본값 `def f(a=[])`", "`a=None` 후 안에서 생성"],
+            ["`b = a.sort()` 했더니 `b` 가 None", "`sort()` 는 제자리, None 반환", "`b = sorted(a)`"],
+            ["`map` 결과를 두 번 썼더니 두 번째가 빔", "iterator 는 1회용", "`list()` 로 고정"],
+            ["`if x:` 가 0 을 '없음' 으로 처리", "0 은 falsy", "`if x is not None:`"],
+            ["`1000 is 1000` 이 환경마다 다름", "소형 정수 캐시(-5~256)", "`==` 사용"],
+            ["`0.1 + 0.2 != 0.3`", "이진 부동소수점", "`math.isclose`, 정수 연산, `Decimal`"],
+            ["`round(2.5) == 2`", "은행가 반올림", "`int(x + 0.5)` / `Decimal.quantize`"],
+            ["`-7 // 2 == -4`, `-7 % 3 == 2`", "바닥 나눗셈, 나머지 부호 = 제수", "C 와 다름을 기억"],
+            ["문자열 루프 `+=` 가 느림", "불변 → 매번 복사 O(n²)", "`''.join(parts)`"],
+            ["dict 순회 중 삭제하면 RuntimeError", "순회 중 크기 변경", "`for k in list(d):`"],
+            ["`count += 1` 에 UnboundLocalError", "대입 → 지역변수로 판정", "`nonlocal`/`global`, 또는 리스트/딕셔너리에 담기"],
+            ["재귀 DFS 가 1000 깊이에서 죽음", "기본 재귀 한도", "`sys.setrecursionlimit`, 반복문 스택"],
+            ["`lambda` 여러 개가 전부 마지막 i 를 참조", "**늦은 바인딩** — 호출 시점의 i", "`lambda x, i=i: …` 기본값으로 고정"],
+            ["`__eq__` 정의 후 set 에 못 넣음", "`__hash__` 가 None 으로", "`__hash__` 함께 정의"],
+            ["`except:` 이 Ctrl+C 를 무시", "BaseException 까지 잡음", "`except Exception`"],
+            ["`a == b` 가 두 리스트에 True 인데 `is` 는 False", "값 같음 ≠ 같은 객체", "정상. `is` 는 None 에만"],
+            ["`s.split(' ')` 에 빈 문자열 섞임", "구분자 명시 시 연속 공백 유지", "`s.split()`"],
+            ["`list.remove(x)` 를 순회 중 호출하니 건너뜀", "인덱스 밀림", "새 리스트로 필터"],
+            ["`global` 없이 전역 리스트 `.append` 는 되는데 `= []` 는 안 됨", "변형 vs 재대입", "이해하면 끝"],
+            ["`int('3.0')` 이 ValueError", "int 는 정수 문자열만", "`int(float(s))`"],
+            ["`'10' < '9'` 가 True", "문자열 사전순", "`int()` 로 변환 후 비교, `key=int`"],
+            ["`sorted(['b', 'A'])` 가 `['A', 'b']`", "대문자 코드가 작음", "`key=str.lower`"],
+            ["`time.time()` 으로 벤치마크가 들쭉날쭉", "벽시계", "`time.perf_counter()`"]
+          ]
+        },
+        {
+          "type": "code",
+          "title": "늦은 바인딩 — 클로저에서 루프 변수",
+          "lang": "python",
+          "code": [
+            "fs = [lambda: i for i in range(3)]",
+            "[f() for f in fs]            # [2, 2, 2]  ← 전부 마지막 i",
+            "",
+            "fs = [lambda i=i: i for i in range(3)]",
+            "[f() for f in fs]            # [0, 1, 2]  ← 정의 시점에 기본값으로 고정",
+            "",
+            "# functools.partial 도 같은 효과",
+            "from functools import partial",
+            "fs = [partial(lambda i: i, i) for i in range(3)]"
+          ],
+          "note": "클로저는 **변수**를 잡지 값을 잡지 않는다. 루프가 끝난 뒤 호출하면 그때의 `i`."
+        },
+        {
+          "type": "table",
+          "title": "면접 '왜' 질문 — 짧은 답",
+          "columns": ["질문", "답"],
+          "rows": [
+            ["파이썬은 왜 느린가", "인터프리터 + 동적 타이핑(매 연산마다 타입 확인) + GIL. 대신 C 확장(numpy)·PyPy·Cython 로 보완"],
+            ["GIL 이 무엇이고 왜 있나", "한 프로세스에서 한 스레드만 바이트코드 실행. 참조 카운팅 메모리 관리를 단순·안전하게 하려고. 3.13 실험적 제거"],
+            ["메모리 관리는", "**참조 카운팅**(0 되면 즉시 해제) + **순환 참조 GC**(세대별)"],
+            ["`list` 는 내부가 무엇", "동적 배열(포인터 배열). append 는 여유분 두고 증가 → 분할상환 O(1). 앞 삽입 O(n)"],
+            ["`dict` 는 어떻게 O(1)", "해시 테이블(오픈 어드레싱). 3.7+ 삽입 순서 보존은 별도 인덱스 배열 덕"],
+            ["`set` 과 `dict` 의 관계", "set 은 값 없는 dict — 같은 해시 테이블"],
+            ["튜플이 리스트보다 나은 점", "불변 → 해시 가능(키), 약간 작고 빠름, 의도 표현(레코드)"],
+            ["`is` 가 `==` 보다 빠른 이유", "id 정수 비교 vs `__eq__` 호출"],
+            ["`__init__` 은 생성자인가", "엄밀히 **초기화자**. 생성은 `__new__`"],
+            ["동기·비동기·스레드·프로세스 언제", "I/O 대기 많음 → `asyncio`/스레드. CPU 계산 → 프로세스. 단순 → 동기"]
+          ]
+        }
+      ],
+      "cards": [
+        { "id": "c1", "q": "`b = a` · `b = a[:]` · `b = copy.deepcopy(a)` 의 차이?", "a": "대입 = 같은 객체. 얕은 복사 = 껍데기만 새로, 안쪽 공유. 깊은 복사 = 전부 새로. 2차원 배열 복사는 deepcopy 또는 `[r[:] for r in a]`." },
+        { "id": "c2", "q": "`[lambda: i for i in range(3)]` 를 전부 호출하면?", "a": "`[2, 2, 2]`. 클로저는 변수를 잡아 호출 시점의 i 를 본다(늦은 바인딩). `lambda i=i: i` 로 고정." },
+        { "id": "c3", "q": "파이썬 메모리 관리 두 축?", "a": "**참조 카운팅**(0이 되면 즉시 해제) + **순환 참조 가비지 컬렉터**(세대별). 순환 참조는 카운팅으로 못 잡아 GC 가 필요." },
+        { "id": "c4", "q": "GIL 이란? 무엇을 위해 존재?", "a": "Global Interpreter Lock — 한 프로세스에서 한 스레드만 파이썬 바이트코드를 실행. 참조 카운팅을 스레드 안전하게 하려고. CPU 병렬은 멀티프로세스로." },
+        { "id": "c5", "q": "list.append 가 O(1) 인 이유?", "a": "동적 배열이 **여유 공간을 미리** 잡고(약 1.125배), 다 차면 재할당. 분할상환(amortized) O(1)." },
+        { "id": "c6", "q": "`'10' < '9'` 는?", "a": "`True`. 문자열은 사전순(첫 글자 '1' < '9'). 숫자 비교는 `int` 로." },
+        { "id": "c7", "q": "dict 를 순회하며 조건에 맞는 키를 지우려면?", "a": "`for k in list(d): if …: del d[k]` — 키 목록을 복사해서 순회. 순회 중 크기 변경은 RuntimeError." },
+        { "id": "c8", "q": "튜플이 리스트보다 나은 세 가지?", "a": "① 불변 → 해시 가능(dict 키·set 원소) ② 약간 작고 빠름 ③ '고정 레코드' 라는 의도 표현." },
+        { "id": "c9", "q": "파이썬이 느린 세 가지 이유와 보완?", "a": "인터프리터 · 동적 타이핑(매 연산 타입 확인) · GIL. 보완은 numpy 같은 C 확장, 멀티프로세스, PyPy/Cython." },
+        { "id": "c10", "q": "`sorted(['b', 'A', 'c'])` 결과와 대소문자 무시 정렬?", "a": "`['A', 'b', 'c']` (대문자 코드가 작음). `sorted(x, key=str.lower)`." }
+      ]
+    }
+  ]
+}

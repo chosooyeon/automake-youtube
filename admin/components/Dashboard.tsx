@@ -12,10 +12,12 @@ import ChatPanel from "./ChatPanel";
 import StockAlertDashboard from "./StockAlertDashboard";
 import QuestBoard from "./QuestBoard";
 import ProjectBrief from "./ProjectBrief";
+import StudyBoard from "./StudyBoard";
 
 type Tab =
   | "stock"
   | "quest"
+  | "study"
   | "brief"
   | "youtube"
   | "instacard"
@@ -30,6 +32,7 @@ type Tab =
 const TABS: { id: Tab; label: string; status: "live" | "planned" }[] = [
   { id: "stock", label: "📈 주식 매매", status: "live" },
   { id: "quest", label: "✅ 데일리 퀘스트", status: "live" },
+  { id: "study", label: "📚 공부 노트", status: "live" },
   { id: "brief", label: "🗂️ 프로젝트 설명", status: "live" },
   { id: "youtube", label: "🎬 유튜브", status: "live" },
   { id: "instacard", label: "🟪 인스타 카드 피드", status: "live" },
@@ -179,6 +182,7 @@ export default function Dashboard() {
 
       {tab === "stock" && <StockAlertDashboard />}
       {tab === "quest" && <QuestBoard />}
+      {tab === "study" && <StudyBoard />}
       {tab === "brief" && <ProjectBrief />}
       {tab === "youtube" && <YoutubeWorkspace />}
       <div className={tab === "instacard" ? "" : "hidden"}>

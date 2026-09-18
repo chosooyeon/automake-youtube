@@ -9,7 +9,7 @@ import { Fragment, type ReactNode } from "react";
  * (표는 코드블록처럼 mono 로만 표시)
  */
 
-function renderInline(text: string, keyPrefix: string): ReactNode[] {
+export function renderInline(text: string, keyPrefix: string): ReactNode[] {
   const out: ReactNode[] = [];
   // 인라인 코드 → 링크 → 굵게 → 기울임 순으로 토큰화
   const re = /(`[^`\n]+`)|(\[[^\]]+\]\([^)\s]+\))|(\*\*[^*\n]+\*\*)|(\*[^*\n]+\*)/g;
