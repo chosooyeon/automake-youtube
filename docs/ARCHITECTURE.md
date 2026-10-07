@@ -113,16 +113,20 @@ project.json 을 저장하므로 실패·중단 지점부터 [⚡ 빈 칸 자동
 - 신호 `kind`: `primary`(매매 포인트) / `context`(추세 배경). context 만으로는 알림이 나가지 않는다.
 - 발송 이력은 `config/stock-alert-state.json` 의 fingerprint(`판정|신호id들`)로 관리 —
   날짜가 바뀌어도 신호 구성이 같으면 재발송하지 않는다.
-- **GitHub Actions 워크플로는 2026-10-07 에 삭제했다** (`stock-alert.yml`, `paper-trade.yml`).
-  시크릿(`TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`)을 끝내 안 넣어 2026-08-13 부터 매일 실패 메일만
-  왔기 때문. 되살리려면 git 이력(커밋 `ada2ee9` 이전)에서 두 파일을 복원하고 저장소 Settings →
-  Secrets 에 두 값을 먼저 등록한다. 관심종목 `config/stock-watchlist.json` 은 그대로 커밋,
-  봇 토큰(`admin/data/stock/telegram.json`)은 git 제외.
-  알림 이력 `config/stock-alert-state.json` 은 로컬 스캔이 건드려도 커밋 안 해도 된다.
-- **발송 주체는 이제 맥 하나뿐이다.** admin 화면의 스캔은 `notify` 없이 부르므로 조회만 한다
-  (손으로 보내는 [🔔 지금 알림 보내기] 버튼만 `?notify=1`). 상시 가동이 필요하면
-  `scripts/stock-watch.mjs` 를 맥에서 돌린다. CI 용 `scripts/stock-scan-ci.ts` 는 남겨뒀다
-  (tsx 로 직접 실행, admin 서버 불필요).
+- **파일이 세 군데인 이유**: 맥이 꺼져 있어도 알림이 가도록 GitHub Actions 가 스캔한다.
+  관심종목 `config/stock-watchlist.json` 은 커밋. 봇 토큰(`admin/data/stock/telegram.json`)은
+  git 제외 + CI 에선 Secrets(`TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`)로 주입 — **이게 없으면
+  CI 가 2초 만에 죽는다**. 2026-08-13~10-07 은 시크릿 미등록으로 전 실행 실패였고,
+  **2026-10-07 에 `gh secret set` 으로 등록**했다 (값은 `telegram.json` 의 `botToken`/`chatId`).
+  알림 이력 `config/stock-alert-state.json` 은 **CI 에선 Actions 캐시**(`actions/cache`, 실행마다
+  새 키 + restore-keys 로 최신 복원)에 살고, 저장소 사본은 캐시가 빌 때의 씨앗이다. 봇 커밋으로
+  되돌리지 않는 이유: 맥에서 push 할 때마다 rebase 가 필요하고 로컬 스캔이 같은 파일을 건드려 충돌난다.
+- **발송 주체는 깃허브 하나뿐이다.** admin 화면의 스캔은 `notify` 없이 부르므로 조회만 한다
+  (손으로 보내는 [🔔 지금 알림 보내기] 버튼만 `?notify=1`). 화면에서도 자동 발송하면
+  알림 이력 파일이 맥과 깃허브에 따로 쌓여 같은 신호가 두 번 간다.
+- 상시 가동: `.github/workflows/stock-alert.yml` (평일 15:50 KST / 06:30 KST).
+  `scripts/stock-scan-ci.ts` 를 tsx 로 직접 실행 — admin 서버도 `npm ci` 도 필요 없다
+  (판정 로직이 node 내장 모듈만 쓰기 때문). 알림 이력은 Actions 캐시로 실행 사이를 잇는다.
 - 데이터 소스가 네이버인 이유: Yahoo Finance 는 429, Stooq 는 JS 챌린지로 막힌다 (2026-08 확인).
 
 ### 주식 자동매매 — 백테스트 (알림 트랙의 확장, 1단계만 구현)
