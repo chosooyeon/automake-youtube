@@ -110,3 +110,6 @@ projects/*/instagram-cards/
 
 # === 개인 문서 (공개 저장소 — 이력서·채용공고·경력 메모는 절대 커밋 금지) ===
 private/
+
+# oh-my-claudecode 운영 상태
+.omc/
